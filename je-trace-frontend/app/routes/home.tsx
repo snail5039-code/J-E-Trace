@@ -20,52 +20,65 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-slate-200 px-6 py-10">
-      <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-6xl flex-col items-center justify-center gap-8">
-        <div className="w-full max-w-4xl rounded-3xl border-4 border-slate-900 bg-white px-8 py-10 text-center shadow-[0_18px_40px_rgba(15,23,42,0.12)]">
-          <p className="mb-3 inline-block rounded-full border border-slate-300 bg-slate-50 px-4 py-1 text-sm font-semibold tracking-[0.2em] text-slate-600">
+    <div className="min-h-screen bg-slate-50 px-6 py-10">
+      <div className="mx-auto max-w-5xl flex flex-col gap-10">
+
+        {/* 🔹 HERO 영역 */}
+        <div className="rounded-2xl bg-white p-10 text-center shadow-sm">
+          <p className="inline-block rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
             JE TRACE
           </p>
-          <h1 className="text-5xl font-extrabold tracking-tight text-slate-900 md:text-7xl">
+
+          <h1 className="mt-4 text-4xl md:text-5xl font-bold text-slate-900">
             AI 교육 솔루션
           </h1>
-          <p className="mt-4 text-base text-slate-600 md:text-lg">
+
+          <p className="mt-3 text-slate-500">
             학습자와 교사를 위한 AI 채팅 기반 학습 기록 및 분석 플랫폼
           </p>
         </div>
 
-        <div className="w-full max-w-3xl rounded-2xl border-4 border-slate-900 bg-slate-900 px-6 py-5 text-center text-white shadow-[0_12px_30px_rgba(15,23,42,0.16)]">
-          <h2 className="text-2xl font-bold md:text-3xl">모드 선택</h2>
-          <p className="mt-2 text-sm text-slate-300 md:text-base">
-            사용할 화면을 선택해 서비스를 시작하세요.
+        {/* 🔹 모드 선택 텍스트 */}
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-slate-800">
+            모드 선택
+          </h2>
+          <p className="mt-1 text-sm text-slate-500">
+            사용할 화면을 선택해 서비스를 시작하세요
           </p>
         </div>
 
-        <div className="grid w-full max-w-4xl grid-cols-1 gap-6 md:grid-cols-2">
+        {/* 🔹 카드 영역 */}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {modes.map((mode) => (
             <button
               key={mode.title}
               onClick={mode.onClick}
-              className="group rounded-3xl border-4 border-slate-900 bg-white p-8 text-left shadow-[0_14px_30px_rgba(15,23,42,0.10)] transition hover:-translate-y-1 hover:bg-slate-50 hover:shadow-[0_20px_36px_rgba(15,23,42,0.16)]"
+              className="group rounded-2xl bg-white p-8 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-md"
             >
-              <div className="mb-5 inline-flex rounded-2xl border-2 border-slate-800 bg-slate-100 p-4 text-slate-800 transition group-hover:bg-slate-900 group-hover:text-white">
+              {/* 아이콘 */}
+              <div className="mb-5 inline-flex rounded-xl bg-slate-100 p-4 text-slate-700 transition group-hover:bg-blue-50 group-hover:text-blue-600">
                 {mode.icon}
               </div>
 
-              <h3 className="text-3xl font-extrabold text-slate-900">
+              {/* 제목 */}
+              <h3 className="text-2xl font-semibold text-slate-900 group-hover:text-blue-600">
                 {mode.title}
               </h3>
 
-              <p className="mt-4 text-sm leading-7 text-slate-600 md:text-base">
+              {/* 설명 */}
+              <p className="mt-3 text-sm text-slate-500">
                 {mode.desc}
               </p>
 
-              <div className="mt-8 inline-flex items-center text-sm font-bold text-slate-800">
+              {/* CTA */}
+              <div className="mt-6 text-sm font-medium text-slate-400 group-hover:text-blue-600">
                 입장하기 →
               </div>
             </button>
           ))}
         </div>
+
       </div>
     </div>
   );
