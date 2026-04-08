@@ -52,8 +52,15 @@ public interface TaskDao {
             """)
     List<String> findStudentNamesByClassName(String className);
 
+    @Select("""
+            SELECT id
+            FROM task
+            WHERE className = #{className}
+            ORDER BY id ASC
+            """)
+    List<Long> findTaskIdsByClassName(String className);
+
     @Insert("""
-            <script>
             INSERT INTO taskSubmission (
                 taskId,
                 studentName,
@@ -67,27 +74,53 @@ public interface TaskDao {
                 createdAt,
                 updatedAt
             )
-            VALUES
-            <foreach collection="studentNames" item="studentName" separator=",">
-                (
-                    #{taskId},
-                    #{studentName},
-                    FALSE,
-                    NULL,
-                    FALSE,
-                    NULL,
-                    0,
-                    NULL,
-                    NULL,
-                    NOW(),
-                    NOW()
-                )
-            </foreach>
-            </script>
+            SELECT
+                #{taskId},
+                #{studentName},
+                FALSE,
+                NULL,
+                FALSE,
+                NULL,
+                0,
+                NULL,
+                NULL,
+                NOW(),
+                NOW()
+            FROM dual
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM taskSubmission
+                WHERE taskId = #{taskId}
+                  AND studentName = #{studentName}
+            )
             """)
-    void insertTaskSubmissionsByClassName(
+    void insertTaskSubmissionIfNotExists(
             @Param("taskId") Long taskId,
-            @Param("studentNames") List<String> studentNames
+            @Param("studentName") String studentName
+    );
+
+    @Select("""
+            SELECT COUNT(*)
+            FROM student
+            WHERE studentName = #{studentName}
+              AND className = #{className}
+            """)
+    int countStudentByNameAndClassName(
+            @Param("studentName") String studentName,
+            @Param("className") String className
+    );
+
+    @Select("""
+            SELECT COUNT(*)
+            FROM student
+            WHERE studentName = #{studentName}
+              AND className = #{className}
+              AND id <> #{studentId}
+            """)
+    int countOtherStudentByNameAndClassName(
+            @Param("studentId") Long studentId,
+            @Param("studentName") String studentName,
+            @Param("className") String className
     );
 
     @Select("""
@@ -353,11 +386,65 @@ public interface TaskDao {
     void updateStudentInfo(StudentResponse request);
 
     @Update("""
-            UPDATE student
-            SET finalScore = #{finalScore}
-            WHERE id = #{id}
+            UPDATE taskSubmission
+            SET studentName = #{newStudentName}
+            WHERE studentName = #{oldStudentName}
             """)
-    void updateStudentFinalScore(StudentResponse request);
+    void updateTaskSubmissionStudentName(
+            @Param("oldStudentName") String oldStudentName,
+            @Param("newStudentName") String newStudentName
+    );
+
+    @Update("""
+            UPDATE taskAiLog
+            SET studentName = #{newStudentName}
+            WHERE studentName = #{oldStudentName}
+            """)
+    void updateTaskAiLogStudentName(
+            @Param("oldStudentName") String oldStudentName,
+            @Param("newStudentName") String newStudentName
+    );
+
+    @Update("""
+            UPDATE similarityResult
+            SET studentName = #{newStudentName}
+            WHERE studentName = #{oldStudentName}
+            """)
+    void updateSimilarityStudentName(
+            @Param("oldStudentName") String oldStudentName,
+            @Param("newStudentName") String newStudentName
+    );
+
+    @Update("""
+            UPDATE similarityResult
+            SET targetName = #{newStudentName}
+            WHERE targetName = #{oldStudentName}
+            """)
+    void updateSimilarityTargetName(
+            @Param("oldStudentName") String oldStudentName,
+            @Param("newStudentName") String newStudentName
+    );
+
+    @Update("""
+            UPDATE studentRequest
+            SET studentName = #{newStudentName}
+            WHERE studentName = #{oldStudentName}
+            """)
+    void updateStudentRequestStudentName(
+            @Param("oldStudentName") String oldStudentName,
+            @Param("newStudentName") String newStudentName
+    );
+
+    @Update("""
+            UPDATE student
+            SET finalScore = COALESCE((
+                SELECT ROUND(AVG(ts.score))
+                FROM taskSubmission ts
+                WHERE ts.studentName = student.studentName
+            ), 0)
+            WHERE id = #{studentId}
+            """)
+    void syncStudentFinalScore(Long studentId);
 
     @Select("""
             SELECT
@@ -375,16 +462,6 @@ public interface TaskDao {
             """)
     List<StudentTaskScoreResponse> findStudentTaskScoresByStudentName(
             @Param("studentName") String studentName
-    );
-
-    @Update("""
-            UPDATE taskSubmission
-            SET score = #{score}
-            WHERE id = #{submissionId}
-            """)
-    void updateTaskSubmissionScore(
-            @Param("submissionId") Long submissionId,
-            @Param("score") Integer score
     );
 
     @Select("""
@@ -413,6 +490,17 @@ public interface TaskDao {
             WHERE ts.id = #{submissionId}
             """)
     TaskSubmissionResponse findTaskSubmissionDetailById(Long submissionId);
+
+    @Update("""
+            UPDATE taskSubmission
+            SET score = #{score},
+                updatedAt = NOW()
+            WHERE id = #{submissionId}
+            """)
+    void updateTaskSubmissionScore(
+            @Param("submissionId") Long submissionId,
+            @Param("score") Integer score
+    );
 
     @Update("""
             UPDATE taskSubmission
@@ -510,7 +598,8 @@ public interface TaskDao {
 
     @Update("""
             UPDATE taskSubmission
-            SET result = #{result}
+            SET result = #{result},
+                updatedAt = NOW()
             WHERE taskId = #{taskId}
               AND studentName = #{studentName}
             """)
@@ -573,4 +662,52 @@ public interface TaskDao {
             @Param("taskId") Long taskId,
             @Param("studentName") String studentName
     );
+
+    @Insert("""
+            INSERT INTO taskSubmission (
+                taskId,
+                studentName,
+                submitted,
+                submittedAt,
+                aiUsed,
+                result,
+                score,
+                content,
+                teacherComment,
+                createdAt,
+                updatedAt
+            )
+            SELECT
+                t.id,
+                s.studentName,
+                FALSE,
+                NULL,
+                FALSE,
+                NULL,
+                0,
+                NULL,
+                NULL,
+                NOW(),
+                NOW()
+            FROM task t
+            JOIN student s
+              ON t.className = s.className
+            LEFT JOIN taskSubmission ts
+              ON ts.taskId = t.id
+             AND ts.studentName = s.studentName
+            WHERE ts.id IS NULL
+            """)
+    void backfillMissingTaskSubmissions();
+
+    @Update("""
+            UPDATE taskSubmission ts
+            SET aiUsed = TRUE
+            WHERE EXISTS (
+                SELECT 1
+                FROM taskAiLog al
+                WHERE al.taskId = ts.taskId
+                  AND al.studentName = ts.studentName
+            )
+            """)
+    void syncAiUsedByLogs();
 }

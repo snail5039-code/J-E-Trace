@@ -1,18 +1,29 @@
 package com.jetrace.backend.teacherController;
 
-import com.jetrace.backend.teacherDto.TaskCreateRequest;
-import com.jetrace.backend.teacherDto.TaskResponse;
-import com.jetrace.backend.teacherService.TaskService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
-import com.jetrace.backend.teacherDto.TaskSubmissionResponse;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.jetrace.backend.teacherDto.SimilarityResponse;
 import com.jetrace.backend.teacherDto.StudentRequestResponse;
 import com.jetrace.backend.teacherDto.StudentResponse;
 import com.jetrace.backend.teacherDto.StudentTaskScoreResponse;
 import com.jetrace.backend.teacherDto.TaskAiLogResponse;
-import java.util.List;
-import java.util.Map;
+import com.jetrace.backend.teacherDto.TaskCreateRequest;
+import com.jetrace.backend.teacherDto.TaskResponse;
+import com.jetrace.backend.teacherDto.TaskSubmissionResponse;
+import com.jetrace.backend.teacherService.TaskService;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/teacher/tasks")
@@ -126,5 +137,11 @@ public class TaskController {
     @GetMapping("/similarity/{similarityId}")
     public SimilarityResponse getSimilarityResultDetail(@PathVariable Long similarityId) {
         return taskService.getSimilarityResultDetail(similarityId);
+    }
+
+    @PostMapping("/maintenance/backfill")
+    public String backfillSystemData() {
+        taskService.backfillSystemData();
+        return "ok";
     }
 }

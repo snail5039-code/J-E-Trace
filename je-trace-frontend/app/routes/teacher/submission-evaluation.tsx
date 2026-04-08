@@ -1,5 +1,5 @@
 import { ArrowLeft, ClipboardList, Search, Sparkles, UserRound } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import axios from "axios";
 
@@ -47,11 +47,34 @@ type AiLog = {
   status: string;
 };
 
+type Notice = {
+  type: "success" | "error" | "info";
+  text: string;
+} | null;
+
 function getJudgeBadgeClass(judge: string | null | undefined) {
   if (judge === "위험") return "bg-rose-50 text-rose-700";
   if (judge === "주의") return "bg-amber-50 text-amber-700";
   if (judge === "정상") return "bg-emerald-50 text-emerald-700";
   return "bg-slate-100 text-slate-500";
+}
+
+function getErrorMessage(error: unknown, fallback: string) {
+  if (axios.isAxiosError(error)) {
+    return (
+      error.response?.data?.message ||
+      error.response?.data ||
+      error.message ||
+      fallback
+    );
+  }
+  if (error instanceof Error) return error.message;
+  return fallback;
+}
+
+function formatDateTime(value: string | null | undefined) {
+  if (!value) return "-";
+  return value.replace("T", " ").slice(0, 16);
 }
 
 export default function TeacherSubmissionEvaluationPage() {
@@ -65,60 +88,97 @@ export default function TeacherSubmissionEvaluationPage() {
   const [teacherComment, setTeacherComment] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [notice, setNotice] = useState<Notice>(null);
+
+  const fetchData = async () => {
+    if (!taskId || !submissionId) return;
+
+    try {
+      const taskResponse = await axios.get(`http://localhost:8080/teacher/tasks/${taskId}`);
+      const submissionResponse = await axios.get(
+        `http://localhost:8080/teacher/tasks/submissions/${submissionId}`
+      );
+
+      setTask(taskResponse.data);
+      setSubmission(submissionResponse.data);
+      setScore(
+        submissionResponse.data?.score !== null && submissionResponse.data?.score !== undefined
+          ? String(submissionResponse.data.score)
+          : ""
+      );
+      setTeacherComment(submissionResponse.data?.teacherComment ?? "");
+
+      if (submissionResponse.data?.studentName) {
+        const logResponse = await axios.get(`http://localhost:8080/teacher/tasks/${taskId}/logs`, {
+          params: { studentName: submissionResponse.data.studentName },
+        });
+        setLogs(logResponse.data);
+      } else {
+        setLogs([]);
+      }
+    } catch (error) {
+      console.error("평가 페이지 조회 실패:", error);
+      setNotice({
+        type: "error",
+        text: getErrorMessage(error, "평가 페이지 조회 실패"),
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!taskId || !submissionId) return;
-
-    const fetchData = async () => {
-      try {
-        const taskResponse = await axios.get(`http://localhost:8080/teacher/tasks/${taskId}`);
-        const submissionResponse = await axios.get(
-          `http://localhost:8080/teacher/tasks/submissions/${submissionId}`
-        );
-
-        setTask(taskResponse.data);
-        setSubmission(submissionResponse.data);
-        setScore(
-          submissionResponse.data?.score !== null && submissionResponse.data?.score !== undefined
-            ? String(submissionResponse.data.score)
-            : ""
-        );
-        setTeacherComment(submissionResponse.data?.teacherComment ?? "");
-
-        if (submissionResponse.data?.studentName) {
-          const logResponse = await axios.get(`http://localhost:8080/teacher/tasks/${taskId}/logs`, {
-            params: { studentName: submissionResponse.data.studentName },
-          });
-          setLogs(logResponse.data);
-        }
-      } catch (error) {
-        console.error("평가 페이지 조회 실패:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchData();
   }, [taskId, submissionId]);
 
   const handleSaveEvaluation = async () => {
     if (!submissionId) return;
 
+    const numericScore = Number(score);
+
+    if (score === "" || Number.isNaN(numericScore)) {
+      setNotice({ type: "error", text: "점수를 입력해주세요." });
+      return;
+    }
+
+    if (numericScore < 0 || numericScore > 100) {
+      setNotice({ type: "error", text: "점수는 0점 이상 100점 이하만 가능합니다." });
+      return;
+    }
+
     setSaving(true);
+    setNotice({ type: "info", text: "평가 저장 중..." });
+
     try {
       await axios.put(`http://localhost:8080/teacher/tasks/submissions/${submissionId}/evaluation`, {
-        score: Number(score),
+        score: numericScore,
         teacherComment,
       });
 
-      alert("평가 저장 완료");
+      await fetchData();
+
+      setNotice({
+        type: "success",
+        text: "평가 저장 완료",
+      });
     } catch (error) {
       console.error("평가 저장 실패:", error);
-      alert("평가 저장 실패");
+      setNotice({
+        type: "error",
+        text: getErrorMessage(error, "평가 저장 실패"),
+      });
     } finally {
       setSaving(false);
     }
   };
+
+  const noticeClassName = useMemo(() => {
+    if (!notice) return "";
+    if (notice.type === "success") return "border-emerald-200 bg-emerald-50 text-emerald-700";
+    if (notice.type === "error") return "border-rose-200 bg-rose-50 text-rose-700";
+    return "border-sky-200 bg-sky-50 text-sky-700";
+  }, [notice]);
 
   if (loading) {
     return <div className="p-6">평가 정보를 불러오는 중...</div>;
@@ -147,6 +207,12 @@ export default function TeacherSubmissionEvaluationPage() {
       </div>
 
       <div className="mx-auto max-w-7xl px-6 py-6">
+        {notice && (
+          <div className={`mb-5 rounded-sm border px-4 py-3 text-sm font-medium ${noticeClassName}`}>
+            {notice.text}
+          </div>
+        )}
+
         <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
           <aside className="overflow-hidden rounded-sm border border-slate-300 bg-[#4a4a4a] text-white shadow-sm">
             <div className="border-b border-white/10 px-5 py-6 text-center">
@@ -258,23 +324,10 @@ export default function TeacherSubmissionEvaluationPage() {
                     </div>
 
                     <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
-                      주요 비교 대상
+                      비교 대상 학생
                     </div>
                     <div className="border-b border-slate-200 px-4 py-4 text-center text-sm">
                       {submission.topStudentTargetName || "-"}
-                    </div>
-
-                    <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
-                      학생 간 판정
-                    </div>
-                    <div className="border-b border-slate-200 px-4 py-4 text-center text-sm">
-                      <span
-                        className={`inline-block rounded-sm px-3 py-1 text-xs font-semibold ${getJudgeBadgeClass(
-                          submission.topStudentJudge
-                        )}`}
-                      >
-                        {submission.topStudentJudge || "-"}
-                      </span>
                     </div>
 
                     <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
@@ -285,40 +338,89 @@ export default function TeacherSubmissionEvaluationPage() {
                     </div>
 
                     <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
-                      AI 로그 판정
+                      AI 사용 여부
                     </div>
                     <div className="border-b border-slate-200 px-4 py-4 text-center text-sm">
-                      <span
-                        className={`inline-block rounded-sm px-3 py-1 text-xs font-semibold ${getJudgeBadgeClass(
-                          submission.aiLogJudge
-                        )}`}
-                      >
-                        {submission.aiLogJudge || "-"}
+                      {submission.aiUsed ? "사용" : "미사용"}
+                    </div>
+
+                    <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
+                      학생 간 판정
+                    </div>
+                    <div className="border-b border-slate-200 px-4 py-4 text-center text-sm">
+                      <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getJudgeBadgeClass(submission.topStudentJudge)}`}>
+                        {submission.topStudentJudge || "-"}
                       </span>
                     </div>
 
                     <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
-                      최종 분석 결과
+                      AI 로그 판정
                     </div>
                     <div className="border-b border-slate-200 px-4 py-4 text-center text-sm">
-                      {submission.result || "-"}
+                      <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getJudgeBadgeClass(submission.aiLogJudge)}`}>
+                        {submission.aiLogJudge || "-"}
+                      </span>
                     </div>
                   </div>
 
-                  <div className="grid gap-4 border-t border-slate-200 px-5 py-5">
-                    <div>
-                      <p className="mb-2 text-sm font-semibold text-slate-700">학생 간 분석 사유</p>
-                      <div className="rounded-sm border border-slate-200 bg-slate-50 px-4 py-4 text-sm whitespace-pre-wrap">
-                        {submission.topStudentReason || "학생 간 유사도 분석 결과가 없습니다."}
-                      </div>
+                  <div className="grid gap-4 border-t border-slate-200 p-5 md:grid-cols-2">
+                    <div className="rounded-sm border border-slate-200 bg-slate-50 p-4">
+                      <p className="mb-2 text-sm font-semibold text-slate-800">학생 간 판정 사유</p>
+                      <p className="text-sm leading-6 text-slate-700">{submission.topStudentReason || "없음"}</p>
                     </div>
 
-                    <div>
-                      <p className="mb-2 text-sm font-semibold text-slate-700">AI 로그 분석 사유</p>
-                      <div className="rounded-sm border border-slate-200 bg-slate-50 px-4 py-4 text-sm whitespace-pre-wrap">
-                        {submission.aiLogReason || "AI 로그 유사도 분석 결과가 없습니다."}
-                      </div>
+                    <div className="rounded-sm border border-slate-200 bg-slate-50 p-4">
+                      <p className="mb-2 text-sm font-semibold text-slate-800">AI 로그 판정 사유</p>
+                      <p className="text-sm leading-6 text-slate-700">{submission.aiLogReason || "없음"}</p>
                     </div>
+                  </div>
+                </div>
+
+                <div className="overflow-hidden rounded-sm border border-slate-300 bg-white shadow-sm">
+                  <div className="border-b border-slate-300 bg-slate-50 px-5 py-4">
+                    <h2 className="text-lg font-semibold text-slate-900">AI 로그</h2>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full border-collapse text-sm">
+                      <thead>
+                        <tr className="bg-slate-100 text-slate-700">
+                          <th className="border border-slate-300 px-4 py-3 text-center font-semibold">시각</th>
+                          <th className="border border-slate-300 px-4 py-3 text-center font-semibold">질문</th>
+                          <th className="border border-slate-300 px-4 py-3 text-center font-semibold">응답</th>
+                          <th className="border border-slate-300 px-4 py-3 text-center font-semibold">상태</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {logs.length === 0 ? (
+                          <tr>
+                            <td colSpan={4} className="border border-slate-300 px-4 py-8 text-center text-slate-500">
+                              AI 로그가 없습니다.
+                            </td>
+                          </tr>
+                        ) : (
+                          logs.map((log) => (
+                            <tr key={log.id} className="hover:bg-slate-50">
+                              <td className="border border-slate-300 px-4 py-4 text-center">
+                                {formatDateTime(log.createdAt)}
+                              </td>
+                              <td className="border border-slate-300 px-4 py-4 align-top">
+                                <div className="whitespace-pre-wrap break-words">{log.question}</div>
+                              </td>
+                              <td className="border border-slate-300 px-4 py-4 align-top">
+                                <div className="whitespace-pre-wrap break-words">{log.answer}</div>
+                              </td>
+                              <td className="border border-slate-300 px-4 py-4 text-center">
+                                <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getJudgeBadgeClass(log.status)}`}>
+                                  {log.status}
+                                </span>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
@@ -328,74 +430,44 @@ export default function TeacherSubmissionEvaluationPage() {
                   <h2 className="text-lg font-semibold text-slate-900">평가 입력</h2>
                 </div>
 
-                <div className="space-y-4 px-5 py-5">
+                <div className="space-y-5 p-5">
                   <div>
-                    <label className="mb-1 block text-sm font-semibold text-slate-700">점수</label>
+                    <label className="mb-2 block text-sm font-semibold text-slate-700">점수</label>
                     <input
                       type="number"
+                      min={0}
+                      max={100}
                       value={score}
                       onChange={(e) => setScore(e.target.value)}
-                      className="w-full rounded-sm border border-slate-300 px-3 py-2"
+                      className="w-full rounded-sm border border-slate-300 px-3 py-3 text-sm outline-none focus:border-teal-600"
+                      placeholder="0~100"
                     />
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-sm font-semibold text-slate-700">평가 코멘트</label>
+                    <label className="mb-2 block text-sm font-semibold text-slate-700">교사 코멘트</label>
                     <textarea
+                      rows={10}
                       value={teacherComment}
                       onChange={(e) => setTeacherComment(e.target.value)}
-                      rows={8}
-                      className="w-full rounded-sm border border-slate-300 px-3 py-2"
+                      className="w-full resize-none rounded-sm border border-slate-300 px-3 py-3 text-sm outline-none focus:border-teal-600"
+                      placeholder="평가 코멘트를 입력하세요."
                     />
+                  </div>
+
+                  <div className="rounded-sm border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">
+                    <p>현재 점수: {submission.score ?? 0}점</p>
+                    <p className="mt-1">최종 수정 시각: {formatDateTime(submission.updatedAt)}</p>
                   </div>
 
                   <button
                     onClick={handleSaveEvaluation}
                     disabled={saving}
-                    className="w-full rounded-sm bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-60"
+                    className="w-full rounded-sm bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {saving ? "저장 중..." : "평가 저장"}
                   </button>
                 </div>
-              </div>
-            </section>
-
-            <section className="overflow-hidden rounded-sm border border-slate-300 bg-white shadow-sm">
-              <div className="border-b border-slate-300 bg-slate-50 px-5 py-4">
-                <h2 className="text-lg font-semibold text-slate-900">AI 로그 참고</h2>
-              </div>
-
-              <div className="divide-y divide-slate-200">
-                {logs.length === 0 ? (
-                  <div className="px-5 py-8 text-center text-slate-500">AI 로그가 없습니다.</div>
-                ) : (
-                  logs.map((log) => (
-                    <div key={log.id} className="space-y-3 px-5 py-5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-slate-500">
-                          {log.createdAt?.replace("T", " ").slice(0, 16)}
-                        </span>
-                        <span className="rounded-sm bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700">
-                          {log.status}
-                        </span>
-                      </div>
-
-                      <div>
-                        <p className="mb-1 text-xs font-semibold text-slate-500">질문</p>
-                        <div className="rounded-sm border border-slate-200 bg-slate-50 px-3 py-3 text-sm whitespace-pre-wrap">
-                          {log.question}
-                        </div>
-                      </div>
-
-                      <div>
-                        <p className="mb-1 block text-xs font-semibold text-slate-500">응답</p>
-                        <div className="rounded-sm border border-slate-200 bg-slate-50 px-3 py-3 text-sm whitespace-pre-wrap">
-                          {log.answer}
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
               </div>
             </section>
           </main>
