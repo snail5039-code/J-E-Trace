@@ -92,3 +92,6 @@ backend/src/main/resources/application-secret.yml
 tmp/
 temp/
 uploads/
+
+# 특정 파일 무시
+ai.yml

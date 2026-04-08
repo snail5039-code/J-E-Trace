@@ -4,4 +4,12 @@ export default [
   index("routes/home.tsx"),
   route("student", "routes/student/page.tsx"),
   route("teacher", "routes/teacher/page.tsx"),
-];  
+  route("teacher/create-task", "routes/teacher/create-task.tsx"),
+  route("teacher/tasks/:taskId", "routes/teacher/task-detail.tsx"),
+  route("teacher/tasks/:taskId/submissions/:submissionId", "routes/teacher/submission-detail.tsx"),
+  route("teacher/tasks/:taskId/submissions/:submissionId/evaluation", "routes/teacher/submission-evaluation.tsx"),
+  route("teacher/logs", "routes/teacher/logs.tsx"),
+  route("teacher/similarity", "routes/teacher/similarity.tsx"),
+  route("teacher/similarity/:similarityId", "routes/teacher/similarity-detail.tsx"),
+  route("teacher/students", "routes/teacher/students.tsx"),
+];
