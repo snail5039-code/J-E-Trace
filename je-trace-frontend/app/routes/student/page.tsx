@@ -1,97 +1,171 @@
 import { BookOpen, Clock3, MessageCircle } from "lucide-react";
 import { Link } from "react-router";
-import { useState } from "react";
-import { getTestMessage } from "../../lib/testApi";
+import { useEffect, useMemo, useState } from "react";
+import api from "../../lib/axios";
+
+type TaskItem = {
+  id: number;
+  title: string;
+  submitted: boolean;
+};
 
 export default function StudentPage() {
-  const [result, setResult] = useState("아직 응답 없음");
-  const [loading, setLoading] = useState(false);
+  const studentName = typeof window !== "undefined" ? localStorage.getItem("studentName") ?? "" : "";
+  const className = typeof window !== "undefined" ? localStorage.getItem("studentClassName") ?? "" : "";
+
+  const [tasks, setTasks] = useState<TaskItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!studentName) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchTasks = async () => {
+      try {
+        const res = await api.get("/student/tasks", {
+          params: { studentName },
+        });
+        setTasks(res.data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTasks();
+  }, [studentName]);
+
+  const summary = useMemo(() => {
+    const submitted = tasks.filter((task) => task.submitted).length;
+    const pending = tasks.length - submitted;
+    return { submitted, pending };
+  }, [tasks]);
+
+  const recentTask = tasks[0];
 
   const cards = [
     {
-      title: "AI 채팅 시작",
-      desc: "AI와 질문·답변을 주고받으며 학습을 진행합니다.",
+      title: "과제 목록",
+      desc: "진행 중인 과제와 제출 상태를 확인합니다.",
       icon: <MessageCircle className="h-8 w-8" />,
+      path: "/student/assignments",
     },
     {
-      title: "학습 기록",
-      desc: "이전 대화와 학습 진행 내역을 확인합니다.",
-      icon: <Clock3 className="h-8 w-8" />,
-    },
-    {
-      title: "학습 자료",
-      desc: "과목별 자료와 추천 콘텐츠를 확인합니다.",
+      title: "회원가입",
+      desc: "학생 계정을 새로 생성합니다.",
       icon: <BookOpen className="h-8 w-8" />,
+      path: "/signup/student",
+    },
+    {
+      title: "로그인",
+      desc: "학생 계정으로 로그인합니다.",
+      icon: <Clock3 className="h-8 w-8" />,
+      path: "/login/student",
     },
   ];
 
-  const handleTest = async () => {
-    try {
-      setLoading(true);
-      const data = await getTestMessage();
-      setResult(data.message);
-    } catch (error) {
-      console.error(error);
-      setResult("백엔드 연결 실패");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-slate-200 px-6 py-10">
-      <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-6xl flex-col gap-8">
-        <div className="rounded-3xl border-4 border-slate-900 bg-white px-8 py-10 shadow-[0_18px_40px_rgba(15,23,42,0.12)]">
-          <p className="mb-3 inline-block rounded-full border border-blue-200 bg-blue-50 px-4 py-1 text-sm font-semibold tracking-[0.2em] text-blue-700">
+    <div className="min-h-screen bg-slate-50 px-6 py-7">
+      <div className="mx-auto max-w-6xl flex flex-col gap-6">
+        <div className="rounded-2xl bg-white p-8 shadow-sm">
+          <p className="inline-block rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600">
             STUDENT MODE
           </p>
-          <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 md:text-6xl">
-            학생 페이지
-          </h1>
-          <p className="mt-4 text-base text-slate-600 md:text-lg">
-            AI와 대화하며 학습하고, 개인별 학습 기록을 확인할 수 있는 학생 전용 화면입니다.
+
+          <h1 className="mt-4 text-4xl font-bold text-slate-900">학생 대시보드</h1>
+
+          <p className="mt-3 text-slate-500">
+            {studentName
+              ? `${studentName}${className ? ` · ${className}` : ""}`
+              : "로그인 후 과제를 확인하세요."}
           </p>
 
-          <div className="mt-8 flex flex-wrap gap-4">
-            <button
-              onClick={handleTest}
-              className="rounded-xl border-2 border-slate-900 bg-slate-900 px-5 py-3 font-bold text-white transition hover:bg-slate-700"
-            >
-              {loading ? "연결 중..." : "백엔드 연결 테스트"}
-            </button>
-
+          <div className="mt-6 flex gap-3">
             <Link
               to="/"
-              className="inline-flex rounded-xl border-2 border-slate-900 bg-white px-5 py-3 font-bold text-slate-900 transition hover:bg-slate-100"
+              className="rounded-xl bg-white px-5 py-2.5 text-sm text-slate-600 shadow-sm hover:bg-slate-100"
             >
-              홈으로 돌아가기
+              홈으로
             </Link>
+            {!studentName && (
+              <Link
+                to="/login/student"
+                className="rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700"
+              >
+                학생 로그인
+              </Link>
+            )}
           </div>
 
-          <div className="mt-6 rounded-2xl border-2 border-slate-300 bg-slate-50 p-5">
-            <p className="text-lg font-bold text-slate-900">응답 결과</p>
-            <p className="mt-2 text-slate-600">{result}</p>
+          {!className && studentName && (
+            <div className="mt-6 rounded-xl bg-amber-50 p-4 text-sm text-amber-700">
+              아직 교사 승인 전입니다. 승인되면 과제가 표시됩니다.
+            </div>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white p-5 rounded-xl shadow-sm">
+            <p className="text-sm text-slate-500">진행 중 과제</p>
+            <p className="text-2xl font-bold text-slate-900">
+              {loading ? "-" : summary.pending}
+            </p>
+          </div>
+
+          <div className="bg-white p-5 rounded-xl shadow-sm">
+            <p className="text-sm text-slate-500">완료 과제</p>
+            <p className="text-2xl font-bold text-slate-900">
+              {loading ? "-" : summary.submitted}
+            </p>
+          </div>
+
+          <div className="bg-white p-5 rounded-xl shadow-sm">
+            <p className="text-sm text-slate-500">최근 과제</p>
+            <p className="text-sm font-medium text-slate-700">
+              {recentTask ? recentTask.title : "표시할 과제가 없습니다."}
+            </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {cards.map((card) => (
-            <div
-              key={card.title}
-              className="rounded-3xl border-4 border-slate-900 bg-white p-6 shadow-[0_14px_30px_rgba(15,23,42,0.10)] transition hover:-translate-y-1 hover:shadow-[0_20px_36px_rgba(15,23,42,0.16)]"
+        {recentTask && (
+          <div className="bg-white p-6 rounded-2xl shadow-sm">
+            <h2 className="text-lg font-semibold text-slate-800 mb-3">최근 학습</h2>
+
+            <p className="text-sm text-slate-600">
+              {recentTask.title} 과제를 이어서 진행할 수 있습니다.
+            </p>
+
+            <Link
+              to={`/student/assignment/${recentTask.id}`}
+              className="inline-block mt-3 text-sm font-medium text-blue-600 hover:underline"
             >
-              <div className="mb-4 inline-flex rounded-2xl border-2 border-slate-800 bg-slate-100 p-3 text-slate-800">
-                {card.icon}
+              이어서 학습 →
+            </Link>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {cards.map((card) => (
+            <Link to={card.path} key={card.title}>
+              <div className="group rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+                <div className="mb-4 inline-flex rounded-xl bg-slate-100 p-3 text-slate-700 transition group-hover:bg-blue-50 group-hover:text-blue-600">
+                  {card.icon}
+                </div>
+
+                <h3 className="text-xl font-semibold text-slate-900 group-hover:text-blue-600">
+                  {card.title}
+                </h3>
+
+                <p className="mt-2 text-sm text-slate-500">{card.desc}</p>
+
+                <div className="mt-4 text-sm text-slate-400 group-hover:text-blue-600">
+                  이동하기 →
+                </div>
               </div>
-
-              <h2 className="text-2xl font-extrabold text-slate-900">
-                {card.title}
-              </h2>
-
-              <p className="mt-3 text-sm leading-7 text-slate-600 md:text-base">
-                {card.desc}
-              </p>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

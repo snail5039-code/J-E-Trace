@@ -2,7 +2,15 @@ import { index, route } from "@react-router/dev/routes";
 
 export default [
   index("routes/home.tsx"),
+
   route("student", "routes/student/page.tsx"),
+  route("student/assignments", "routes/student/assignments.tsx"),
+  route("student/assignment/:taskId", "routes/student/assignmentDetail.tsx"),
+
+  route("signup", "routes/SignupSelectPage.tsx"),
+  route("signup/student", "routes/student/StudentSignupPage.tsx"),
+  route("login/student", "routes/student/StudentLoginPage.tsx"),
+
   route("teacher", "routes/teacher/page.tsx"),
   route("teacher/create-task", "routes/teacher/create-task.tsx"),
   route("teacher/tasks/:taskId", "routes/teacher/task-detail.tsx"),

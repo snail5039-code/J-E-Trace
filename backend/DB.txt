@@ -303,3 +303,12 @@ INSERT INTO taskAiLog (
 (2, '김민수', 'primary key와 foreign key 차이 설명해줘', 'Primary key는 각 행을 고유하게 식별하고, foreign key는 다른 테이블의 primary key를 참조합니다.', '2026-04-08 08:30:00', '정상'),
 (2, '이서연', 'foreign key 쉽게 설명해줘', 'Foreign key는 다른 테이블과의 관계를 연결하는 키입니다.', '2026-04-08 08:35:00', '정상'),
 (2, '최유진', 'primary key, foreign key 차이 요약해줘', 'Primary key는 행 식별, foreign key는 다른 테이블 참조에 사용됩니다.', '2026-04-08 08:40:00', '정상');
+
+CREATE TABLE users (
+    login_id VARCHAR(50) PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    role ENUM('STUDENT', 'TEACHER') NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
