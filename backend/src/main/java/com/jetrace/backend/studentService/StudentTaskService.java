@@ -32,23 +32,27 @@ public class StudentTaskService {
     @Value("${openai.api-key}")
     private String apiKey;
 
-    public List<StudentTaskResponse> getTasks(String studentName) {
-        validateStudentName(studentName);
+    public List<StudentTaskResponse> getTasks(String loginId) {
+        validateLoginId(loginId);
 
-        String className = studentDao.findApprovedClassNameByStudentName(studentName);
-        if (className == null || className.isBlank()) {
-            throw new RuntimeException("승인된 학생 정보가 없습니다. 교사 승인 후 다시 시도하세요.");
+        String className = studentDao.findApprovedClassNameByLoginId(loginId);
+        String studentName = studentDao.findStudentNameByLoginId(loginId);
+
+        if (className == null || studentName == null) {
+            throw new RuntimeException("승인된 학생 계정을 찾을 수 없습니다.");
         }
 
         return studentDao.findTasksByClassNameAndStudentName(className, studentName);
     }
 
-    public StudentTaskDetailResponse getTaskDetail(Long taskId, String studentName) {
-        validateStudentName(studentName);
+    public StudentTaskDetailResponse getTaskDetail(Long taskId, String loginId) {
+        validateLoginId(loginId);
 
-        String className = studentDao.findApprovedClassNameByStudentName(studentName);
-        if (className == null || className.isBlank()) {
-            throw new RuntimeException("승인된 학생 정보가 없습니다.");
+        String className = studentDao.findApprovedClassNameByLoginId(loginId);
+        String studentName = studentDao.findStudentNameByLoginId(loginId);
+
+        if (className == null || studentName == null) {
+            throw new RuntimeException("승인된 학생 계정을 찾을 수 없습니다.");
         }
 
         int allowed = studentDao.countTaskInStudentClass(taskId, className);
@@ -70,11 +74,16 @@ public class StudentTaskService {
     }
 
     @Transactional
-    public void submitTask(Long taskId, String studentName, String content, Boolean aiUsed) {
-        validateStudentName(studentName);
+    public void submitTask(Long taskId, String loginId, String content, Boolean aiUsed) {
+        validateLoginId(loginId);
 
         if (content == null || content.isBlank()) {
             throw new RuntimeException("제출 내용이 비어 있습니다.");
+        }
+
+        String studentName = studentDao.findStudentNameByLoginId(loginId);
+        if (studentName == null) {
+            throw new RuntimeException("학생 정보를 찾을 수 없습니다.");
         }
 
         if (studentDao.countTaskSubmission(taskId, studentName) == 0) {
@@ -85,21 +94,23 @@ public class StudentTaskService {
     }
 
     @Transactional
-    public ChatResponseDto askTaskAi(Long taskId, String studentName, String question) {
-        validateStudentName(studentName);
+    public ChatResponseDto askTaskAi(Long taskId, String loginId, String question) {
+        validateLoginId(loginId);
 
         if (question == null || question.isBlank()) {
             throw new RuntimeException("질문을 입력하세요.");
         }
 
+        String className = studentDao.findApprovedClassNameByLoginId(loginId);
+        String studentName = studentDao.findStudentNameByLoginId(loginId);
+
+        if (className == null || studentName == null) {
+            throw new RuntimeException("승인된 학생 계정을 찾을 수 없습니다.");
+        }
+
         StudentTaskResponse task = studentDao.findTaskById(taskId);
         if (task == null) {
             throw new RuntimeException("과제를 찾을 수 없습니다.");
-        }
-
-        String className = studentDao.findApprovedClassNameByStudentName(studentName);
-        if (className == null || className.isBlank()) {
-            throw new RuntimeException("승인된 학생 정보가 없습니다.");
         }
 
         int allowed = studentDao.countTaskInStudentClass(taskId, className);
@@ -157,9 +168,7 @@ public class StudentTaskService {
             Map message = (Map) firstChoice.get("message");
             String content = (String) message.get("content");
 
-            content = content.replace("```json", "")
-                    .replace("```", "")
-                    .trim();
+            content = content.replace("```json", "").replace("```", "").trim();
 
             AiResponseDto result = objectMapper.readValue(content, AiResponseDto.class);
 
@@ -178,9 +187,9 @@ public class StudentTaskService {
         }
     }
 
-    private void validateStudentName(String studentName) {
-        if (studentName == null || studentName.isBlank()) {
-            throw new RuntimeException("학생명이 필요합니다.");
+    private void validateLoginId(String loginId) {
+        if (loginId == null || loginId.isBlank()) {
+            throw new RuntimeException("로그인이 필요합니다.");
         }
     }
 }

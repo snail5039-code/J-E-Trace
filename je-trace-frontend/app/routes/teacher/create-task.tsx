@@ -1,11 +1,29 @@
 import { ArrowLeft, FilePlus2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import axios from "axios";
 
 export default function TeacherCreateTaskPage() {
   const navigate = useNavigate();
 
+  const loginId =
+    typeof window !== "undefined" ? localStorage.getItem("loginId") ?? "" : "";
+  const loginRole =
+    typeof window !== "undefined" ? localStorage.getItem("loginRole") ?? "" : "";
+
+  useEffect(() => {
+    if (!loginId) {
+      alert("로그인이 필요합니다.");
+      navigate("/auth?mode=TEACHER");
+      return;
+    }
+
+    if (loginRole !== "TEACHER") {
+      alert("교사 계정만 접근할 수 있습니다.");
+      navigate("/");
+      return;
+    }
+  }, [loginId, loginRole, navigate]);
   const [form, setForm] = useState({
     title: "",
     className: "",

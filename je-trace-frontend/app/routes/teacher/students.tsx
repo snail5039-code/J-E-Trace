@@ -61,7 +61,24 @@ function formatDateTime(value: string | null | undefined) {
 
 export default function TeacherStudentsPage() {
     const navigate = useNavigate();
+    const loginId =
+        typeof window !== "undefined" ? localStorage.getItem("loginId") ?? "" : "";
+    const loginRole =
+        typeof window !== "undefined" ? localStorage.getItem("loginRole") ?? "" : "";
 
+    useEffect(() => {
+        if (!loginId) {
+            alert("로그인이 필요합니다.");
+            navigate("/auth?mode=TEACHER");
+            return;
+        }
+
+        if (loginRole !== "TEACHER") {
+            alert("교사 계정만 접근할 수 있습니다.");
+            navigate("/");
+            return;
+        }
+    }, [loginId, loginRole, navigate]);
     const [requests, setRequests] = useState<StudentRequest[]>([]);
     const [students, setStudents] = useState<Student[]>([]);
     const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);

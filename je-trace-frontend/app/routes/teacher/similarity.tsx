@@ -18,7 +18,24 @@ type SimilarityItem = {
 
 export default function TeacherSimilarityPage() {
     const navigate = useNavigate();
+    const loginId =
+        typeof window !== "undefined" ? localStorage.getItem("loginId") ?? "" : "";
+    const loginRole =
+        typeof window !== "undefined" ? localStorage.getItem("loginRole") ?? "" : "";
 
+    useEffect(() => {
+        if (!loginId) {
+            alert("로그인이 필요합니다.");
+            navigate("/auth?mode=TEACHER");
+            return;
+        }
+
+        if (loginRole !== "TEACHER") {
+            alert("교사 계정만 접근할 수 있습니다.");
+            navigate("/");
+            return;
+        }
+    }, [loginId, loginRole, navigate]);
     const [items, setItems] = useState<SimilarityItem[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -54,8 +71,8 @@ export default function TeacherSimilarityPage() {
                 typeFilter === "전체"
                     ? true
                     : typeFilter === "학생 간 비교"
-                    ? item.comparisonType === "STUDENT_TO_STUDENT"
-                    : item.comparisonType === "STUDENT_TO_AI_LOG";
+                        ? item.comparisonType === "STUDENT_TO_STUDENT"
+                        : item.comparisonType === "STUDENT_TO_AI_LOG";
 
             return matchStudent && matchTask && matchJudge && matchType;
         });
@@ -231,13 +248,12 @@ export default function TeacherSimilarityPage() {
                                                     </td>
                                                     <td className="border border-slate-300 px-4 py-4 text-center">
                                                         <span
-                                                            className={`inline-block rounded-sm px-3 py-1 text-xs font-semibold ${
-                                                                item.judge === "위험"
+                                                            className={`inline-block rounded-sm px-3 py-1 text-xs font-semibold ${item.judge === "위험"
                                                                     ? "bg-rose-50 text-rose-700"
                                                                     : item.judge === "주의"
-                                                                    ? "bg-amber-50 text-amber-700"
-                                                                    : "bg-emerald-50 text-emerald-700"
-                                                            }`}
+                                                                        ? "bg-amber-50 text-amber-700"
+                                                                        : "bg-emerald-50 text-emerald-700"
+                                                                }`}
                                                         >
                                                             {item.judge}
                                                         </span>

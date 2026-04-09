@@ -33,7 +33,24 @@ type AiLog = {
 
 export default function TeacherLogsPage() {
     const navigate = useNavigate();
+    const loginId =
+        typeof window !== "undefined" ? localStorage.getItem("loginId") ?? "" : "";
+    const loginRole =
+        typeof window !== "undefined" ? localStorage.getItem("loginRole") ?? "" : "";
 
+    useEffect(() => {
+        if (!loginId) {
+            alert("로그인이 필요합니다.");
+            navigate("/auth?mode=TEACHER");
+            return;
+        }
+
+        if (loginRole !== "TEACHER") {
+            alert("교사 계정만 접근할 수 있습니다.");
+            navigate("/");
+            return;
+        }
+    }, [loginId, loginRole, navigate]);
     const [tasks, setTasks] = useState<Task[]>([]);
     const [students, setStudents] = useState<TaskSubmission[]>([]);
     const [logs, setLogs] = useState<AiLog[]>([]);
@@ -428,8 +445,8 @@ export default function TeacherLogsPage() {
                                                         <td className="w-[90px] whitespace-nowrap border border-slate-300 px-4 py-4 text-center">
                                                             <span
                                                                 className={`inline-block rounded-sm px-3 py-1 text-xs font-semibold ${log.status === "주의"
-                                                                        ? "bg-rose-50 text-rose-700"
-                                                                        : "bg-emerald-50 text-emerald-700"
+                                                                    ? "bg-rose-50 text-rose-700"
+                                                                    : "bg-emerald-50 text-emerald-700"
                                                                     }`}
                                                             >
                                                                 {log.status}

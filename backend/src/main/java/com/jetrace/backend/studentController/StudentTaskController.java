@@ -2,14 +2,7 @@ package com.jetrace.backend.studentController;
 
 import java.util.List;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.jetrace.backend.studentDto.ChatResponseDto;
 import com.jetrace.backend.studentDto.StudentTaskChatRequest;
@@ -28,16 +21,16 @@ public class StudentTaskController {
     private final StudentTaskService studentTaskService;
 
     @GetMapping
-    public List<StudentTaskResponse> getTasks(@RequestParam String studentName) {
-        return studentTaskService.getTasks(studentName);
+    public List<StudentTaskResponse> getTasks(@RequestParam String loginId) {
+        return studentTaskService.getTasks(loginId);
     }
 
     @GetMapping("/{taskId}")
     public StudentTaskDetailResponse getTaskDetail(
             @PathVariable Long taskId,
-            @RequestParam String studentName
+            @RequestParam String loginId
     ) {
-        return studentTaskService.getTaskDetail(taskId, studentName);
+        return studentTaskService.getTaskDetail(taskId, loginId);
     }
 
     @PostMapping("/{taskId}/chat")
@@ -45,7 +38,7 @@ public class StudentTaskController {
             @PathVariable Long taskId,
             @RequestBody StudentTaskChatRequest request
     ) {
-        return studentTaskService.askTaskAi(taskId, request.getStudentName(), request.getQuestion());
+        return studentTaskService.askTaskAi(taskId, request.getLoginId(), request.getQuestion());
     }
 
     @PutMapping("/{taskId}/submit")
@@ -53,7 +46,7 @@ public class StudentTaskController {
             @PathVariable Long taskId,
             @RequestBody StudentTaskSubmitRequest request
     ) {
-        studentTaskService.submitTask(taskId, request.getStudentName(), request.getContent(), request.getAiUsed());
+        studentTaskService.submitTask(taskId, request.getLoginId(), request.getContent(), request.getAiUsed());
         return "ok";
     }
 }

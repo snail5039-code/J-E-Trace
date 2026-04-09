@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import api from "../../lib/axios";
 
 type LogItem = {
@@ -29,7 +29,10 @@ type TaskDetail = {
 
 export default function AssignmentDetailPage() {
   const { taskId } = useParams();
-  const studentName = typeof window !== "undefined" ? localStorage.getItem("studentName") ?? "" : "";
+  const navigate = useNavigate();
+
+  const loginId = typeof window !== "undefined" ? localStorage.getItem("loginId") ?? "" : "";
+  const loginRole = typeof window !== "undefined" ? localStorage.getItem("loginRole") ?? "" : "";
 
   const [detail, setDetail] = useState<TaskDetail | null>(null);
   const [question, setQuestion] = useState("");
@@ -37,12 +40,26 @@ export default function AssignmentDetailPage() {
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [isSubmitLoading, setIsSubmitLoading] = useState(false);
 
+  useEffect(() => {
+    if (!loginId) {
+      alert("로그인이 필요합니다.");
+      navigate("/auth?mode=STUDENT");
+      return;
+    }
+
+    if (loginRole !== "STUDENT") {
+      alert("학생 계정만 접근할 수 있습니다.");
+      navigate("/");
+      return;
+    }
+  }, [loginId, loginRole, navigate]);
+
   const fetchDetail = async () => {
-    if (!taskId || !studentName) return;
+    if (!taskId || !loginId) return;
 
     try {
       const res = await api.get(`/student/tasks/${taskId}`, {
-        params: { studentName },
+        params: { loginId },
       });
       setDetail(res.data);
       setAnswerText(res.data.content ?? "");
@@ -54,7 +71,7 @@ export default function AssignmentDetailPage() {
 
   useEffect(() => {
     fetchDetail();
-  }, [taskId, studentName]);
+  }, [taskId, loginId]);
 
   const cautionCount = useMemo(() => {
     return detail?.logs?.filter((log) => log.status === "주의").length ?? 0;
@@ -75,7 +92,7 @@ export default function AssignmentDetailPage() {
       setIsChatLoading(true);
 
       const res = await api.post(`/student/tasks/${taskId}/chat`, {
-        studentName,
+        loginId,
         question,
       });
 
@@ -100,7 +117,7 @@ export default function AssignmentDetailPage() {
       setIsSubmitLoading(true);
 
       await api.put(`/student/tasks/${taskId}/submit`, {
-        studentName,
+        loginId,
         content: answerText,
         aiUsed: (detail?.logs?.length ?? 0) > 0,
       });
@@ -114,19 +131,6 @@ export default function AssignmentDetailPage() {
       setIsSubmitLoading(false);
     }
   };
-
-  if (!studentName) {
-    return (
-      <div className="min-h-screen bg-slate-50 p-10">
-        <div className="mx-auto max-w-4xl rounded-2xl bg-white p-8 shadow-sm">
-          <p className="text-slate-700">학생 로그인부터 해라.</p>
-          <Link to="/login/student" className="mt-4 inline-block text-blue-600 hover:underline">
-            로그인 페이지로 →
-          </Link>
-        </div>
-      </div>
-    );
-  }
 
   if (!detail) {
     return (
@@ -197,7 +201,6 @@ export default function AssignmentDetailPage() {
 
             <div className="rounded-2xl bg-white p-6 shadow-sm">
               <h2 className="text-lg font-semibold text-slate-900">교사 피드백</h2>
-
               <div className="mt-4 space-y-2 text-sm text-slate-700">
                 <p>점수: {detail.score ?? 0}</p>
                 <p>코멘트: {detail.teacherComment ?? "아직 없음"}</p>
@@ -224,10 +227,6 @@ export default function AssignmentDetailPage() {
               >
                 {isChatLoading ? "질문 중..." : "AI에게 질문하기"}
               </button>
-
-              {!detail.aiAllowed && (
-                <p className="mt-3 text-sm text-red-500">이 과제는 AI 질문이 허용되지 않습니다.</p>
-              )}
             </div>
 
             <div className="rounded-2xl bg-white p-6 shadow-sm">

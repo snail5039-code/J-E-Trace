@@ -4,12 +4,10 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
-import com.jetrace.backend.studentDto.StudentDto;
 import com.jetrace.backend.studentDto.StudentTaskDetailResponse;
 import com.jetrace.backend.studentDto.StudentTaskLogResponse;
 import com.jetrace.backend.studentDto.StudentTaskResponse;
@@ -17,71 +15,26 @@ import com.jetrace.backend.studentDto.StudentTaskResponse;
 @Mapper
 public interface StudentDao {
 
-    // =========================
-    // users
-    // =========================
-    @Select("SELECT COUNT(*) FROM users WHERE login_id = #{loginId}")
-    int countByLoginId(String loginId);
-
-    @Insert("""
-        INSERT INTO users (login_id, email, password, name, role)
-        VALUES (#{loginId}, #{email}, #{password}, #{name}, #{role})
-    """)
-    void insertStudentUser(
-        @Param("loginId") String loginId,
-        @Param("email") String email,
-        @Param("password") String password,
-        @Param("name") String name,
-        @Param("role") String role
-    );
-
     @Select("""
-        SELECT
-            login_id AS loginId,
-            email,
-            password,
-            name,
-            role
+        SELECT class_name
         FROM users
         WHERE login_id = #{loginId}
-    """)
-    StudentDto findByLoginId(String loginId);
-
-    // =========================
-    // studentRequest
-    // =========================
-    @Select("""
-        SELECT COUNT(*)
-        FROM studentRequest
-        WHERE studentName = #{studentName}
-          AND className = #{className}
-          AND status = 'PENDING'
-    """)
-    int countPendingStudentRequest(
-        @Param("studentName") String studentName,
-        @Param("className") String className
-    );
-
-    @Insert("""
-        INSERT INTO studentRequest (studentName, className, status)
-        VALUES (#{studentName}, #{className}, 'PENDING')
-    """)
-    void insertStudentRequest(
-        @Param("studentName") String studentName,
-        @Param("className") String className
-    );
-
-    @Select("""
-        SELECT className
-        FROM student
-        WHERE studentName = #{studentName}
+          AND role = 'STUDENT'
+          AND approved = TRUE
         LIMIT 1
     """)
-    String findApprovedClassNameByStudentName(String studentName);
+    String findApprovedClassNameByLoginId(String loginId);
 
-    // =========================
-    // task list
-    // =========================
+    @Select("""
+        SELECT name
+        FROM users
+        WHERE login_id = #{loginId}
+          AND role = 'STUDENT'
+          AND approved = TRUE
+        LIMIT 1
+    """)
+    String findStudentNameByLoginId(String loginId);
+
     @Select("""
         SELECT
             t.id,
@@ -104,9 +57,6 @@ public interface StudentDao {
         @Param("studentName") String studentName
     );
 
-    // =========================
-    // task detail
-    // =========================
     @Select("""
         SELECT
             t.id,
@@ -218,7 +168,6 @@ public interface StudentDao {
             #{status}
         )
     """)
-    @Options(useGeneratedKeys = true, keyProperty = "id")
     void insertTaskAiLog(StudentTaskLogResponse log);
 
     @Select("""
@@ -237,13 +186,6 @@ public interface StudentDao {
 
     @Select("""
         SELECT COUNT(*)
-        FROM student
-        WHERE studentName = #{studentName}
-    """)
-    int countApprovedStudentByName(String studentName);
-
-    @Select("""
-        SELECT COUNT(*)
         FROM task
         WHERE id = #{taskId}
           AND className = #{className}
@@ -252,36 +194,4 @@ public interface StudentDao {
         @Param("taskId") Long taskId,
         @Param("className") String className
     );
-
-    @Select("""
-        SELECT COUNT(*)
-        FROM taskAiLog
-        WHERE taskId = #{taskId}
-          AND studentName = #{studentName}
-          AND status = '주의'
-    """)
-    int countCautionLogs(
-        @Param("taskId") Long taskId,
-        @Param("studentName") String studentName
-    );
-
-    @Select("""
-        SELECT COUNT(*)
-        FROM taskAiLog
-        WHERE taskId = #{taskId}
-          AND studentName = #{studentName}
-    """)
-    int countAllLogs(
-        @Param("taskId") Long taskId,
-        @Param("studentName") String studentName
-    );
-
-    @Select("""
-        SELECT
-            COUNT(*)
-        FROM taskSubmission
-        WHERE studentName = #{studentName}
-          AND submitted = TRUE
-    """)
-    int countSubmittedTasks(String studentName);
 }

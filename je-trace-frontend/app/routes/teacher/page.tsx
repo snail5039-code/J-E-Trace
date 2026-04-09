@@ -19,7 +19,24 @@ type Task = {
 
 export default function TeacherPage() {
   const navigate = useNavigate();
+  const loginId =
+    typeof window !== "undefined" ? localStorage.getItem("loginId") ?? "" : "";
+  const loginRole =
+    typeof window !== "undefined" ? localStorage.getItem("loginRole") ?? "" : "";
 
+  useEffect(() => {
+    if (!loginId) {
+      alert("로그인이 필요합니다.");
+      navigate("/auth?mode=TEACHER");
+      return;
+    }
+
+    if (loginRole !== "TEACHER") {
+      alert("교사 계정만 접근할 수 있습니다.");
+      navigate("/");
+      return;
+    }
+  }, [loginId, loginRole, navigate]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -62,8 +79,8 @@ export default function TeacherPage() {
         submissionRateText:
           totalStudentCount > 0
             ? `${submittedCount} / ${totalStudentCount} (${Math.round(
-                (submittedCount / totalStudentCount) * 100
-              )}%)`
+              (submittedCount / totalStudentCount) * 100
+            )}%)`
             : "-",
         statusText: notSubmittedCount === 0 ? "제출 완료" : "진행 중",
         statusClass:
@@ -284,11 +301,10 @@ export default function TeacherPage() {
 
                           <td className="border border-slate-300 px-4 py-4 text-center">
                             <span
-                              className={`inline-block rounded-sm px-3 py-1 text-xs font-semibold ${
-                                task.aiAllowed
+                              className={`inline-block rounded-sm px-3 py-1 text-xs font-semibold ${task.aiAllowed
                                   ? "bg-blue-50 text-blue-700"
                                   : "bg-slate-100 text-slate-600"
-                              }`}
+                                }`}
                             >
                               {task.aiAllowed ? "허용" : "비허용"}
                             </span>
