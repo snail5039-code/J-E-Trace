@@ -27,6 +27,13 @@ type TaskDetail = {
   logs: LogItem[];
 };
 
+type ChatResponse = {
+  relevant: boolean;
+  score: number;
+  answer: string;
+  status: string;
+};
+
 export default function AssignmentDetailPage() {
   const { taskId } = useParams();
   const navigate = useNavigate();
@@ -37,6 +44,7 @@ export default function AssignmentDetailPage() {
   const [detail, setDetail] = useState<TaskDetail | null>(null);
   const [question, setQuestion] = useState("");
   const [answerText, setAnswerText] = useState("");
+  const [lastAiAnswer, setLastAiAnswer] = useState<ChatResponse | null>(null);
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [isSubmitLoading, setIsSubmitLoading] = useState(false);
 
@@ -63,9 +71,9 @@ export default function AssignmentDetailPage() {
       });
       setDetail(res.data);
       setAnswerText(res.data.content ?? "");
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert("과제 상세 조회 실패");
+      alert(error?.response?.data?.message ?? "과제 상세 조회 실패");
     }
   };
 
@@ -96,15 +104,24 @@ export default function AssignmentDetailPage() {
         question,
       });
 
-      alert(`AI 응답 완료\n상태: ${res.data.status}`);
+      setLastAiAnswer(res.data);
       setQuestion("");
       await fetchDetail();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert("AI 질문 실패");
+      alert(error?.response?.data?.message ?? "AI 질문 실패");
     } finally {
       setIsChatLoading(false);
     }
+  };
+
+  const appendAiAnswerToContent = () => {
+    if (!lastAiAnswer?.answer) return;
+
+    setAnswerText((prev) => {
+      if (!prev.trim()) return lastAiAnswer.answer;
+      return `${prev}\n\n${lastAiAnswer.answer}`;
+    });
   };
 
   const handleSubmit = async () => {
@@ -124,9 +141,9 @@ export default function AssignmentDetailPage() {
 
       alert("제출 완료");
       await fetchDetail();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert("제출 실패");
+      alert(error?.response?.data?.message ?? "제출 실패");
     } finally {
       setIsSubmitLoading(false);
     }
@@ -227,6 +244,34 @@ export default function AssignmentDetailPage() {
               >
                 {isChatLoading ? "질문 중..." : "AI에게 질문하기"}
               </button>
+
+              {lastAiAnswer && (
+                <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-slate-900">방금 받은 AI 답변</h3>
+                    <span
+                      className={`rounded-full px-2 py-1 text-xs ${
+                        lastAiAnswer.status === "주의"
+                          ? "bg-red-100 text-red-600"
+                          : "bg-green-100 text-green-600"
+                      }`}
+                    >
+                      {lastAiAnswer.status}
+                    </span>
+                  </div>
+
+                  <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700">
+                    {lastAiAnswer.answer}
+                  </p>
+
+                  <button
+                    onClick={appendAiAnswerToContent}
+                    className="mt-4 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
+                  >
+                    답안에 추가
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="rounded-2xl bg-white p-6 shadow-sm">

@@ -76,7 +76,7 @@ export default function AuthPage() {
         return;
       }
 
-      navigate("/student/assignments");
+      navigate("/student");
     } catch (error: any) {
       console.error(error);
       alert(error?.response?.data?.message || "로그인 중 오류가 발생했습니다.");
@@ -104,7 +104,7 @@ export default function AuthPage() {
               <input
                 value={loginId}
                 onChange={(e) => setLoginId(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none"
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none"
                 placeholder="아이디 입력"
               />
             </div>
@@ -120,7 +120,7 @@ export default function AuthPage() {
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleLogin();
                 }}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none"
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none"
                 placeholder="비밀번호 입력"
               />
             </div>
@@ -136,7 +136,11 @@ export default function AuthPage() {
             <div className="flex gap-3">
               {mode !== "ADMIN" && (
                 <Link
-                  to={mode === "STUDENT" ? "/signup?mode=STUDENT" : "/signup?mode=TEACHER"}
+                  to={
+                    mode === "STUDENT"
+                      ? "/signup?mode=STUDENT"
+                      : "/signup?mode=TEACHER"
+                  }
                   className="rounded-xl bg-slate-100 px-5 py-3 text-slate-800"
                 >
                   회원가입

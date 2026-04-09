@@ -1,4 +1,10 @@
-import { ClipboardList, Search, Sparkles, UserRound } from "lucide-react";
+import {
+  ClipboardList,
+  LogOut,
+  Search,
+  Sparkles,
+  UserRound,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import axios from "axios";
@@ -37,6 +43,7 @@ export default function TeacherPage() {
       return;
     }
   }, [loginId, loginRole, navigate]);
+
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -54,6 +61,16 @@ export default function TeacherPage() {
 
     fetchTasks();
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("loginId");
+    localStorage.removeItem("loginName");
+    localStorage.removeItem("loginRole");
+    localStorage.removeItem("className");
+
+    alert("로그아웃 되었습니다.");
+    navigate("/");
+  };
 
   const totalTaskCount = tasks.length;
   const aiAllowedTaskCount = tasks.filter((task) => task.aiAllowed).length;
@@ -79,8 +96,8 @@ export default function TeacherPage() {
         submissionRateText:
           totalStudentCount > 0
             ? `${submittedCount} / ${totalStudentCount} (${Math.round(
-              (submittedCount / totalStudentCount) * 100
-            )}%)`
+                (submittedCount / totalStudentCount) * 100
+              )}%)`
             : "-",
         statusText: notSubmittedCount === 0 ? "제출 완료" : "진행 중",
         statusClass:
@@ -111,7 +128,7 @@ export default function TeacherPage() {
 
       <div className="mx-auto max-w-7xl px-6 py-6">
         <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
-          <aside className="overflow-hidden rounded-sm border border-slate-300 bg-[#4a4a4a] text-white shadow-sm">
+          <aside className="flex min-h-[700px] flex-col overflow-hidden rounded-sm border border-slate-300 bg-[#4a4a4a] text-white shadow-sm">
             <div className="border-b border-white/10 px-5 py-6 text-center">
               <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-sm bg-slate-200 text-2xl font-bold text-slate-700">
                 T
@@ -150,6 +167,16 @@ export default function TeacherPage() {
                 학생 관리
               </button>
             </div>
+
+            <div className="mt-auto px-3 py-4">
+              <button
+                onClick={handleLogout}
+                className="flex w-full items-center gap-3 rounded-sm border border-white/10 bg-red-500/90 px-4 py-3 text-left text-sm font-medium text-white transition hover:bg-red-500"
+              >
+                <LogOut size={18} />
+                로그아웃
+              </button>
+            </div>
           </aside>
 
           <main className="space-y-5">
@@ -182,7 +209,7 @@ export default function TeacherPage() {
                   관리 반
                 </div>
                 <div className="border-b border-slate-200 px-4 py-4 text-center text-sm text-slate-800">
-                  1학년 2반, 1학년 3반, 2학년 1반, 2학년 2반
+                  A반 , B반, C반
                 </div>
               </div>
             </section>
@@ -301,10 +328,11 @@ export default function TeacherPage() {
 
                           <td className="border border-slate-300 px-4 py-4 text-center">
                             <span
-                              className={`inline-block rounded-sm px-3 py-1 text-xs font-semibold ${task.aiAllowed
+                              className={`inline-block rounded-sm px-3 py-1 text-xs font-semibold ${
+                                task.aiAllowed
                                   ? "bg-blue-50 text-blue-700"
                                   : "bg-slate-100 text-slate-600"
-                                }`}
+                              }`}
                             >
                               {task.aiAllowed ? "허용" : "비허용"}
                             </span>

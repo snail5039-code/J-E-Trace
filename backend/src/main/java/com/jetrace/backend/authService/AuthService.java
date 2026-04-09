@@ -19,9 +19,10 @@ public class AuthService {
     private final AuthDao authDao;
 
     private static final List<String> ALLOWED_CLASSES = List.of(
-            "1학년 1반",
-            "1학년 2반",
-            "1학년 3반"
+            "A",
+            "B",
+            "C",
+            "D"
     );
 
     public boolean isAvailableLoginId(String loginId) {

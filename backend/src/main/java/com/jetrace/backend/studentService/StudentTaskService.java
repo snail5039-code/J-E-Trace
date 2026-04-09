@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class StudentTaskService {
 
     private final StudentDao studentDao;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     @Value("${openai.api-key}")
     private String apiKey;
@@ -64,7 +65,9 @@ public class StudentTaskService {
             studentDao.insertTaskSubmissionIfNotExists(taskId, studentName);
         }
 
-        StudentTaskDetailResponse detail = studentDao.findTaskDetailByTaskIdAndStudentName(taskId, studentName);
+        StudentTaskDetailResponse detail =
+                studentDao.findTaskDetailByTaskIdAndStudentName(taskId, studentName, className);
+
         if (detail == null) {
             throw new RuntimeException("과제 정보를 찾을 수 없습니다.");
         }
@@ -81,16 +84,23 @@ public class StudentTaskService {
             throw new RuntimeException("제출 내용이 비어 있습니다.");
         }
 
+        String className = studentDao.findApprovedClassNameByLoginId(loginId);
         String studentName = studentDao.findStudentNameByLoginId(loginId);
-        if (studentName == null) {
-            throw new RuntimeException("학생 정보를 찾을 수 없습니다.");
+
+        if (className == null || studentName == null) {
+            throw new RuntimeException("승인된 학생 계정을 찾을 수 없습니다.");
+        }
+
+        int allowed = studentDao.countTaskInStudentClass(taskId, className);
+        if (allowed == 0) {
+            throw new RuntimeException("해당 과제에 접근할 수 없습니다.");
         }
 
         if (studentDao.countTaskSubmission(taskId, studentName) == 0) {
             studentDao.insertTaskSubmissionIfNotExists(taskId, studentName);
         }
 
-        studentDao.updateTaskSubmission(taskId, studentName, content, Boolean.TRUE.equals(aiUsed));
+        studentDao.updateTaskSubmission(taskId, studentName, content.trim(), Boolean.TRUE.equals(aiUsed));
     }
 
     @Transactional
@@ -118,12 +128,16 @@ public class StudentTaskService {
             throw new RuntimeException("해당 과제에 접근할 수 없습니다.");
         }
 
-        ChatResponseDto response = callOpenAi(question, task.getDescription());
+        if (Boolean.FALSE.equals(task.getAiAllowed())) {
+            throw new RuntimeException("이 과제는 AI 사용이 허용되지 않았습니다.");
+        }
+
+        ChatResponseDto response = callOpenAi(question.trim(), task.getDescription());
 
         StudentTaskLogResponse log = new StudentTaskLogResponse();
         log.setTaskId(taskId);
         log.setStudentName(studentName);
-        log.setQuestion(question);
+        log.setQuestion(question.trim());
         log.setAnswer(response.getAnswer());
         log.setStatus(response.getStatus());
 
@@ -140,18 +154,37 @@ public class StudentTaskService {
         headers.setBearerAuth(apiKey);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
+        Map<String, Object> responseFormat = Map.of(
+                "type", "json_schema",
+                "json_schema", Map.of(
+                        "name", "task_ai_response",
+                        "schema", Map.of(
+                                "type", "object",
+                                "properties", Map.of(
+                                        "relevant", Map.of("type", "boolean"),
+                                        "score", Map.of("type", "integer"),
+                                        "answer", Map.of("type", "string")
+                                ),
+                                "required", List.of("relevant", "score", "answer"),
+                                "additionalProperties", false
+                        )
+                )
+        );
+
         Map<String, Object> body = Map.of(
                 "model", "gpt-4o-mini",
+                "response_format", responseFormat,
                 "messages", List.of(
                         Map.of(
                                 "role", "system",
                                 "content",
-                                "너는 과제 질문 관련성 판단 AI다.\n\n" +
-                                "아래 과제를 기준으로 학생 질문이 과제와 관련 있는지 판단하고 답변하라.\n" +
-                                "완전히 무관한 질문만 irrelevant 처리하라.\n\n" +
-                                "과제:\n" + taskDescription + "\n\n" +
-                                "반드시 아래 JSON만 출력:\n" +
-                                "{ \"relevant\": true/false, \"score\": 0~100, \"answer\": \"학생에게 보여줄 답변\" }"
+                                """
+                                너는 학생 과제 도우미 AI다.
+                                아래 과제 설명을 기준으로 학생 질문이 과제와 관련 있는지 판단하고 답변하라.
+                                완전히 무관한 질문만 relevant=false로 처리하라.
+
+                                과제 설명:
+                                """ + taskDescription
                         ),
                         Map.of("role", "user", "content", question)
                 )
@@ -160,16 +193,26 @@ public class StudentTaskService {
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
 
         try {
-            ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
+            ResponseEntity<Map> response =
+                    restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
 
-            Map responseBody = response.getBody();
-            List choices = (List) responseBody.get("choices");
-            Map firstChoice = (Map) choices.get(0);
-            Map message = (Map) firstChoice.get("message");
+            Map<?, ?> responseBody = response.getBody();
+            if (responseBody == null || responseBody.get("choices") == null) {
+                throw new RuntimeException("OpenAI 응답이 비어 있습니다.");
+            }
+
+            List<?> choices = (List<?>) responseBody.get("choices");
+            if (choices.isEmpty()) {
+                throw new RuntimeException("OpenAI choices가 비어 있습니다.");
+            }
+
+            Map<?, ?> firstChoice = (Map<?, ?>) choices.get(0);
+            Map<?, ?> message = (Map<?, ?>) firstChoice.get("message");
+            if (message == null || message.get("content") == null) {
+                throw new RuntimeException("OpenAI message content가 없습니다.");
+            }
+
             String content = (String) message.get("content");
-
-            content = content.replace("```json", "").replace("```", "").trim();
-
             AiResponseDto result = objectMapper.readValue(content, AiResponseDto.class);
 
             boolean relevant = result.isRelevant() || result.getScore() >= 20;
@@ -179,11 +222,16 @@ public class StudentTaskService {
                 return new ChatResponseDto(false, result.getScore(), "과제와 관련된 질문을 해주세요.", "주의");
             }
 
-            return new ChatResponseDto(true, result.getScore(), result.getAnswer(), status);
+            String answer = result.getAnswer();
+            if (answer == null || answer.isBlank()) {
+                answer = "질문과 관련된 핵심 개념을 과제 설명에 맞춰 정리해보세요.";
+            }
+
+            return new ChatResponseDto(true, result.getScore(), answer, status);
 
         } catch (Exception e) {
             e.printStackTrace();
-            return new ChatResponseDto(false, 0, "AI 응답 처리 실패", "주의");
+            throw new RuntimeException("AI 응답 처리 실패");
         }
     }
 

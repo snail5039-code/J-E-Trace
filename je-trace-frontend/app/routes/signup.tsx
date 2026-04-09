@@ -3,9 +3,11 @@ import { Link, useNavigate, useSearchParams } from "react-router";
 import api from "~/lib/axios";
 
 const STUDENT_CLASS_OPTIONS = [
-  "1학년 1반",
-  "1학년 2반",
-  "1학년 3반",
+  "선택하세요",
+  "A",
+  "B",
+  "C",
+  "D",
 ];
 
 export default function SignupPage() {
@@ -21,7 +23,7 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [className, setClassName] = useState(STUDENT_CLASS_OPTIONS[0]);
+  const [className, setClassName] = useState("선택하세요");
   const [loading, setLoading] = useState(false);
 
   const modeLabel = mode === "TEACHER" ? "교사" : "학생";
@@ -44,6 +46,11 @@ export default function SignupPage() {
 
     if (!name.trim()) {
       alert("이름을 입력하세요.");
+      return;
+    }
+
+    if (mode === "STUDENT" && className === "선택하세요") {
+      alert("반을 선택하세요.");
       return;
     }
 
@@ -104,7 +111,7 @@ export default function SignupPage() {
               <input
                 value={loginId}
                 onChange={(e) => setLoginId(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none"
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none"
                 placeholder="아이디 입력"
               />
             </div>
@@ -117,7 +124,7 @@ export default function SignupPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none"
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none"
                 placeholder="이메일 입력"
               />
             </div>
@@ -130,7 +137,7 @@ export default function SignupPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none"
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none"
                 placeholder="비밀번호 입력"
               />
             </div>
@@ -142,7 +149,7 @@ export default function SignupPage() {
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none"
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none"
                 placeholder="이름 입력"
               />
             </div>
@@ -155,9 +162,14 @@ export default function SignupPage() {
                 <select
                   value={className}
                   onChange={(e) => setClassName(e.target.value)}
-                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none"
                 >
-                  {STUDENT_CLASS_OPTIONS.map((option) => (
+                  <option value="선택하세요" disabled>
+                    선택하세요
+                  </option>
+                  {STUDENT_CLASS_OPTIONS.filter(
+                    (option) => option !== "선택하세요"
+                  ).map((option) => (
                     <option key={option} value={option}>
                       {option}
                     </option>

@@ -43,7 +43,7 @@ public interface StudentDao {
             t.description,
             t.dueDate,
             t.aiAllowed,
-            ts.submitted,
+            COALESCE(ts.submitted, FALSE) AS submitted,
             ts.submittedAt
         FROM task t
         LEFT JOIN taskSubmission ts
@@ -66,9 +66,9 @@ public interface StudentDao {
             t.dueDate,
             t.aiAllowed,
             ts.id AS submissionId,
-            ts.submitted,
+            COALESCE(ts.submitted, FALSE) AS submitted,
             ts.submittedAt,
-            ts.aiUsed,
+            COALESCE(ts.aiUsed, FALSE) AS aiUsed,
             ts.content,
             ts.score,
             ts.teacherComment
@@ -77,11 +77,13 @@ public interface StudentDao {
           ON ts.taskId = t.id
          AND ts.studentName = #{studentName}
         WHERE t.id = #{taskId}
+          AND t.className = #{className}
         LIMIT 1
     """)
     StudentTaskDetailResponse findTaskDetailByTaskIdAndStudentName(
         @Param("taskId") Long taskId,
-        @Param("studentName") String studentName
+        @Param("studentName") String studentName,
+        @Param("className") String className
     );
 
     @Select("""
@@ -92,7 +94,7 @@ public interface StudentDao {
             question,
             answer,
             createdAt,
-            status
+            STATUS AS status
         FROM taskAiLog
         WHERE taskId = #{taskId}
           AND studentName = #{studentName}
@@ -159,7 +161,7 @@ public interface StudentDao {
             studentName,
             question,
             answer,
-            status
+            STATUS
         ) VALUES (
             #{taskId},
             #{studentName},

@@ -158,10 +158,10 @@ export default function TeacherCreateTaskPage() {
                         required
                       >
                         <option value="">반을 선택하세요</option>
-                        <option value="1학년 2반">1학년 2반</option>
-                        <option value="1학년 3반">1학년 3반</option>
-                        <option value="2학년 1반">2학년 1반</option>
-                        <option value="2학년 2반">2학년 2반</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
                       </select>
                     </div>
 
