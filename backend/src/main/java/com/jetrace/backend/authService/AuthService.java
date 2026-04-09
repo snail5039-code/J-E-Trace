@@ -76,6 +76,9 @@ public class AuthService {
         }
 
         if (!user.isApproved()) {
+            if ("TEACHER".equals(user.getRole())) {
+                return new LoginResponseDto(false, "관리자 승인 후 교사 로그인이 가능합니다.", null, null, null, false, null);
+            }
             return new LoginResponseDto(false, "아직 승인되지 않은 계정입니다.", null, null, null, false, null);
         }
 

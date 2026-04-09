@@ -10,10 +10,18 @@ import com.jetrace.backend.authDto.LoginResponseDto;
 @Mapper
 public interface AuthDao {
 
-    @Select("SELECT COUNT(*) FROM users WHERE login_id = #{loginId}")
+    @Select("""
+        SELECT COUNT(*)
+        FROM users
+        WHERE login_id = #{loginId}
+    """)
     int countByLoginId(String loginId);
 
-    @Select("SELECT COUNT(*) FROM users WHERE email = #{email}")
+    @Select("""
+        SELECT COUNT(*)
+        FROM users
+        WHERE email = #{email}
+    """)
     int countByEmail(String email);
 
     @Insert("""

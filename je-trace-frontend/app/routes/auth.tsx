@@ -18,14 +18,17 @@ export default function AuthPage() {
 
   const mode = useMemo(() => {
     const value = searchParams.get("mode");
-    return value === "TEACHER" ? "TEACHER" : "STUDENT";
+    if (value === "TEACHER") return "TEACHER";
+    if (value === "ADMIN") return "ADMIN";
+    return "STUDENT";
   }, [searchParams]);
 
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const modeLabel = mode === "TEACHER" ? "교사" : "학생";
+  const modeLabel =
+    mode === "TEACHER" ? "교사" : mode === "ADMIN" ? "관리자" : "학생";
 
   const handleLogin = async () => {
     if (!loginId.trim()) {
@@ -63,11 +66,17 @@ export default function AuthPage() {
       localStorage.setItem("loginRole", data.role ?? "");
       localStorage.setItem("className", data.className ?? "");
 
+      if (data.role === "ADMIN") {
+        navigate("/admin");
+        return;
+      }
+
       if (data.role === "TEACHER") {
         navigate("/teacher");
-      } else {
-        navigate("/student/assignments");
+        return;
       }
+
+      navigate("/student/assignments");
     } catch (error: any) {
       console.error(error);
       alert(error?.response?.data?.message || "로그인 중 오류가 발생했습니다.");
@@ -125,12 +134,15 @@ export default function AuthPage() {
             </button>
 
             <div className="flex gap-3">
-              <Link
-                to={mode === "STUDENT" ? "/signup?mode=STUDENT" : "/signup?mode=TEACHER"}
-                className="rounded-xl bg-slate-100 px-5 py-3 text-slate-800"
-              >
-                회원가입
-              </Link>
+              {mode !== "ADMIN" && (
+                <Link
+                  to={mode === "STUDENT" ? "/signup?mode=STUDENT" : "/signup?mode=TEACHER"}
+                  className="rounded-xl bg-slate-100 px-5 py-3 text-slate-800"
+                >
+                  회원가입
+                </Link>
+              )}
+
               <Link
                 to="/"
                 className="rounded-xl bg-slate-100 px-5 py-3 text-slate-800"

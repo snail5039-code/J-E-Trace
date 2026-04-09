@@ -1,4 +1,4 @@
-import { GraduationCap, School } from "lucide-react";
+import { GraduationCap, School, ShieldCheck } from "lucide-react";
 import { Link } from "react-router";
 
 export default function Home() {
@@ -20,7 +20,7 @@ export default function Home() {
           <p className="mt-3 text-lg text-slate-300">사용할 화면을 선택해 서비스를 시작하세요.</p>
         </div>
 
-        <div className="mt-8 grid gap-6 md:grid-cols-2">
+        <div className="mt-8 grid gap-6 md:grid-cols-3">
           <div className="rounded-[28px] border-4 border-slate-900 bg-white p-8">
             <div className="inline-flex rounded-2xl border-2 border-slate-300 p-4">
               <GraduationCap className="h-10 w-10 text-slate-700" />
@@ -54,6 +54,26 @@ export default function Home() {
             <div className="mt-8">
               <Link
                 to="/auth?mode=TEACHER"
+                className="inline-block rounded-xl bg-slate-900 px-5 py-3 text-white"
+              >
+                시작하기
+              </Link>
+            </div>
+          </div>
+
+          <div className="rounded-[28px] border-4 border-slate-900 bg-white p-8">
+            <div className="inline-flex rounded-2xl border-2 border-slate-300 p-4">
+              <ShieldCheck className="h-10 w-10 text-slate-700" />
+            </div>
+
+            <h3 className="mt-6 text-4xl font-bold text-slate-900">관리자</h3>
+            <p className="mt-4 text-xl leading-9 text-slate-500">
+              교사 회원가입 승인과 관리자 전용 계정 관리를 진행합니다.
+            </p>
+
+            <div className="mt-8">
+              <Link
+                to="/auth?mode=ADMIN"
                 className="inline-block rounded-xl bg-slate-900 px-5 py-3 text-white"
               >
                 시작하기

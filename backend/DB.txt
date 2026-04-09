@@ -59,7 +59,7 @@ CREATE TABLE taskAiLog (
     question TEXT NOT NULL,
     answer TEXT NOT NULL,
     createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    status VARCHAR(20) NOT NULL
+    STATUS VARCHAR(20) NOT NULL
 );
 
 -- =========================
@@ -69,7 +69,7 @@ CREATE TABLE studentRequest (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     studentName VARCHAR(100) NOT NULL,
     className VARCHAR(100) NOT NULL,
-    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    STATUS VARCHAR(20) NOT NULL DEFAULT 'PENDING',
     requestedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     processedAt DATETIME NULL
 );
@@ -115,7 +115,7 @@ USE jetrace;
 INSERT INTO task (
     title,
     className,
-    description,
+    DESCRIPTION,
     dueDate,
     aiAllowed
 ) VALUES
@@ -140,7 +140,7 @@ INSERT INTO task (
 INSERT INTO studentRequest (
     studentName,
     className,
-    status
+    STATUS
 ) VALUES
 ('김민수', '1학년 2반', 'PENDING'),
 ('이서연', '1학년 2반', 'PENDING'),
@@ -280,7 +280,7 @@ INSERT INTO taskAiLog (
     question,
     answer,
     createdAt,
-    status
+    STATUS
 ) VALUES
 (1, '김민수', '정보처리산업기사가 뭐예요?', '정보처리산업기사는 시스템 개발과 운영에 필요한 기본 이론과 실무 능력을 평가하는 국가기술자격입니다.', '2026-04-06 09:10:00', '정상'),
 (1, '김민수', '한 줄로 다시 정리해줘', '시스템 개발과 운영에 필요한 이론과 실무 능력을 평가하는 자격입니다.', '2026-04-06 09:18:00', '정상'),
@@ -298,7 +298,7 @@ INSERT INTO taskAiLog (
     question,
     answer,
     createdAt,
-    status
+    STATUS
 ) VALUES
 (2, '김민수', 'primary key와 foreign key 차이 설명해줘', 'Primary key는 각 행을 고유하게 식별하고, foreign key는 다른 테이블의 primary key를 참조합니다.', '2026-04-08 08:30:00', '정상'),
 (2, '이서연', 'foreign key 쉽게 설명해줘', 'Foreign key는 다른 테이블과의 관계를 연결하는 키입니다.', '2026-04-08 08:35:00', '정상'),
@@ -307,8 +307,29 @@ INSERT INTO taskAiLog (
 CREATE TABLE users (
     login_id VARCHAR(50) PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    name VARCHAR(100) NOT NULL,
-    role ENUM('STUDENT', 'TEACHER') NOT NULL,
+    PASSWORD VARCHAR(255) NOT NULL,
+    NAME VARCHAR(100) NOT NULL,
+    ROLE ENUM('STUDENT', 'TEACHER', 'ADMIN') NOT NULL,
+    approved BOOLEAN NOT NULL DEFAULT FALSE,
+    class_name VARCHAR(100) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO users (
+    login_id,
+    email,
+    PASSWORD,
+    NAME,
+    ROLE,
+    approved,
+    class_name
+) VALUES
+(
+    'admin',
+    'admin@jetrace.com',
+    '1234',
+    '관리자',
+    'ADMIN',
+    TRUE,
+    NULL
 );
