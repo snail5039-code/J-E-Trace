@@ -7,12 +7,12 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PendingTeacherResponse {
+public class TeacherProfileChangeRequestResponse {
+    private Long id;
     private String loginId;
-    private String email;
     private String name;
-    private boolean approved;
     private String subject;
     private String managedClasses;
-    private String createdAt;
+    private String status;
+    private String requestedAt;
 }

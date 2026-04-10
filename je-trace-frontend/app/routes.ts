@@ -18,6 +18,7 @@ export default [
   route("teacher/similarity", "routes/teacher/similarity.tsx"),
   route("teacher/similarity/:similarityId", "routes/teacher/similarity-detail.tsx"),
   route("teacher/students", "routes/teacher/students.tsx"),
+  route("teacher/profile", "routes/teacher/profile.tsx"),
 
   route("admin", "routes/admin/page.tsx"),
 

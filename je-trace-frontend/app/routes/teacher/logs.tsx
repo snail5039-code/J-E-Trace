@@ -65,6 +65,34 @@ export default function TeacherLogsPage() {
     const [expandedQuestionIds, setExpandedQuestionIds] = useState<number[]>([]);
     const [expandedAnswerIds, setExpandedAnswerIds] = useState<number[]>([]);
 
+    const [teacherName, setTeacherName] = useState(
+        typeof window !== "undefined" ? localStorage.getItem("loginName") ?? "" : ""
+    );
+    const [teacherSubject, setTeacherSubject] = useState(
+        typeof window !== "undefined" ? localStorage.getItem("subject") ?? "" : ""
+    );
+    useEffect(() => {
+        const fetchTeacherProfile = async () => {
+            if (!loginId || loginRole !== "TEACHER") return;
+
+            try {
+                const response = await axios.get("http://localhost:8080/teacher/profile", {
+                    params: { loginId },
+                });
+
+                const data = response.data;
+                setTeacherName(data?.name ?? "");
+                setTeacherSubject(data?.subject ?? "");
+
+                localStorage.setItem("loginName", data?.name ?? "");
+                localStorage.setItem("subject", data?.subject ?? "");
+            } catch (error) {
+                console.error("교사 프로필 조회 실패:", error);
+            }
+        };
+
+        fetchTeacherProfile();
+    }, [loginId, loginRole]);
     useEffect(() => {
         const fetchTasks = async () => {
             try {
@@ -192,8 +220,10 @@ export default function TeacherLogsPage() {
                             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-sm bg-slate-200 text-2xl font-bold text-slate-700">
                                 T
                             </div>
-                            <p className="mt-4 text-lg font-semibold">박의혁</p>
-                            <p className="mt-1 text-sm text-white/70">정보처리 수업 담당</p>
+                            <p className="mt-4 text-lg font-semibold">{teacherName || "교사"}</p>
+                            <p className="mt-1 text-sm text-white/70">
+                                {teacherSubject ? `${teacherSubject} 수업 담당` : "담당 과목 미설정"}
+                            </p>
                         </div>
 
                         <div className="space-y-2 px-3 py-4">
@@ -331,7 +361,7 @@ export default function TeacherLogsPage() {
                                 <h2 className="text-lg font-semibold text-slate-900">AI 로그 목록</h2>
                             </div>
 
-                            <div className="overflow-x-auto">
+                            <div className="max-h-[640px] overflow-auto">
                                 <table className="min-w-full border-collapse text-sm">
                                     <thead>
                                         <tr className="bg-slate-100 text-slate-700">

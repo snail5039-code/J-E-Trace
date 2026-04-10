@@ -79,6 +79,12 @@ export default function TeacherStudentsPage() {
             return;
         }
     }, [loginId, loginRole, navigate]);
+    const [teacherName, setTeacherName] = useState(
+        typeof window !== "undefined" ? localStorage.getItem("loginName") ?? "" : ""
+    );
+    const [teacherSubject, setTeacherSubject] = useState(
+        typeof window !== "undefined" ? localStorage.getItem("subject") ?? "" : ""
+    );
     const [requests, setRequests] = useState<StudentRequest[]>([]);
     const [students, setStudents] = useState<Student[]>([]);
     const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
@@ -96,7 +102,28 @@ export default function TeacherStudentsPage() {
         studentName: "",
         className: "",
     });
+    useEffect(() => {
+        const fetchTeacherProfile = async () => {
+            if (!loginId || loginRole !== "TEACHER") return;
 
+            try {
+                const response = await axios.get("http://localhost:8080/teacher/profile", {
+                    params: { loginId },
+                });
+
+                const data = response.data;
+                setTeacherName(data?.name ?? "");
+                setTeacherSubject(data?.subject ?? "");
+
+                localStorage.setItem("loginName", data?.name ?? "");
+                localStorage.setItem("subject", data?.subject ?? "");
+            } catch (error) {
+                console.error("교사 프로필 조회 실패:", error);
+            }
+        };
+
+        fetchTeacherProfile();
+    }, [loginId, loginRole]);
     const [savingInfo, setSavingInfo] = useState(false);
     const [savingScoreId, setSavingScoreId] = useState<number | null>(null);
     const [notice, setNotice] = useState<Notice>(null);
@@ -389,8 +416,10 @@ export default function TeacherStudentsPage() {
                             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-sm bg-slate-200 text-2xl font-bold text-slate-700">
                                 T
                             </div>
-                            <p className="mt-4 text-lg font-semibold">박의혁</p>
-                            <p className="mt-1 text-sm text-white/70">정보처리 수업 담당</p>
+                            <p className="mt-4 text-lg font-semibold">{teacherName || "교사"}</p>
+                            <p className="mt-1 text-sm text-white/70">
+                                {teacherSubject ? `${teacherSubject} 수업 담당` : "담당 과목 미설정"}
+                            </p>
                         </div>
 
                         <div className="space-y-2 px-3 py-4">

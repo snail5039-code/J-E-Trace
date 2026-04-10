@@ -8,6 +8,8 @@ public class SignupRequestDto {
     private String email;
     private String password;
     private String name;
-    private String role;      // STUDENT / TEACHER
-    private String className; // 학생만 사용
+    private String role;
+    private String className;
+    private String subject;
+    private String managedClasses;
 }

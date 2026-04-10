@@ -46,7 +46,40 @@ export default function TeacherPage() {
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+  const [teacherName, setTeacherName] = useState(
+    typeof window !== "undefined" ? localStorage.getItem("loginName") ?? "" : ""
+  );
+  const [teacherSubject, setTeacherSubject] = useState(
+    typeof window !== "undefined" ? localStorage.getItem("subject") ?? "" : ""
+  );
+  const [teacherManagedClasses, setTeacherManagedClasses] = useState(
+    typeof window !== "undefined" ? localStorage.getItem("managedClasses") ?? "" : ""
+  );
 
+  useEffect(() => {
+    const fetchTeacherProfile = async () => {
+      if (!loginId || loginRole !== "TEACHER") return;
+
+      try {
+        const response = await axios.get("http://localhost:8080/teacher/profile", {
+          params: { loginId },
+        });
+
+        const data = response.data;
+        setTeacherName(data?.name ?? "");
+        setTeacherSubject(data?.subject ?? "");
+        setTeacherManagedClasses(data?.managedClasses ?? "");
+
+        localStorage.setItem("loginName", data?.name ?? "");
+        localStorage.setItem("subject", data?.subject ?? "");
+        localStorage.setItem("managedClasses", data?.managedClasses ?? "");
+      } catch (error) {
+        console.error("교사 프로필 조회 실패:", error);
+      }
+    };
+
+    fetchTeacherProfile();
+  }, [loginId, loginRole]);
   useEffect(() => {
     const fetchTasks = async () => {
       try {
@@ -67,6 +100,8 @@ export default function TeacherPage() {
     localStorage.removeItem("loginName");
     localStorage.removeItem("loginRole");
     localStorage.removeItem("className");
+    localStorage.removeItem("subject");
+    localStorage.removeItem("managedClasses");
 
     alert("로그아웃 되었습니다.");
     navigate("/");
@@ -96,8 +131,8 @@ export default function TeacherPage() {
         submissionRateText:
           totalStudentCount > 0
             ? `${submittedCount} / ${totalStudentCount} (${Math.round(
-                (submittedCount / totalStudentCount) * 100
-              )}%)`
+              (submittedCount / totalStudentCount) * 100
+            )}%)`
             : "-",
         statusText: notSubmittedCount === 0 ? "제출 완료" : "진행 중",
         statusClass:
@@ -133,8 +168,10 @@ export default function TeacherPage() {
               <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-sm bg-slate-200 text-2xl font-bold text-slate-700">
                 T
               </div>
-              <p className="mt-4 text-lg font-semibold">박의혁</p>
-              <p className="mt-1 text-sm text-white/70">정보처리 수업 담당</p>
+              <p className="mt-4 text-lg font-semibold">{teacherName || "교사"}</p>
+              <p className="mt-1 text-sm text-white/70">
+                {teacherSubject ? `${teacherSubject} 수업 담당` : "담당 과목 미설정"}
+              </p>
             </div>
 
             <div className="space-y-2 px-3 py-4">
@@ -166,7 +203,17 @@ export default function TeacherPage() {
                 <UserRound size={18} />
                 학생 관리
               </button>
+              <div className="mt-auto border-t border-white/10 px-4 py-6">
+                <button
+                  onClick={() => navigate("/teacher/profile")}
+                  className="flex w-full items-center justify-center rounded-xl bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/20"
+                >
+                  회원정보 수정
+                </button>
+              </div>
             </div>
+
+
 
             <div className="mt-auto px-3 py-4">
               <button
@@ -190,26 +237,25 @@ export default function TeacherPage() {
                   담당 교사
                 </div>
                 <div className="border-b border-slate-200 px-4 py-4 text-center text-sm text-slate-800">
-                  박의혁
+                  {teacherName || "-"}
                 </div>
-                <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium text-slate-600">
-                  학기
-                </div>
-                <div className="border-b border-slate-200 px-4 py-4 text-center text-sm text-slate-800">
-                  2026년 1학기
-                </div>
-
                 <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium text-slate-600">
                   담당 과목
                 </div>
                 <div className="border-b border-slate-200 px-4 py-4 text-center text-sm text-slate-800">
-                  국어 / 영어 / 사회
+                  {teacherSubject || "-"}
                 </div>
+
                 <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium text-slate-600">
                   관리 반
                 </div>
-                <div className="border-b border-slate-200 px-4 py-4 text-center text-sm text-slate-800">
-                  A반 , B반, C반
+                <div className="col-span-3 border-b border-slate-200 px-4 py-4 text-center text-sm text-slate-800">
+                  {teacherManagedClasses
+                    ? teacherManagedClasses
+                      .split(",")
+                      .map((value) => `${value.trim()}반`)
+                      .join(", ")
+                    : "-"}
                 </div>
               </div>
             </section>
@@ -328,11 +374,10 @@ export default function TeacherPage() {
 
                           <td className="border border-slate-300 px-4 py-4 text-center">
                             <span
-                              className={`inline-block rounded-sm px-3 py-1 text-xs font-semibold ${
-                                task.aiAllowed
-                                  ? "bg-blue-50 text-blue-700"
-                                  : "bg-slate-100 text-slate-600"
-                              }`}
+                              className={`inline-block rounded-sm px-3 py-1 text-xs font-semibold ${task.aiAllowed
+                                ? "bg-blue-50 text-blue-700"
+                                : "bg-slate-100 text-slate-600"
+                                }`}
                             >
                               {task.aiAllowed ? "허용" : "비허용"}
                             </span>

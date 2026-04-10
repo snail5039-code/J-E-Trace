@@ -32,7 +32,9 @@ public interface AuthDao {
             name,
             role,
             approved,
-            class_name
+            class_name,
+            subject,
+            managed_classes
         ) VALUES (
             #{loginId},
             #{email},
@@ -40,7 +42,9 @@ public interface AuthDao {
             #{name},
             #{role},
             #{approved},
-            #{className}
+            #{className},
+            #{subject},
+            #{managedClasses}
         )
     """)
     void insertUser(
@@ -50,7 +54,9 @@ public interface AuthDao {
         @Param("name") String name,
         @Param("role") String role,
         @Param("approved") boolean approved,
-        @Param("className") String className
+        @Param("className") String className,
+        @Param("subject") String subject,
+        @Param("managedClasses") String managedClasses
     );
 
     @Select("""
@@ -59,7 +65,9 @@ public interface AuthDao {
             name,
             role,
             approved,
-            class_name AS className
+            class_name AS className,
+            subject,
+            managed_classes AS managedClasses
         FROM users
         WHERE login_id = #{loginId}
           AND password = #{password}

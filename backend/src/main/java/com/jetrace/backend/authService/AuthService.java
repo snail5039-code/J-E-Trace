@@ -1,6 +1,8 @@
 package com.jetrace.backend.authService;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +27,15 @@ public class AuthService {
             "D"
     );
 
+    private static final List<String> ALLOWED_SUBJECTS = List.of(
+            "정보처리",
+            "국어",
+            "영어",
+            "수학",
+            "사회",
+            "과학"
+    );
+
     public boolean isAvailableLoginId(String loginId) {
         return authDao.countByLoginId(loginId) == 0;
     }
@@ -43,6 +54,10 @@ public class AuthService {
 
         boolean approved = "STUDENT".equals(dto.getRole());
         String className = "STUDENT".equals(dto.getRole()) ? dto.getClassName() : null;
+        String subject = "TEACHER".equals(dto.getRole()) ? dto.getSubject() : null;
+        String managedClasses = "TEACHER".equals(dto.getRole())
+                ? normalizeManagedClasses(dto.getManagedClasses())
+                : null;
 
         authDao.insertUser(
                 dto.getLoginId(),
@@ -51,7 +66,9 @@ public class AuthService {
                 dto.getName(),
                 dto.getRole(),
                 approved,
-                className
+                className,
+                subject,
+                managedClasses
         );
 
         if ("STUDENT".equals(dto.getRole())) {
@@ -73,14 +90,14 @@ public class AuthService {
         LoginResponseDto user = authDao.findLoginUser(dto.getLoginId(), dto.getPassword());
 
         if (user == null) {
-            return new LoginResponseDto(false, "아이디 또는 비밀번호가 올바르지 않습니다.", null, null, null, false, null);
+            return new LoginResponseDto(false, "아이디 또는 비밀번호가 올바르지 않습니다.", null, null, null, false, null, null, null);
         }
 
         if (!user.isApproved()) {
             if ("TEACHER".equals(user.getRole())) {
-                return new LoginResponseDto(false, "관리자 승인 후 교사 로그인이 가능합니다.", null, null, null, false, null);
+                return new LoginResponseDto(false, "관리자 승인 후 교사 로그인이 가능합니다.", null, null, null, false, null, null, null);
             }
-            return new LoginResponseDto(false, "아직 승인되지 않은 계정입니다.", null, null, null, false, null);
+            return new LoginResponseDto(false, "아직 승인되지 않은 계정입니다.", null, null, null, false, null, null, null);
         }
 
         user.setSuccess(true);
@@ -118,5 +135,34 @@ public class AuthService {
                 throw new RuntimeException("허용되지 않은 반 정보입니다.");
             }
         }
+
+        if ("TEACHER".equals(dto.getRole())) {
+            if (dto.getSubject() == null || dto.getSubject().isBlank()) {
+                throw new RuntimeException("담당 과목 입력은 필수입니다.");
+            }
+
+            String normalizedManagedClasses = normalizeManagedClasses(dto.getManagedClasses());
+            if (normalizedManagedClasses.isBlank()) {
+                throw new RuntimeException("관리 반 선택은 필수입니다.");
+            }
+
+            for (String className : normalizedManagedClasses.split(",")) {
+                if (!ALLOWED_CLASSES.contains(className)) {
+                    throw new RuntimeException("허용되지 않은 관리 반 정보입니다.");
+                }
+            }
+        }
+    }
+
+    private String normalizeManagedClasses(String managedClasses) {
+        if (managedClasses == null || managedClasses.isBlank()) {
+            return "";
+        }
+
+        return Arrays.stream(managedClasses.split(","))
+                .map(String::trim)
+                .filter(value -> !value.isBlank())
+                .distinct()
+                .collect(Collectors.joining(","));
     }
 }

@@ -10,6 +10,8 @@ type LoginResponse = {
   role: string | null;
   approved: boolean;
   className: string | null;
+  subject: string | null;
+  managedClasses: string | null;
 };
 
 export default function AuthPage() {
@@ -65,6 +67,8 @@ export default function AuthPage() {
       localStorage.setItem("loginName", data.name ?? "");
       localStorage.setItem("loginRole", data.role ?? "");
       localStorage.setItem("className", data.className ?? "");
+      localStorage.setItem("subject", data.subject ?? "");
+      localStorage.setItem("managedClasses", data.managedClasses ?? "");
 
       if (data.role === "ADMIN") {
         navigate("/admin");

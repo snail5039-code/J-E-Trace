@@ -15,4 +15,6 @@ public class LoginResponseDto {
     private String role;
     private boolean approved;
     private String className;
+    private String subject;
+    private String managedClasses;
 }

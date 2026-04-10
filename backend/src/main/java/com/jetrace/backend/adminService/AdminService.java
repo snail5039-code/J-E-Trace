@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.jetrace.backend.adminDao.AdminDao;
 import com.jetrace.backend.adminDto.PendingTeacherResponse;
+import com.jetrace.backend.adminDto.TeacherProfileChangeRequestResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,6 +19,10 @@ public class AdminService {
 
     public List<PendingTeacherResponse> getPendingTeachers() {
         return adminDao.findPendingTeachers();
+    }
+
+    public List<TeacherProfileChangeRequestResponse> getPendingTeacherProfileChanges() {
+        return adminDao.findPendingTeacherProfileChanges();
     }
 
     @Transactional
@@ -32,5 +37,34 @@ public class AdminService {
         }
 
         adminDao.approveTeacher(loginId);
+    }
+
+    @Transactional
+    public void approveTeacherProfileChange(Long id) {
+        if (id == null) {
+            throw new RuntimeException("요청 ID가 필요합니다.");
+        }
+
+        int count = adminDao.countPendingTeacherProfileChangeById(id);
+        if (count == 0) {
+            throw new RuntimeException("승인 대기 중인 교사 정보 수정 요청을 찾을 수 없습니다.");
+        }
+
+        adminDao.applyTeacherProfileChange(id);
+        adminDao.approveTeacherProfileChange(id);
+    }
+
+    @Transactional
+    public void rejectTeacherProfileChange(Long id) {
+        if (id == null) {
+            throw new RuntimeException("요청 ID가 필요합니다.");
+        }
+
+        int count = adminDao.countPendingTeacherProfileChangeById(id);
+        if (count == 0) {
+            throw new RuntimeException("승인 대기 중인 교사 정보 수정 요청을 찾을 수 없습니다.");
+        }
+
+        adminDao.rejectTeacherProfileChange(id);
     }
 }

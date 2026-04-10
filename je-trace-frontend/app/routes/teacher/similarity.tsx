@@ -43,7 +43,34 @@ export default function TeacherSimilarityPage() {
     const [taskKeyword, setTaskKeyword] = useState("");
     const [judgeFilter, setJudgeFilter] = useState<"전체" | "정상" | "주의" | "위험">("전체");
     const [typeFilter, setTypeFilter] = useState<"전체" | "학생 간 비교" | "AI 로그 비교">("전체");
+    const [teacherName, setTeacherName] = useState(
+        typeof window !== "undefined" ? localStorage.getItem("loginName") ?? "" : ""
+    );
+    const [teacherSubject, setTeacherSubject] = useState(
+        typeof window !== "undefined" ? localStorage.getItem("subject") ?? "" : ""
+    );
+    useEffect(() => {
+        const fetchTeacherProfile = async () => {
+            if (!loginId || loginRole !== "TEACHER") return;
 
+            try {
+                const response = await axios.get("http://localhost:8080/teacher/profile", {
+                    params: { loginId },
+                });
+
+                const data = response.data;
+                setTeacherName(data?.name ?? "");
+                setTeacherSubject(data?.subject ?? "");
+
+                localStorage.setItem("loginName", data?.name ?? "");
+                localStorage.setItem("subject", data?.subject ?? "");
+            } catch (error) {
+                console.error("교사 프로필 조회 실패:", error);
+            }
+        };
+
+        fetchTeacherProfile();
+    }, [loginId, loginRole]);
     useEffect(() => {
         const fetchSimilarityResults = async () => {
             try {
@@ -103,8 +130,10 @@ export default function TeacherSimilarityPage() {
                             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-sm bg-slate-200 text-2xl font-bold text-slate-700">
                                 T
                             </div>
-                            <p className="mt-4 text-lg font-semibold">박의혁</p>
-                            <p className="mt-1 text-sm text-white/70">정보처리 수업 담당</p>
+                            <p className="mt-4 text-lg font-semibold">{teacherName || "교사"}</p>
+                            <p className="mt-1 text-sm text-white/70">
+                                {teacherSubject ? `${teacherSubject} 수업 담당` : "담당 과목 미설정"}
+                            </p>
                         </div>
 
                         <div className="space-y-2 px-3 py-4">
@@ -206,7 +235,7 @@ export default function TeacherSimilarityPage() {
                                 <h2 className="text-lg font-semibold text-slate-900">유사도 분석 목록</h2>
                             </div>
 
-                            <div className="overflow-x-auto">
+                            <div className="max-h-[640px] overflow-auto">
                                 <table className="min-w-full border-collapse text-sm">
                                     <thead>
                                         <tr className="bg-slate-100 text-slate-700">
@@ -249,10 +278,10 @@ export default function TeacherSimilarityPage() {
                                                     <td className="border border-slate-300 px-4 py-4 text-center">
                                                         <span
                                                             className={`inline-block rounded-sm px-3 py-1 text-xs font-semibold ${item.judge === "위험"
-                                                                    ? "bg-rose-50 text-rose-700"
-                                                                    : item.judge === "주의"
-                                                                        ? "bg-amber-50 text-amber-700"
-                                                                        : "bg-emerald-50 text-emerald-700"
+                                                                ? "bg-rose-50 text-rose-700"
+                                                                : item.judge === "주의"
+                                                                    ? "bg-amber-50 text-amber-700"
+                                                                    : "bg-emerald-50 text-emerald-700"
                                                                 }`}
                                                         >
                                                             {item.judge}

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jetrace.backend.adminDto.PendingTeacherResponse;
+import com.jetrace.backend.adminDto.TeacherProfileChangeRequestResponse;
 import com.jetrace.backend.adminService.AdminService;
 
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,23 @@ public class AdminController {
     @PostMapping("/teachers/{loginId}/approve")
     public String approveTeacher(@PathVariable String loginId) {
         adminService.approveTeacher(loginId);
+        return "ok";
+    }
+
+    @GetMapping("/teacher-profile-changes/pending")
+    public List<TeacherProfileChangeRequestResponse> getPendingTeacherProfileChanges() {
+        return adminService.getPendingTeacherProfileChanges();
+    }
+
+    @PostMapping("/teacher-profile-changes/{id}/approve")
+    public String approveTeacherProfileChange(@PathVariable Long id) {
+        adminService.approveTeacherProfileChange(id);
+        return "ok";
+    }
+
+    @PostMapping("/teacher-profile-changes/{id}/reject")
+    public String rejectTeacherProfileChange(@PathVariable Long id) {
+        adminService.rejectTeacherProfileChange(id);
         return "ok";
     }
 }

@@ -2,13 +2,8 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import api from "~/lib/axios";
 
-const STUDENT_CLASS_OPTIONS = [
-  "선택하세요",
-  "A",
-  "B",
-  "C",
-  "D",
-];
+const STUDENT_CLASS_OPTIONS = ["선택하세요", "A", "B", "C", "D"];
+const TEACHER_CLASS_OPTIONS = ["A", "B", "C", "D"];
 
 export default function SignupPage() {
   const navigate = useNavigate();
@@ -19,14 +14,24 @@ export default function SignupPage() {
     return value === "TEACHER" ? "TEACHER" : "STUDENT";
   }, [searchParams]);
 
+  const modeLabel = mode === "TEACHER" ? "교사" : "학생";
+
   const [loginId, setLoginId] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [className, setClassName] = useState("선택하세요");
+  const [subject, setSubject] = useState("");
+  const [managedClasses, setManagedClasses] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const modeLabel = mode === "TEACHER" ? "교사" : "학생";
+  const toggleManagedClass = (value: string) => {
+    setManagedClasses((prev) =>
+      prev.includes(value)
+        ? prev.filter((item) => item !== value)
+        : [...prev, value]
+    );
+  };
 
   const handleSignup = async () => {
     if (!loginId.trim()) {
@@ -54,38 +59,39 @@ export default function SignupPage() {
       return;
     }
 
+    if (mode === "TEACHER" && !subject.trim()) {
+      alert("담당 과목을 입력하세요.");
+      return;
+    }
+
+    if (mode === "TEACHER" && managedClasses.length === 0) {
+      alert("관리 반을 하나 이상 선택하세요.");
+      return;
+    }
+
     try {
       setLoading(true);
 
-      const payload =
-        mode === "TEACHER"
-          ? {
-              loginId,
-              email,
-              password,
-              name,
-              role: "TEACHER",
-            }
-          : {
-              loginId,
-              email,
-              password,
-              name,
-              role: "STUDENT",
-              className,
-            };
-
-      await api.post("/auth/signup", payload);
+      await api.post("/auth/signup", {
+        loginId,
+        email,
+        password,
+        name,
+        role: mode,
+        className: mode === "STUDENT" ? className : null,
+        subject: mode === "TEACHER" ? subject : null,
+        managedClasses: mode === "TEACHER" ? managedClasses.join(",") : null,
+      });
 
       if (mode === "TEACHER") {
-        alert("교사 회원가입이 완료되었습니다. 관리자 승인 후 로그인할 수 있습니다.");
+        alert("교사 회원가입 완료. 관리자 승인 후 로그인 가능합니다.");
       } else {
-        alert("학생 회원가입이 완료되었습니다.");
+        alert("회원가입 완료");
       }
 
       navigate(`/auth?mode=${mode}`);
     } catch (error: any) {
-      console.error("회원가입 실패:", error);
+      console.error(error);
       alert(error?.response?.data?.message || "회원가입 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
@@ -164,18 +170,62 @@ export default function SignupPage() {
                   onChange={(e) => setClassName(e.target.value)}
                   className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none"
                 >
-                  <option value="선택하세요" disabled>
-                    선택하세요
-                  </option>
-                  {STUDENT_CLASS_OPTIONS.filter(
-                    (option) => option !== "선택하세요"
-                  ).map((option) => (
-                    <option key={option} value={option}>
+                  {STUDENT_CLASS_OPTIONS.map((option) => (
+                    <option
+                      key={option}
+                      value={option}
+                      disabled={option === "선택하세요"}
+                    >
                       {option}
                     </option>
                   ))}
                 </select>
               </div>
+            )}
+
+            {mode === "TEACHER" && (
+              <>
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    담당 과목
+                  </label>
+                  <input
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none"
+                    placeholder="담당 과목 입력"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-3 block text-sm font-semibold text-slate-700">
+                    관리 반
+                  </label>
+                  <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                    {TEACHER_CLASS_OPTIONS.map((option) => {
+                      const checked = managedClasses.includes(option);
+
+                      return (
+                        <label
+                          key={option}
+                          className={`flex cursor-pointer items-center justify-center rounded-xl border px-4 py-3 text-sm font-semibold transition ${checked
+                            ? "border-slate-900 bg-slate-900 text-white"
+                            : "border-slate-300 bg-white text-slate-800"
+                            }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => toggleManagedClass(option)}
+                            className="hidden"
+                          />
+                          {option}반
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
             )}
 
             <button
