@@ -43,4 +43,9 @@ public class AuthController {
     public LoginResponseDto login(@RequestBody LoginRequestDto dto) {
         return authService.login(dto);
     }
+
+    @GetMapping("/check-login-id")
+    public boolean checkLoginId(@RequestParam String loginId) {
+        return authService.isAvailableLoginId(loginId);
+    }
 }

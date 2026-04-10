@@ -19,11 +19,16 @@ export default function SignupPage() {
   const [loginId, setLoginId] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
   const [name, setName] = useState("");
   const [className, setClassName] = useState("선택하세요");
   const [subject, setSubject] = useState("");
   const [managedClasses, setManagedClasses] = useState<string[]>([]);
+
   const [loading, setLoading] = useState(false);
+  const [checkingLoginId, setCheckingLoginId] = useState(false);
+  const [isLoginIdChecked, setIsLoginIdChecked] = useState(false);
+  const [isLoginIdAvailable, setIsLoginIdAvailable] = useState(false);
 
   const toggleManagedClass = (value: string) => {
     setManagedClasses((prev) =>
@@ -33,9 +38,46 @@ export default function SignupPage() {
     );
   };
 
+  const handleCheckLoginId = async () => {
+    if (!loginId.trim()) {
+      alert("아이디를 입력하세요.");
+      return;
+    }
+
+    try {
+      setCheckingLoginId(true);
+
+      const response = await api.get("/auth/check-login-id", {
+        params: { loginId: loginId.trim() },
+      });
+
+      const available =
+        response.data === true || response.data?.available === true;
+
+      setIsLoginIdChecked(true);
+      setIsLoginIdAvailable(available);
+
+      if (available) {
+        alert("사용 가능한 아이디입니다.");
+      } else {
+        alert("이미 사용 중인 아이디입니다.");
+      }
+    } catch (error: any) {
+      console.error(error);
+      alert(error?.response?.data?.message || "중복확인 중 오류가 발생했습니다.");
+    } finally {
+      setCheckingLoginId(false);
+    }
+  };
+
   const handleSignup = async () => {
     if (!loginId.trim()) {
       alert("아이디를 입력하세요.");
+      return;
+    }
+
+    if (!isLoginIdChecked || !isLoginIdAvailable) {
+      alert("아이디 중복확인을 완료하세요.");
       return;
     }
 
@@ -46,6 +88,16 @@ export default function SignupPage() {
 
     if (!password.trim()) {
       alert("비밀번호를 입력하세요.");
+      return;
+    }
+
+    if (!passwordConfirm.trim()) {
+      alert("비밀번호 확인을 입력하세요.");
+      return;
+    }
+
+    if (password !== passwordConfirm) {
+      alert("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
       return;
     }
 
@@ -73,13 +125,13 @@ export default function SignupPage() {
       setLoading(true);
 
       await api.post("/auth/signup", {
-        loginId,
-        email,
+        loginId: loginId.trim(),
+        email: email.trim(),
         password,
-        name,
+        name: name.trim(),
         role: mode,
         className: mode === "STUDENT" ? className : null,
-        subject: mode === "TEACHER" ? subject : null,
+        subject: mode === "TEACHER" ? subject.trim() : null,
         managedClasses: mode === "TEACHER" ? managedClasses.join(",") : null,
       });
 
@@ -114,12 +166,40 @@ export default function SignupPage() {
               <label className="mb-2 block text-sm font-semibold text-slate-700">
                 아이디
               </label>
-              <input
-                value={loginId}
-                onChange={(e) => setLoginId(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none"
-                placeholder="아이디 입력"
-              />
+
+              <div className="flex gap-3">
+                <input
+                  value={loginId}
+                  onChange={(e) => {
+                    setLoginId(e.target.value);
+                    setIsLoginIdChecked(false);
+                    setIsLoginIdAvailable(false);
+                  }}
+                  className="flex-1 rounded-xl border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none"
+                  placeholder="아이디 입력"
+                />
+
+                <button
+                  type="button"
+                  onClick={handleCheckLoginId}
+                  disabled={checkingLoginId}
+                  className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white disabled:opacity-60"
+                >
+                  {checkingLoginId ? "확인 중..." : "중복확인"}
+                </button>
+              </div>
+
+              {isLoginIdChecked && (
+                <p
+                  className={`mt-2 text-sm ${
+                    isLoginIdAvailable ? "text-emerald-600" : "text-rose-600"
+                  }`}
+                >
+                  {isLoginIdAvailable
+                    ? "사용 가능한 아이디입니다."
+                    : "이미 사용 중인 아이디입니다."}
+                </p>
+              )}
             </div>
 
             <div>
@@ -146,6 +226,33 @@ export default function SignupPage() {
                 className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none"
                 placeholder="비밀번호 입력"
               />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-slate-700">
+                비밀번호 확인
+              </label>
+              <input
+                type="password"
+                value={passwordConfirm}
+                onChange={(e) => setPasswordConfirm(e.target.value)}
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none"
+                placeholder="비밀번호 다시 입력"
+              />
+
+              {passwordConfirm.trim() && (
+                <p
+                  className={`mt-2 text-sm ${
+                    password === passwordConfirm
+                      ? "text-emerald-600"
+                      : "text-rose-600"
+                  }`}
+                >
+                  {password === passwordConfirm
+                    ? "비밀번호가 일치합니다."
+                    : "비밀번호가 일치하지 않습니다."}
+                </p>
+              )}
             </div>
 
             <div>
@@ -208,10 +315,11 @@ export default function SignupPage() {
                       return (
                         <label
                           key={option}
-                          className={`flex cursor-pointer items-center justify-center rounded-xl border px-4 py-3 text-sm font-semibold transition ${checked
-                            ? "border-slate-900 bg-slate-900 text-white"
-                            : "border-slate-300 bg-white text-slate-800"
-                            }`}
+                          className={`flex cursor-pointer items-center justify-center rounded-xl border px-4 py-3 text-sm font-semibold transition ${
+                            checked
+                              ? "border-slate-900 bg-slate-900 text-white"
+                              : "border-slate-300 bg-white text-slate-800"
+                          }`}
                         >
                           <input
                             type="checkbox"
@@ -230,7 +338,13 @@ export default function SignupPage() {
 
             <button
               onClick={handleSignup}
-              disabled={loading}
+              disabled={
+                loading ||
+                !isLoginIdChecked ||
+                !isLoginIdAvailable ||
+                !passwordConfirm.trim() ||
+                password !== passwordConfirm
+              }
               className="w-full rounded-xl bg-slate-900 px-5 py-3 text-white disabled:opacity-60"
             >
               {loading ? "처리 중..." : "회원가입"}

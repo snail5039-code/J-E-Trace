@@ -37,7 +37,10 @@ public class AuthService {
     );
 
     public boolean isAvailableLoginId(String loginId) {
-        return authDao.countByLoginId(loginId) == 0;
+        if (loginId == null || loginId.isBlank()) {
+            throw new RuntimeException("아이디를 입력하세요.");
+        }
+        return authDao.countByLoginId(loginId.trim()) == 0;
     }
 
     @Transactional

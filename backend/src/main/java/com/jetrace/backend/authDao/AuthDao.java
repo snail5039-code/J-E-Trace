@@ -48,15 +48,15 @@ public interface AuthDao {
         )
     """)
     void insertUser(
-        @Param("loginId") String loginId,
-        @Param("email") String email,
-        @Param("password") String password,
-        @Param("name") String name,
-        @Param("role") String role,
-        @Param("approved") boolean approved,
-        @Param("className") String className,
-        @Param("subject") String subject,
-        @Param("managedClasses") String managedClasses
+            @Param("loginId") String loginId,
+            @Param("email") String email,
+            @Param("password") String password,
+            @Param("name") String name,
+            @Param("role") String role,
+            @Param("approved") boolean approved,
+            @Param("className") String className,
+            @Param("subject") String subject,
+            @Param("managedClasses") String managedClasses
     );
 
     @Select("""
@@ -74,8 +74,8 @@ public interface AuthDao {
         LIMIT 1
     """)
     LoginResponseDto findLoginUser(
-        @Param("loginId") String loginId,
-        @Param("password") String password
+            @Param("loginId") String loginId,
+            @Param("password") String password
     );
 
     @Select("""
@@ -86,8 +86,8 @@ public interface AuthDao {
           AND status = 'PENDING'
     """)
     int countPendingStudentRequest(
-        @Param("studentName") String studentName,
-        @Param("className") String className
+            @Param("studentName") String studentName,
+            @Param("className") String className
     );
 
     @Insert("""
@@ -95,7 +95,7 @@ public interface AuthDao {
         VALUES (#{studentName}, #{className}, 'PENDING')
     """)
     void insertStudentRequest(
-        @Param("studentName") String studentName,
-        @Param("className") String className
+            @Param("studentName") String studentName,
+            @Param("className") String className
     );
 }
