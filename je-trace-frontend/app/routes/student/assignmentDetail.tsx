@@ -1,5 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
+import {
+  ArrowLeft,
+  Bot,
+  CalendarDays,
+  CheckCircle2,
+  ClipboardCheck,
+  MessageSquare,
+  Sparkles,
+  TriangleAlert,
+} from "lucide-react";
 import api from "../../lib/axios";
 
 type LogItem = {
@@ -36,19 +46,19 @@ type ChatResponse = {
 
 type ChatMessage =
   | {
-    type: "question";
-    text: string;
-    createdAt: string;
-    status?: string;
-    isLatest?: boolean;
-  }
+      type: "question";
+      text: string;
+      createdAt: string;
+      status?: string;
+      isLatest?: boolean;
+    }
   | {
-    type: "answer";
-    text: string;
-    createdAt: string;
-    status: string;
-    isLatest?: boolean;
-  };
+      type: "answer";
+      text: string;
+      createdAt: string;
+      status: string;
+      isLatest?: boolean;
+    };
 
 export default function AssignmentDetailPage() {
   const { taskId } = useParams();
@@ -243,10 +253,10 @@ export default function AssignmentDetailPage() {
       setDetail((prev) =>
         prev
           ? {
-            ...prev,
-            submitted: true,
-            submittedAt: new Date().toLocaleString("ko-KR"),
-          }
+              ...prev,
+              submitted: true,
+              submittedAt: new Date().toLocaleString("ko-KR"),
+            }
           : prev
       );
 
@@ -271,8 +281,8 @@ export default function AssignmentDetailPage() {
 
   if (!detail) {
     return (
-      <div className="min-h-screen bg-slate-50 p-10">
-        <div className="mx-auto max-w-4xl rounded-2xl bg-white p-8 shadow-sm">
+      <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-blue-50 p-6 sm:p-8">
+        <div className="mx-auto max-w-5xl rounded-[28px] border border-slate-200 bg-white px-8 py-10 text-slate-600 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
           불러오는 중...
         </div>
       </div>
@@ -280,108 +290,219 @@ export default function AssignmentDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-6 sm:px-6 sm:py-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-blue-50 px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto max-w-[1500px] space-y-6">
-        <div className="flex flex-col gap-4 rounded-2xl bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
-          <div>
-            <p className="text-sm text-slate-500">{detail.className}</p>
-            <h1 className="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">
-              {detail.title}
-            </h1>
-            <p className="mt-2 text-sm text-slate-600 sm:text-base">
-              마감일: {detail.dueDate}
-            </p>
-          </div>
+        <section className="overflow-hidden rounded-[30px] border border-slate-200 bg-white/90 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur">
+          <div className="relative px-6 py-7 sm:px-8 sm:py-8">
+            <div className="absolute right-0 top-0 h-36 w-36 rounded-full bg-blue-100/60 blur-3xl" />
+            <div className="absolute bottom-0 left-0 h-24 w-24 rounded-full bg-slate-200/70 blur-3xl" />
 
-          <Link
-            to="/student/assignments"
-            className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-100 px-4 text-sm font-medium text-slate-700"
-          >
-            과제 목록
-          </Link>
-        </div>
+            <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+              <div className="min-w-0">
+                <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">
+                  <Sparkles size={16} />
+                  ASSIGNMENT DETAIL
+                </div>
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.2fr)]">
-          <div className="space-y-6">
-            <div className="rounded-2xl bg-white p-5 shadow-sm sm:p-6">
-              <h2 className="text-lg font-semibold text-slate-900">과제 설명</h2>
-              <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-slate-700">
-                {detail.description}
-              </p>
+                <p className="mt-4 text-sm font-semibold text-slate-500">
+                  {detail.className}
+                </p>
 
-              <div className="mt-4 text-sm text-slate-500">
-                AI 사용: {detail.aiAllowed ? "허용" : "금지"}
+                <h1 className="mt-2 break-words text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
+                  {detail.title}
+                </h1>
+
+                <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-slate-600">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-2">
+                    <CalendarDays size={15} />
+                    마감일: {detail.dueDate}
+                  </div>
+
+                  <div
+                    className={`inline-flex items-center gap-2 rounded-full px-3 py-2 ${
+                      detail.aiAllowed
+                        ? "bg-blue-50 text-blue-700"
+                        : "bg-slate-100 text-slate-600"
+                    }`}
+                  >
+                    <Bot size={15} />
+                    AI 사용: {detail.aiAllowed ? "허용" : "금지"}
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <div className="rounded-2xl bg-white p-5 shadow-sm sm:p-6">
-              <h2 className="text-lg font-semibold text-slate-900">최종 답안 작성</h2>
+              <Link
+                to="/student/assignments"
+                className="inline-flex h-12 items-center justify-center gap-2 self-start rounded-2xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50"
+              >
+                <ArrowLeft size={16} />
+                과제 목록
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.18fr)]">
+          <div className="space-y-6">
+            <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.06)] sm:p-7">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">
+                  <ClipboardCheck size={20} />
+                </div>
+                <h2 className="text-xl font-black tracking-tight text-slate-900">
+                  과제 설명
+                </h2>
+              </div>
+
+              <div className="mt-5 rounded-3xl bg-slate-50 p-5 ring-1 ring-slate-200">
+                <p className="whitespace-pre-wrap text-sm leading-7 text-slate-700">
+                  {detail.description}
+                </p>
+              </div>
+
+              <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+                    AI 사용
+                  </p>
+                  <p className="mt-2 text-base font-bold text-slate-900">
+                    {detail.aiAllowed ? "허용" : "금지"}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+                    제출 여부
+                  </p>
+                  <p className="mt-2 text-base font-bold text-slate-900">
+                    {detail.submitted ? "제출 완료" : "미제출"}
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.06)] sm:p-7">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">
+                  <MessageSquare size={20} />
+                </div>
+                <h2 className="text-xl font-black tracking-tight text-slate-900">
+                  최종 답안 작성
+                </h2>
+              </div>
 
               <textarea
                 value={answerText}
                 onChange={(e) => setAnswerText(e.target.value)}
                 rows={14}
                 disabled={detail.submitted}
-                className="mt-4 w-full rounded-2xl border border-slate-200 p-4 text-sm leading-6 text-slate-800 outline-none transition focus:border-slate-400 disabled:opacity-60"
+                className="mt-5 w-full rounded-[24px] border border-slate-200 bg-slate-50 p-5 text-sm leading-7 text-slate-800 outline-none transition focus:border-slate-400 focus:bg-white focus:ring-4 focus:ring-slate-200/60 disabled:opacity-60"
                 placeholder="최종 답안을 입력하세요."
               />
 
-              <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="text-sm text-slate-500">
-                  제출 상태: {detail.submitted ? `제출 완료 (${detail.submittedAt ?? "-"})` : "미제출"}
+              <div className="mt-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600 ring-1 ring-slate-200">
+                  제출 상태:{" "}
+                  {detail.submitted
+                    ? `제출 완료 (${detail.submittedAt ?? "-"})`
+                    : "미제출"}
                 </div>
 
                 <button
                   onClick={handleSubmit}
                   disabled={isSubmitLoading || detail.submitted}
-                  className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-900 px-5 text-sm font-semibold text-white disabled:opacity-50"
+                  className="inline-flex h-12 items-center justify-center rounded-2xl bg-slate-900 px-6 text-sm font-bold text-white shadow-lg shadow-slate-900/15 transition hover:bg-slate-800 disabled:opacity-50"
                 >
-                  {detail.submitted ? "제출 완료" : isSubmitLoading ? "제출 중..." : "최종 제출"}
+                  {detail.submitted
+                    ? "제출 완료"
+                    : isSubmitLoading
+                    ? "제출 중..."
+                    : "최종 제출"}
                 </button>
               </div>
-            </div>
+            </section>
 
-            <div className="rounded-2xl bg-white p-5 shadow-sm sm:p-6">
-              <h2 className="text-lg font-semibold text-slate-900">교사 피드백</h2>
-              <div className="mt-4 space-y-2 text-sm text-slate-700">
-                <p>점수: {detail.score ?? 0}</p>
-                <p>코멘트: {detail.teacherComment ?? "아직 없음"}</p>
+            <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.06)] sm:p-7">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">
+                  <CheckCircle2 size={20} />
+                </div>
+                <h2 className="text-xl font-black tracking-tight text-slate-900">
+                  교사 피드백
+                </h2>
               </div>
-            </div>
+
+              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-3xl bg-slate-50 p-5 ring-1 ring-slate-200">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+                    점수
+                  </p>
+                  <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">
+                    {detail.score ?? 0}
+                  </p>
+                </div>
+
+                <div className="rounded-3xl bg-slate-50 p-5 ring-1 ring-slate-200">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+                    코멘트
+                  </p>
+                  <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-slate-700">
+                    {detail.teacherComment ?? "아직 없음"}
+                  </p>
+                </div>
+              </div>
+            </section>
           </div>
 
           <div>
-            <div className="rounded-2xl bg-white p-5 shadow-sm sm:p-6 lg:sticky lg:top-6">
-              <div className="flex flex-col gap-4 border-b border-slate-200 pb-4 md:flex-row md:items-start md:justify-between">
+            <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.06)] sm:p-7 lg:sticky lg:top-6">
+              <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 md:flex-row md:items-start md:justify-between">
                 <div className="min-w-0">
-                  <h2 className="text-lg font-semibold text-slate-900">AI 대화</h2>
-                  <p className="mt-1 text-sm leading-6 text-slate-500">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">
+                      <Bot size={20} />
+                    </div>
+                    <h2 className="text-xl font-black tracking-tight text-slate-900">
+                      AI 대화
+                    </h2>
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-slate-500">
                     이전 대화는 위에, 새 질문과 새 답변은 아래에 쌓입니다.
                   </p>
                 </div>
 
                 <div className="flex shrink-0 gap-3">
-                  <div className="min-w-[92px] rounded-xl bg-slate-50 px-4 py-3 text-center">
-                    <p className="text-xs text-slate-500">총 질문 수</p>
-                    <p className="mt-1 text-2xl font-bold text-slate-900">
+                  <div className="min-w-[100px] rounded-2xl bg-slate-50 px-4 py-4 text-center ring-1 ring-slate-200">
+                    <p className="text-xs font-semibold text-slate-500">
+                      총 질문 수
+                    </p>
+                    <p className="mt-2 text-3xl font-black tracking-tight text-slate-900">
                       {sortedLogs.length}
                     </p>
                   </div>
-                  <div className="min-w-[92px] rounded-xl bg-red-50 px-4 py-3 text-center">
-                    <p className="text-xs text-red-500">주의</p>
-                    <p className="mt-1 text-2xl font-bold text-red-600">{cautionCount}</p>
+
+                  <div className="min-w-[100px] rounded-2xl bg-rose-50 px-4 py-4 text-center ring-1 ring-rose-100">
+                    <p className="text-xs font-semibold text-rose-500">주의</p>
+                    <p className="mt-2 text-3xl font-black tracking-tight text-rose-600">
+                      {cautionCount}
+                    </p>
                   </div>
                 </div>
               </div>
 
               <div
                 ref={chatScrollRef}
-                className="mt-4 h-[420px] overflow-y-auto rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:p-4"
+                className="mt-5 h-[460px] overflow-y-auto rounded-[24px] border border-slate-200 bg-slate-50 p-4 sm:p-5"
               >
                 <div className="flex flex-col gap-4">
                   {chatMessages.length === 0 && !isChatLoading && (
-                    <div className="flex h-[220px] items-center justify-center text-sm text-slate-500">
-                      아직 질문 기록이 없습니다.
+                    <div className="flex h-[260px] flex-col items-center justify-center text-center">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-slate-500 ring-1 ring-slate-200">
+                        <MessageSquare size={22} />
+                      </div>
+                      <p className="mt-4 text-sm text-slate-500">
+                        아직 질문 기록이 없습니다.
+                      </p>
                     </div>
                   )}
 
@@ -391,18 +512,24 @@ export default function AssignmentDetailPage() {
                     return (
                       <div
                         key={`${message.type}-${index}-${message.createdAt}`}
-                        className={`flex ${isQuestion ? "justify-end" : "justify-start"}`}
+                        className={`flex ${
+                          isQuestion ? "justify-end" : "justify-start"
+                        }`}
                       >
                         <div
-                          className={`w-full rounded-2xl px-4 py-3 shadow-sm ${isQuestion
-                            ? "max-w-[88%] bg-slate-900 text-white"
-                            : "max-w-[94%] border border-slate-200 bg-white text-slate-800"
-                            }`}
+                          className={`w-full rounded-[24px] px-4 py-4 shadow-sm ${
+                            isQuestion
+                              ? "max-w-[88%] bg-slate-900 text-white"
+                              : "max-w-[94%] border border-slate-200 bg-white text-slate-800"
+                          }`}
                         >
-                          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                             <span
-                              className={`text-xs font-semibold ${isQuestion ? "text-slate-200" : "text-slate-500"
-                                }`}
+                              className={`text-xs font-bold ${
+                                isQuestion
+                                  ? "text-slate-200"
+                                  : "text-slate-500"
+                              }`}
                             >
                               {isQuestion ? "나" : "AI"}
                             </span>
@@ -410,18 +537,22 @@ export default function AssignmentDetailPage() {
                             <div className="flex flex-wrap items-center gap-2">
                               {!isQuestion && "status" in message && (
                                 <span
-                                  className={`rounded-full px-2 py-1 text-xs font-semibold ${message.status === "주의"
-                                    ? "bg-red-100 text-red-600"
-                                    : "bg-green-100 text-green-600"
-                                    }`}
+                                  className={`rounded-full px-2.5 py-1 text-xs font-bold ${
+                                    message.status === "주의"
+                                      ? "bg-rose-50 text-rose-600 ring-1 ring-rose-100"
+                                      : "bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100"
+                                  }`}
                                 >
                                   {message.status}
                                 </span>
                               )}
 
                               <span
-                                className={`text-[11px] ${isQuestion ? "text-slate-300" : "text-slate-400"
-                                  }`}
+                                className={`text-[11px] ${
+                                  isQuestion
+                                    ? "text-slate-300"
+                                    : "text-slate-400"
+                                }`}
                               >
                                 {message.createdAt}
                               </span>
@@ -429,8 +560,9 @@ export default function AssignmentDetailPage() {
                           </div>
 
                           <p
-                            className={`whitespace-pre-wrap break-words text-[15px] leading-7 ${isQuestion ? "text-white" : "text-slate-700"
-                              }`}
+                            className={`whitespace-pre-wrap break-words text-[15px] leading-7 ${
+                              isQuestion ? "text-white" : "text-slate-700"
+                            }`}
                           >
                             {message.text}
                           </p>
@@ -438,8 +570,10 @@ export default function AssignmentDetailPage() {
                           {!isQuestion && (
                             <div className="mt-4 flex justify-end">
                               <button
-                                onClick={() => handleAppendSpecificAnswer(message.text)}
-                                className="inline-flex h-9 items-center justify-center rounded-xl bg-slate-900 px-3 text-xs font-semibold text-white"
+                                onClick={() =>
+                                  handleAppendSpecificAnswer(message.text)
+                                }
+                                className="inline-flex h-10 items-center justify-center rounded-xl bg-slate-900 px-4 text-xs font-bold text-white transition hover:bg-slate-800"
                               >
                                 답안에 추가
                               </button>
@@ -452,10 +586,14 @@ export default function AssignmentDetailPage() {
 
                   {isChatLoading && (
                     <div className="flex justify-start">
-                      <div className="w-full max-w-[94%] rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-                        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                          <span className="text-xs font-semibold text-slate-500">AI</span>
-                          <span className="text-[11px] text-slate-400">응답 생성 중</span>
+                      <div className="w-full max-w-[94%] rounded-[24px] border border-slate-200 bg-white px-4 py-4 shadow-sm">
+                        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                          <span className="text-xs font-bold text-slate-500">
+                            AI
+                          </span>
+                          <span className="text-[11px] text-slate-400">
+                            응답 생성 중
+                          </span>
                         </div>
                         <p className="text-[15px] leading-7 text-slate-600">
                           질문을 분석하고 답변을 작성하는 중...
@@ -466,13 +604,13 @@ export default function AssignmentDetailPage() {
                 </div>
               </div>
 
-              <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
+              <div className="mt-5 rounded-[24px] border border-slate-200 bg-white p-4 sm:p-5">
                 <textarea
                   value={question}
                   onChange={(e) => setQuestion(e.target.value)}
                   onKeyDown={handleQuestionKeyDown}
                   rows={3}
-                  className="w-full resize-none rounded-2xl border border-slate-200 p-4 text-sm leading-6 text-slate-800 outline-none transition focus:border-blue-400"
+                  className="w-full resize-none rounded-[22px] border border-slate-200 bg-slate-50 p-4 text-sm leading-7 text-slate-800 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
                   placeholder={
                     detail.aiAllowed
                       ? "과제와 관련된 질문을 입력하세요. (Enter 전송 / Shift+Enter 줄바꿈)"
@@ -482,17 +620,20 @@ export default function AssignmentDetailPage() {
                 />
 
                 <div className="mt-4 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-                  <div className="text-sm leading-6 text-slate-500">
-                    {detail.aiAllowed
-                      ? "채팅창은 스크롤되고, 새 질문과 새 답변은 맨 아래에 계속 누적됩니다."
-                      : "현재 과제는 AI 사용 금지 상태입니다."}
+                  <div className="flex items-start gap-2 rounded-2xl bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-500 ring-1 ring-slate-200">
+                    <TriangleAlert size={16} className="mt-0.5 shrink-0" />
+                    <span>
+                      {detail.aiAllowed
+                        ? "채팅창은 스크롤되고, 새 질문과 새 답변은 맨 아래에 계속 누적됩니다."
+                        : "현재 과제는 AI 사용 금지 상태입니다."}
+                    </span>
                   </div>
 
                   <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
                     {lastAiAnswer && (
                       <button
                         onClick={appendAiAnswerToContent}
-                        className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-200 px-4 text-sm font-semibold text-slate-800 whitespace-nowrap"
+                        className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-200 px-4 text-sm font-semibold text-slate-800 whitespace-nowrap transition hover:bg-slate-300"
                       >
                         최근 답변 추가
                       </button>
@@ -500,15 +641,17 @@ export default function AssignmentDetailPage() {
 
                     <button
                       onClick={handleAskAi}
-                      disabled={isChatLoading || !detail.aiAllowed || detail.submitted}
-                      className="inline-flex h-11 items-center justify-center rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white whitespace-nowrap disabled:opacity-50"
+                      disabled={
+                        isChatLoading || !detail.aiAllowed || detail.submitted
+                      }
+                      className="inline-flex h-11 items-center justify-center rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white whitespace-nowrap transition hover:bg-blue-700 disabled:opacity-50"
                     >
                       {isChatLoading ? "질문 중..." : "보내기"}
                     </button>
                   </div>
                 </div>
               </div>
-            </div>
+            </section>
           </div>
         </div>
       </div>
