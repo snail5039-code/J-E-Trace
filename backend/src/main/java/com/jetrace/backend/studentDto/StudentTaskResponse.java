@@ -16,4 +16,5 @@ public class StudentTaskResponse {
     private Boolean aiAllowed;
     private Boolean submitted;
     private String submittedAt;
+    private Integer score;
 }

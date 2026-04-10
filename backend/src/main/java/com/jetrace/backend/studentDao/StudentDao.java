@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import com.jetrace.backend.studentDto.StudentMyPageSummaryResponse;
 import com.jetrace.backend.studentDto.StudentTaskDetailResponse;
 import com.jetrace.backend.studentDto.StudentTaskLogResponse;
 import com.jetrace.backend.studentDto.StudentTaskResponse;
@@ -44,17 +45,51 @@ public interface StudentDao {
             t.dueDate,
             t.aiAllowed,
             COALESCE(ts.submitted, FALSE) AS submitted,
-            ts.submittedAt
+            ts.submittedAt,
+            ts.score
+        FROM task t
+        LEFT JOIN taskSubmission ts
+        ON ts.taskId = t.id
+        AND ts.studentName = #{studentName}
+        WHERE t.className = #{className}
+        ORDER BY t.id DESC
+    """)
+    List<StudentTaskResponse> findTasksByClassNameAndStudentName(
+            @Param("className") String className,
+            @Param("studentName") String studentName
+    );
+
+    @Select("""
+        SELECT
+            SUM(CASE WHEN COALESCE(ts.submitted, FALSE) = TRUE THEN 1 ELSE 0 END) AS submittedCount,
+            SUM(CASE WHEN COALESCE(ts.submitted, FALSE) = TRUE THEN 0 ELSE 1 END) AS notSubmittedCount
         FROM task t
         LEFT JOIN taskSubmission ts
           ON ts.taskId = t.id
          AND ts.studentName = #{studentName}
         WHERE t.className = #{className}
-        ORDER BY t.id DESC
     """)
-    List<StudentTaskResponse> findTasksByClassNameAndStudentName(
-        @Param("className") String className,
-        @Param("studentName") String studentName
+    StudentMyPageSummaryResponse findStudentMyPageSummary(
+            @Param("className") String className,
+            @Param("studentName") String studentName
+    );
+
+    @Select("""
+        SELECT
+            id,
+            taskId,
+            studentName,
+            question,
+            answer,
+            createdAt,
+            STATUS AS status
+        FROM taskAiLog
+        WHERE studentName = #{studentName}
+        ORDER BY id DESC
+        LIMIT 3
+    """)
+    List<StudentTaskLogResponse> findRecentTaskLogsByStudentName(
+            @Param("studentName") String studentName
     );
 
     @Select("""
@@ -81,9 +116,9 @@ public interface StudentDao {
         LIMIT 1
     """)
     StudentTaskDetailResponse findTaskDetailByTaskIdAndStudentName(
-        @Param("taskId") Long taskId,
-        @Param("studentName") String studentName,
-        @Param("className") String className
+            @Param("taskId") Long taskId,
+            @Param("studentName") String studentName,
+            @Param("className") String className
     );
 
     @Select("""
@@ -101,8 +136,8 @@ public interface StudentDao {
         ORDER BY id DESC
     """)
     List<StudentTaskLogResponse> findTaskLogsByTaskIdAndStudentName(
-        @Param("taskId") Long taskId,
-        @Param("studentName") String studentName
+            @Param("taskId") Long taskId,
+            @Param("studentName") String studentName
     );
 
     @Select("""
@@ -112,8 +147,8 @@ public interface StudentDao {
           AND studentName = #{studentName}
     """)
     int countTaskSubmission(
-        @Param("taskId") Long taskId,
-        @Param("studentName") String studentName
+            @Param("taskId") Long taskId,
+            @Param("studentName") String studentName
     );
 
     @Insert("""
@@ -134,8 +169,8 @@ public interface StudentDao {
         )
     """)
     void insertTaskSubmissionIfNotExists(
-        @Param("taskId") Long taskId,
-        @Param("studentName") String studentName
+            @Param("taskId") Long taskId,
+            @Param("studentName") String studentName
     );
 
     @Update("""
@@ -149,10 +184,10 @@ public interface StudentDao {
           AND studentName = #{studentName}
     """)
     void updateTaskSubmission(
-        @Param("taskId") Long taskId,
-        @Param("studentName") String studentName,
-        @Param("content") String content,
-        @Param("aiUsed") Boolean aiUsed
+            @Param("taskId") Long taskId,
+            @Param("studentName") String studentName,
+            @Param("content") String content,
+            @Param("aiUsed") Boolean aiUsed
     );
 
     @Insert("""
@@ -193,7 +228,7 @@ public interface StudentDao {
           AND className = #{className}
     """)
     int countTaskInStudentClass(
-        @Param("taskId") Long taskId,
-        @Param("className") String className
+            @Param("taskId") Long taskId,
+            @Param("className") String className
     );
 }

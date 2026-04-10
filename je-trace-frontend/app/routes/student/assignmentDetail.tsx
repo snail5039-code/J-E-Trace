@@ -36,19 +36,19 @@ type ChatResponse = {
 
 type ChatMessage =
   | {
-      type: "question";
-      text: string;
-      createdAt: string;
-      status?: string;
-      isLatest?: boolean;
-    }
+    type: "question";
+    text: string;
+    createdAt: string;
+    status?: string;
+    isLatest?: boolean;
+  }
   | {
-      type: "answer";
-      text: string;
-      createdAt: string;
-      status: string;
-      isLatest?: boolean;
-    };
+    type: "answer";
+    text: string;
+    createdAt: string;
+    status: string;
+    isLatest?: boolean;
+  };
 
 export default function AssignmentDetailPage() {
   const { taskId } = useParams();
@@ -168,6 +168,11 @@ export default function AssignmentDetailPage() {
   }, [chatMessages, isChatLoading]);
 
   const handleAskAi = async () => {
+    if (detail?.submitted) {
+      alert("제출 완료 후에는 AI 질문을 할 수 없습니다.");
+      return;
+    }
+
     if (!question.trim()) {
       alert("질문을 입력하세요.");
       return;
@@ -219,6 +224,8 @@ export default function AssignmentDetailPage() {
   };
 
   const handleSubmit = async () => {
+    if (!detail || detail.submitted || isSubmitLoading) return;
+
     if (!answerText.trim()) {
       alert("답안을 입력하세요.");
       return;
@@ -233,8 +240,18 @@ export default function AssignmentDetailPage() {
         aiUsed: (detail?.logs?.length ?? 0) > 0,
       });
 
+      setDetail((prev) =>
+        prev
+          ? {
+            ...prev,
+            submitted: true,
+            submittedAt: new Date().toLocaleString("ko-KR"),
+          }
+          : prev
+      );
+
       alert("제출 완료");
-      await fetchDetail();
+      navigate("/student/assignments");
     } catch (error: any) {
       console.error(error);
       alert(error?.response?.data?.message ?? "제출 실패");
@@ -304,7 +321,8 @@ export default function AssignmentDetailPage() {
                 value={answerText}
                 onChange={(e) => setAnswerText(e.target.value)}
                 rows={14}
-                className="mt-4 w-full rounded-2xl border border-slate-200 p-4 text-sm leading-6 text-slate-800 outline-none transition focus:border-slate-400"
+                disabled={detail.submitted}
+                className="mt-4 w-full rounded-2xl border border-slate-200 p-4 text-sm leading-6 text-slate-800 outline-none transition focus:border-slate-400 disabled:opacity-60"
                 placeholder="최종 답안을 입력하세요."
               />
 
@@ -315,10 +333,10 @@ export default function AssignmentDetailPage() {
 
                 <button
                   onClick={handleSubmit}
-                  disabled={isSubmitLoading}
+                  disabled={isSubmitLoading || detail.submitted}
                   className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-900 px-5 text-sm font-semibold text-white disabled:opacity-50"
                 >
-                  {isSubmitLoading ? "제출 중..." : "최종 제출"}
+                  {detail.submitted ? "제출 완료" : isSubmitLoading ? "제출 중..." : "최종 제출"}
                 </button>
               </div>
             </div>
@@ -376,17 +394,15 @@ export default function AssignmentDetailPage() {
                         className={`flex ${isQuestion ? "justify-end" : "justify-start"}`}
                       >
                         <div
-                          className={`w-full rounded-2xl px-4 py-3 shadow-sm ${
-                            isQuestion
-                              ? "max-w-[88%] bg-slate-900 text-white"
-                              : "max-w-[94%] border border-slate-200 bg-white text-slate-800"
-                          }`}
+                          className={`w-full rounded-2xl px-4 py-3 shadow-sm ${isQuestion
+                            ? "max-w-[88%] bg-slate-900 text-white"
+                            : "max-w-[94%] border border-slate-200 bg-white text-slate-800"
+                            }`}
                         >
                           <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                             <span
-                              className={`text-xs font-semibold ${
-                                isQuestion ? "text-slate-200" : "text-slate-500"
-                              }`}
+                              className={`text-xs font-semibold ${isQuestion ? "text-slate-200" : "text-slate-500"
+                                }`}
                             >
                               {isQuestion ? "나" : "AI"}
                             </span>
@@ -394,20 +410,18 @@ export default function AssignmentDetailPage() {
                             <div className="flex flex-wrap items-center gap-2">
                               {!isQuestion && "status" in message && (
                                 <span
-                                  className={`rounded-full px-2 py-1 text-xs font-semibold ${
-                                    message.status === "주의"
-                                      ? "bg-red-100 text-red-600"
-                                      : "bg-green-100 text-green-600"
-                                  }`}
+                                  className={`rounded-full px-2 py-1 text-xs font-semibold ${message.status === "주의"
+                                    ? "bg-red-100 text-red-600"
+                                    : "bg-green-100 text-green-600"
+                                    }`}
                                 >
                                   {message.status}
                                 </span>
                               )}
 
                               <span
-                                className={`text-[11px] ${
-                                  isQuestion ? "text-slate-300" : "text-slate-400"
-                                }`}
+                                className={`text-[11px] ${isQuestion ? "text-slate-300" : "text-slate-400"
+                                  }`}
                               >
                                 {message.createdAt}
                               </span>
@@ -415,9 +429,8 @@ export default function AssignmentDetailPage() {
                           </div>
 
                           <p
-                            className={`whitespace-pre-wrap break-words text-[15px] leading-7 ${
-                              isQuestion ? "text-white" : "text-slate-700"
-                            }`}
+                            className={`whitespace-pre-wrap break-words text-[15px] leading-7 ${isQuestion ? "text-white" : "text-slate-700"
+                              }`}
                           >
                             {message.text}
                           </p>
@@ -465,7 +478,7 @@ export default function AssignmentDetailPage() {
                       ? "과제와 관련된 질문을 입력하세요. (Enter 전송 / Shift+Enter 줄바꿈)"
                       : "이 과제는 AI 사용이 허용되지 않았습니다."
                   }
-                  disabled={!detail.aiAllowed || isChatLoading}
+                  disabled={!detail.aiAllowed || isChatLoading || detail.submitted}
                 />
 
                 <div className="mt-4 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
@@ -487,7 +500,7 @@ export default function AssignmentDetailPage() {
 
                     <button
                       onClick={handleAskAi}
-                      disabled={isChatLoading || !detail.aiAllowed}
+                      disabled={isChatLoading || !detail.aiAllowed || detail.submitted}
                       className="inline-flex h-11 items-center justify-center rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white whitespace-nowrap disabled:opacity-50"
                     >
                       {isChatLoading ? "질문 중..." : "보내기"}
@@ -500,5 +513,5 @@ export default function AssignmentDetailPage() {
         </div>
       </div>
     </div>
-  ); 
-}    
+  );
+}

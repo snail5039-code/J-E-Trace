@@ -10,6 +10,7 @@ type Task = {
   dueDate: string;
   submitted: boolean;
   aiAllowed: boolean;
+  score: number | null;
 };
 
 export default function AssignmentsPage() {
@@ -94,20 +95,21 @@ export default function AssignmentsPage() {
                     <div className="flex justify-between items-center mb-4">
                       <span className="text-xs font-medium text-slate-400">과제</span>
                       <span
-                        className={`text-xs px-2 py-1 rounded-full ${
-                          task.submitted
+                        className={`text-xs px-2 py-1 rounded-full ${task.submitted
                             ? "bg-green-100 text-green-600"
                             : isUrgent
-                            ? "bg-red-100 text-red-500"
-                            : "bg-blue-100 text-blue-500"
-                        }`}
+                              ? "bg-red-100 text-red-500"
+                              : "bg-blue-100 text-blue-500"
+                          }`}
                       >
                         {task.submitted ? "제출 완료" : isUrgent ? "마감 임박" : "진행 중"}
                       </span>
                     </div>
 
                     <h2 className="text-xl font-semibold text-slate-900">{task.title}</h2>
-                    <p className="mt-3 text-sm text-slate-500 line-clamp-2">{task.description}</p>
+                    <div className="mt-2 text-sm text-slate-500">
+                      점수: {task.score == null ? "미입력" : `${task.score}점`}
+                    </div>
 
                     <div className="mt-6 flex justify-between items-center text-sm">
                       <span className="text-slate-400">마감일</span>

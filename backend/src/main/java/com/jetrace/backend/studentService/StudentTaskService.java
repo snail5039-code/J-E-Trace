@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jetrace.backend.studentDao.StudentDao;
 import com.jetrace.backend.studentDto.AiResponseDto;
 import com.jetrace.backend.studentDto.ChatResponseDto;
+import com.jetrace.backend.studentDto.StudentMyPageSummaryResponse;
 import com.jetrace.backend.studentDto.StudentTaskDetailResponse;
 import com.jetrace.backend.studentDto.StudentTaskLogResponse;
 import com.jetrace.backend.studentDto.StudentTaskResponse;
@@ -44,6 +45,29 @@ public class StudentTaskService {
         }
 
         return studentDao.findTasksByClassNameAndStudentName(className, studentName);
+    }
+
+    public StudentMyPageSummaryResponse getMyPageSummary(String loginId) {
+        validateLoginId(loginId);
+
+        String className = studentDao.findApprovedClassNameByLoginId(loginId);
+        String studentName = studentDao.findStudentNameByLoginId(loginId);
+
+        if (className == null || studentName == null) {
+            throw new RuntimeException("승인된 학생 계정을 찾을 수 없습니다.");
+        }
+
+        StudentMyPageSummaryResponse summary =
+                studentDao.findStudentMyPageSummary(className, studentName);
+
+        if (summary == null) {
+            summary = new StudentMyPageSummaryResponse();
+            summary.setSubmittedCount(0);
+            summary.setNotSubmittedCount(0);
+        }
+
+        summary.setRecentLogs(studentDao.findRecentTaskLogsByStudentName(studentName));
+        return summary;
     }
 
     public StudentTaskDetailResponse getTaskDetail(Long taskId, String loginId) {
