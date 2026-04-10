@@ -65,8 +65,8 @@ public class StudentTaskService {
             studentDao.insertTaskSubmissionIfNotExists(taskId, studentName);
         }
 
-        StudentTaskDetailResponse detail
-                = studentDao.findTaskDetailByTaskIdAndStudentName(taskId, studentName, className);
+        StudentTaskDetailResponse detail =
+                studentDao.findTaskDetailByTaskIdAndStudentName(taskId, studentName, className);
 
         if (detail == null) {
             throw new RuntimeException("과제 정보를 찾을 수 없습니다.");
@@ -193,8 +193,8 @@ public class StudentTaskService {
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
 
         try {
-            ResponseEntity<Map> response
-                    = restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
+            ResponseEntity<Map> response =
+                    restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
 
             Map<?, ?> responseBody = response.getBody();
             if (responseBody == null || responseBody.get("choices") == null) {
