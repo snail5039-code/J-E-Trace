@@ -500,5 +500,5 @@ export default function AssignmentDetailPage() {
         </div>
       </div>
     </div>
-  );
-}
+  ); 
+}    
