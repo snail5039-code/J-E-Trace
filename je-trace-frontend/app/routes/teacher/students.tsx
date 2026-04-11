@@ -1,8 +1,8 @@
 import { ClipboardList, Search, Sparkles, UserRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import api from "../../lib/axios";
 import axios from "axios";
-
 type StudentRequest = {
     id: number;
     studentName: string;
@@ -107,7 +107,7 @@ export default function TeacherStudentsPage() {
             if (!loginId || loginRole !== "TEACHER") return;
 
             try {
-                const response = await axios.get("http://localhost:8080/teacher/profile", {
+                const response = await api.get("/teacher/profile", {
                     params: { loginId },
                 });
 
@@ -130,7 +130,7 @@ export default function TeacherStudentsPage() {
 
     const fetchRequests = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/teacher/tasks/studentRequests", {
+            const response = await api.get("/teacher/tasks/studentRequests", {
                 params: { loginId },
             });
             setRequests(response.data);
@@ -147,7 +147,7 @@ export default function TeacherStudentsPage() {
 
     const fetchStudents = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/teacher/tasks/students", {
+            const response = await api.get("/teacher/tasks/students", {
                 params: { loginId },
             });
             setStudents(response.data);
@@ -166,7 +166,7 @@ export default function TeacherStudentsPage() {
         setDetailLoading(true);
 
         try {
-            const response = await axios.get(`http://localhost:8080/teacher/tasks/students/${studentId}`, {
+            const response = await api.get(`/teacher/tasks/students/${studentId}`, {
                 params: { loginId },
             });
             const data = response.data;
@@ -192,7 +192,7 @@ export default function TeacherStudentsPage() {
         setScoreLoading(true);
 
         try {
-            const response = await axios.get(`http://localhost:8080/teacher/tasks/students/${studentId}/taskScores`, {
+            const response = await api.get(`/teacher/tasks/students/${studentId}/taskScores`, {
                 params: { loginId },
             });
             setTaskScores(response.data);
@@ -238,7 +238,7 @@ export default function TeacherStudentsPage() {
         setNotice({ type: "info", text: "학생 신청 승인 중..." });
 
         try {
-            await axios.post(`http://localhost:8080/teacher/tasks/studentRequests/${requestId}/approve`, null, {
+            await api.post(`/teacher/tasks/studentRequests/${requestId}/approve`, null, {
                 params: { loginId },
             });
             await Promise.all([fetchRequests(), fetchStudents()]);
@@ -263,7 +263,7 @@ export default function TeacherStudentsPage() {
         setNotice({ type: "info", text: "학생 신청 거절 처리 중..." });
 
         try {
-            await axios.post(`http://localhost:8080/teacher/tasks/studentRequests/${requestId}/reject`, null, {
+            await api.post(`/teacher/tasks/studentRequests/${requestId}/reject`, null, {
                 params: { loginId },
             });
             await fetchRequests();
@@ -309,8 +309,8 @@ export default function TeacherStudentsPage() {
         setNotice({ type: "info", text: "학생 정보 저장 중..." });
 
         try {
-            await axios.put(
-                `http://localhost:8080/teacher/tasks/students/${selectedStudentId}`,
+            await api.put(
+                `/teacher/tasks/students/${selectedStudentId}`,
                 {
                     studentName: editForm.studentName.trim(),
                     className: editForm.className.trim(),
@@ -366,8 +366,8 @@ export default function TeacherStudentsPage() {
         setNotice({ type: "info", text: "과제 점수 저장 중..." });
 
         try {
-            await axios.put(
-                `http://localhost:8080/teacher/tasks/students/${selectedStudentId}/taskScores/${submissionId}`,
+            await api.put(
+                `/teacher/tasks/students/${selectedStudentId}/taskScores/${submissionId}`,
                 { score },
                 {
                     params: { loginId },

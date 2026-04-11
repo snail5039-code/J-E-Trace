@@ -1,7 +1,7 @@
 import { ArrowLeft, ClipboardList, FileText, Search, Sparkles, UserRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import axios from "axios";
+import api from "../../lib/axios";
 
 type TaskDetail = {
   id: number;
@@ -91,7 +91,7 @@ export default function TeacherSubmissionDetailPage() {
       if (!loginId || loginRole !== "TEACHER") return;
 
       try {
-        const response = await axios.get("http://localhost:8080/teacher/profile", {
+        const response = await api.get("/teacher/profile", {
           params: { loginId },
         });
 
@@ -113,9 +113,9 @@ export default function TeacherSubmissionDetailPage() {
 
     const fetchData = async () => {
       try {
-        const taskResponse = await axios.get(`http://localhost:8080/teacher/tasks/${taskId}`, { params: { loginId } });
-        const submissionResponse = await axios.get(
-          `http://localhost:8080/teacher/tasks/submissions/${submissionId}`,
+        const taskResponse = await api.get(`/teacher/tasks/${taskId}`, { params: { loginId } });
+        const submissionResponse = await api.get(
+          `/teacher/tasks/submissions/${submissionId}`,
           { params: { loginId } }
         );
 
@@ -123,7 +123,7 @@ export default function TeacherSubmissionDetailPage() {
         setSubmission(submissionResponse.data);
 
         if (submissionResponse.data?.studentName) {
-          const logResponse = await axios.get(`http://localhost:8080/teacher/tasks/${taskId}/logs`, {
+          const logResponse = await api.get(`/teacher/tasks/${taskId}/logs`, {
             params: { loginId, studentName: submissionResponse.data.studentName },
           });
           setLogs(logResponse.data);

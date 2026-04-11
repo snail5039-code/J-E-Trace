@@ -65,7 +65,7 @@ export default function TeacherSimilarityDetailPage() {
             if (!loginId || loginRole !== "TEACHER") return;
 
             try {
-                const response = await axios.get("http://localhost:8080/teacher/profile", {
+                const response = await axios.get("/teacher/profile", {
                     params: { loginId },
                 });
 
@@ -88,7 +88,7 @@ export default function TeacherSimilarityDetailPage() {
         const fetchDetail = async () => {
             try {
                 const detailResponse = await axios.get(
-                    `http://localhost:8080/teacher/tasks/similarity/${similarityId}`,
+                    `/teacher/tasks/similarity/${similarityId}`,
                     { params: { loginId } }
                 );
 
@@ -96,14 +96,14 @@ export default function TeacherSimilarityDetailPage() {
                 setDetail(detailData);
 
                 const studentLogResponse = await axios.get(
-                    `http://localhost:8080/teacher/tasks/${detailData.taskId}/logs`,
+                    `/teacher/tasks/${detailData.taskId}/logs`,
                     { params: { loginId, studentName: detailData.studentName } }
                 );
                 setStudentLogs(studentLogResponse.data);
 
                 if (detailData.comparisonType === "STUDENT_TO_STUDENT") {
                     const targetLogResponse = await axios.get(
-                        `http://localhost:8080/teacher/tasks/${detailData.taskId}/logs`,
+                        `/teacher/tasks/${detailData.taskId}/logs`,
                         { params: { loginId, studentName: detailData.targetName } }
                     );
                     setTargetLogs(targetLogResponse.data);

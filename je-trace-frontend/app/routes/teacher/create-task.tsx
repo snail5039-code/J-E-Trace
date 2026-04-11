@@ -1,7 +1,7 @@
 import { ArrowLeft, FilePlus2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import axios from "axios";
+import api from "../../lib/axios";
 
 type TeacherProfileResponse = {
   name?: string;
@@ -71,8 +71,8 @@ export default function TeacherCreateTaskPage() {
       if (!loginId || loginRole !== "TEACHER") return;
 
       try {
-        const response = await axios.get<TeacherProfileResponse>(
-          "http://localhost:8080/teacher/profile",
+        const response = await api.get<TeacherProfileResponse>(
+          "/teacher/profile",
           {
             params: { loginId },
           }
@@ -141,7 +141,7 @@ export default function TeacherCreateTaskPage() {
     }
 
     try {
-      await axios.post("http://localhost:8080/teacher/tasks", {
+      await api.post("/teacher/tasks", {
         loginId,
         title: form.title,
         className: form.className,

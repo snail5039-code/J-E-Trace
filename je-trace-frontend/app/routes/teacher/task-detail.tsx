@@ -1,6 +1,7 @@
 import { ArrowLeft, FileText, Search, Sparkles, UserRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
+import api from "../../lib/axios";
 import axios from "axios";
 
 type TaskDetail = {
@@ -100,7 +101,7 @@ export default function TeacherTaskDetailPage() {
       if (!loginId || loginRole !== "TEACHER") return;
 
       try {
-        const response = await axios.get("http://localhost:8080/teacher/profile", {
+        const response = await api.get("/teacher/profile", {
           params: { loginId },
         });
 
@@ -122,8 +123,8 @@ export default function TeacherTaskDetailPage() {
 
     try {
       const [taskResponse, studentResponse] = await Promise.all([
-        axios.get(`http://localhost:8080/teacher/tasks/${taskId}`, { params: { loginId } }),
-        axios.get(`http://localhost:8080/teacher/tasks/${taskId}/taskSubmissions`, { params: { loginId } }),
+        api.get(`/teacher/tasks/${taskId}`, { params: { loginId } }),
+        api.get(`/teacher/tasks/${taskId}/taskSubmissions`, { params: { loginId } }),
       ]);
 
       setAssignment(taskResponse.data);
@@ -150,7 +151,7 @@ export default function TeacherTaskDetailPage() {
     setNotice({ type: "info", text: "유사도 분석 실행 중..." });
 
     try {
-      await axios.post(`http://localhost:8080/teacher/tasks/${taskId}/similarity/run`, null, { params: { loginId } });
+      await api.post(`/teacher/tasks/${taskId}/similarity/run`, null, { params: { loginId } });
       await fetchData();
 
       setNotice({

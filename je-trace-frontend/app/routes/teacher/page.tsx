@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import axios from "axios";
+import api from "../../lib/axios";
 
 type Task = {
   id: number;
@@ -61,7 +61,7 @@ export default function TeacherPage() {
       if (!loginId || loginRole !== "TEACHER") return;
 
       try {
-        const response = await axios.get("http://localhost:8080/teacher/profile", {
+        const response = await axios.get("/teacher/profile", {
           params: { loginId },
         });
 
@@ -83,7 +83,7 @@ export default function TeacherPage() {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/teacher/tasks", {
+        const response = await axios.get("/teacher/tasks", {
           params: { loginId },
         });
         setTasks(response.data ?? []);

@@ -1,7 +1,7 @@
 import { ClipboardList, Search, Sparkles, UserRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import axios from "axios";
+import api from "../../lib/axios";
 
 type Task = {
     id: number;
@@ -76,7 +76,7 @@ export default function TeacherLogsPage() {
             if (!loginId || loginRole !== "TEACHER") return;
 
             try {
-                const response = await axios.get("http://localhost:8080/teacher/profile", {
+                const response = await api.get("/teacher/profile", {
                     params: { loginId },
                 });
 
@@ -96,7 +96,7 @@ export default function TeacherLogsPage() {
     useEffect(() => {
         const fetchTasks = async () => {
             try {
-                const response = await axios.get("http://localhost:8080/teacher/tasks", {
+                const response = await api.get("/teacher/tasks", {
                     params: { loginId },
                 });
                 setTasks(response.data);
@@ -121,8 +121,8 @@ export default function TeacherLogsPage() {
         const fetchStudents = async () => {
             setStudentLoading(true);
             try {
-                const response = await axios.get(
-                    `http://localhost:8080/teacher/tasks/${selectedTaskId}/taskSubmissions`,
+                const response = await api.get(
+                    `/teacher/tasks/${selectedTaskId}/taskSubmissions`,
                     { params: { loginId } }
                 );
                 setStudents(response.data);
@@ -150,8 +150,8 @@ export default function TeacherLogsPage() {
         const fetchLogs = async () => {
             setLogLoading(true);
             try {
-                const response = await axios.get(
-                    `http://localhost:8080/teacher/tasks/${selectedTaskId}/logs`,
+                const response = await api.get(
+                    `/teacher/tasks/${selectedTaskId}/logs`,
                     {
                         params: {
                             loginId,

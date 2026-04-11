@@ -1,6 +1,7 @@
 import { ArrowLeft, ClipboardList, Search, Sparkles, UserRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
+import api from "../../lib/axios";
 import axios from "axios";
 
 type TaskDetail = {
@@ -118,7 +119,7 @@ export default function TeacherSubmissionEvaluationPage() {
       if (!loginId || loginRole !== "TEACHER") return;
 
       try {
-        const response = await axios.get("http://localhost:8080/teacher/profile", {
+        const response = await api.get("/teacher/profile", {
           params: { loginId },
         });
 
@@ -139,9 +140,9 @@ export default function TeacherSubmissionEvaluationPage() {
     if (!taskId || !submissionId) return;
 
     try {
-      const taskResponse = await axios.get(`http://localhost:8080/teacher/tasks/${taskId}`, { params: { loginId } });
-      const submissionResponse = await axios.get(
-        `http://localhost:8080/teacher/tasks/submissions/${submissionId}`,
+      const taskResponse = await api.get(`/teacher/tasks/${taskId}`, { params: { loginId } });
+      const submissionResponse = await api.get(
+        `/teacher/tasks/submissions/${submissionId}`,
         { params: { loginId } }
       );
 
@@ -155,7 +156,7 @@ export default function TeacherSubmissionEvaluationPage() {
       setTeacherComment(submissionResponse.data?.teacherComment ?? "");
 
       if (submissionResponse.data?.studentName) {
-        const logResponse = await axios.get(`http://localhost:8080/teacher/tasks/${taskId}/logs`, {
+        const logResponse = await api.get(`/teacher/tasks/${taskId}/logs`, {
           params: { loginId, studentName: submissionResponse.data.studentName },
         });
         setLogs(logResponse.data);
@@ -197,8 +198,8 @@ export default function TeacherSubmissionEvaluationPage() {
     setNotice({ type: "info", text: "평가 저장 중..." });
 
     try {
-      await axios.put(
-        `http://localhost:8080/teacher/tasks/submissions/${submissionId}/evaluation`,
+      await api.put(
+        `/teacher/tasks/submissions/${submissionId}/evaluation`,
         {
           score: numericScore,
           teacherComment,

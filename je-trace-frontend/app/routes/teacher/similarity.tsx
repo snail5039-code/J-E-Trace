@@ -54,7 +54,7 @@ export default function TeacherSimilarityPage() {
             if (!loginId || loginRole !== "TEACHER") return;
 
             try {
-                const response = await axios.get("http://localhost:8080/teacher/profile", {
+                const response = await axios.get("/teacher/profile", {
                     params: { loginId },
                 });
 
@@ -74,7 +74,7 @@ export default function TeacherSimilarityPage() {
     useEffect(() => {
         const fetchSimilarityResults = async () => {
             try {
-                const response = await axios.get("http://localhost:8080/teacher/tasks/similarity", {
+                const response = await axios.get("/teacher/tasks/similarity", {
                     params: { loginId },
                 });
                 setItems(response.data);
