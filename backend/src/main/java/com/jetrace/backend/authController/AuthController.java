@@ -3,6 +3,8 @@ package com.jetrace.backend.authController;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,14 +36,31 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public String signup(@RequestBody SignupRequestDto dto) {
-        authService.signup(dto);
-        return "ok";
+    public ResponseEntity<?> signup(@RequestBody SignupRequestDto dto) {
+        try {
+            authService.signup(dto);
+            return ResponseEntity.ok("ok");
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            Map<String, Object> error = new HashMap<>();
+            error.put("message", e.getClass().getSimpleName() + ": " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
     }
 
     @PostMapping("/login")
-    public LoginResponseDto login(@RequestBody LoginRequestDto dto) {
-        return authService.login(dto);
+    public ResponseEntity<?> login(@RequestBody LoginRequestDto dto) {
+        try {
+            LoginResponseDto response = authService.login(dto);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            Map<String, Object> error = new HashMap<>();
+            error.put("message", e.getClass().getSimpleName() + ": " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
     }
 
     @GetMapping("/check-login-id")
