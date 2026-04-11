@@ -208,12 +208,8 @@ export default function TeacherSubmissionEvaluationPage() {
         }
       );
 
-      await fetchData();
-
-      setNotice({
-        type: "success",
-        text: "평가 저장 완료",
-      });
+      alert("평가가 저장되었습니다.");
+      navigate(-1);
     } catch (error) {
       console.error("평가 저장 실패:", error);
       setNotice({

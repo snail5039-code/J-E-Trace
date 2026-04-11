@@ -335,8 +335,8 @@ public class TaskService {
             TaskSubmissionResponse a = submittedList.get(i);
             validateStudentAccessByTaskClass(task.getClassName(), a.getStudentName());
 
-            List<TaskAiLogResponse> aLogs =
-                    taskDao.findTaskAiLogsByTaskIdAndStudentName(taskId, a.getStudentName());
+            List<TaskAiLogResponse> aLogs
+                    = taskDao.findTaskAiLogsByTaskIdAndStudentName(taskId, a.getStudentName());
 
             for (int j = i + 1; j < submittedList.size(); j++) {
                 TaskSubmissionResponse b = submittedList.get(j);
@@ -430,8 +430,8 @@ public class TaskService {
         }
 
         for (TaskSubmissionResponse submission : submittedList) {
-            List<SimilarityResponse> results =
-                    studentResultMap.getOrDefault(submission.getStudentName(), List.of());
+            List<SimilarityResponse> results
+                    = studentResultMap.getOrDefault(submission.getStudentName(), List.of());
 
             String finalResult = decideFinalSubmissionResult(results);
             taskDao.updateTaskSubmissionResult(taskId, submission.getStudentName(), finalResult);
@@ -458,13 +458,12 @@ public class TaskService {
 
         TaskResponse task = getAccessibleTask(loginId, result.getTaskId());
 
-        if ("STUDENT_TO_STUDENT".equals(result.getCompareType())) {
+        if ("STUDENT_TO_STUDENT".equals(result.getComparisonType())) {
             validateStudentAccessByTaskClass(task.getClassName(), result.getStudentName());
             validateStudentAccessByTaskClass(task.getClassName(), result.getTargetName());
-        } else if ("STUDENT_TO_AI_LOG".equals(result.getCompareType())) {
+        } else if ("STUDENT_TO_AI_LOG".equals(result.getComparisonType())) {
             validateStudentAccessByTaskClass(task.getClassName(), result.getStudentName());
         }
-
         return result;
     }
 
@@ -655,9 +654,12 @@ public class TaskService {
         }
 
         return switch (top.getJudge()) {
-            case "위험" -> "복사 가능성 높음";
-            case "주의" -> "일부 재구성";
-            default -> "자기화 수준 높음";
+            case "위험" ->
+                "복사 가능성 높음";
+            case "주의" ->
+                "일부 재구성";
+            default ->
+                "자기화 수준 높음";
         };
     }
 
