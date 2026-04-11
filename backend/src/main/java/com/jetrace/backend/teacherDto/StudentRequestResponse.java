@@ -1,3 +1,4 @@
+// backend/src/main/java/com/jetrace/backend/teacherDto/StudentRequestResponse.java
 package com.jetrace.backend.teacherDto;
 
 public class StudentRequestResponse {
@@ -11,7 +12,14 @@ public class StudentRequestResponse {
     public StudentRequestResponse() {
     }
 
-    public StudentRequestResponse(Long id, String studentName, String className, String status, String requestedAt, String processedAt) {
+    public StudentRequestResponse(
+            Long id,
+            String studentName,
+            String className,
+            String status,
+            String requestedAt,
+            String processedAt
+    ) {
         this.id = id;
         this.studentName = studentName;
         this.className = className;
