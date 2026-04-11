@@ -196,300 +196,213 @@ export default function TeacherLogsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#eef1f5] text-slate-800">
-            <div className="border-b border-slate-300 bg-gradient-to-r from-teal-600 to-cyan-500 px-6 py-4 text-white shadow-sm">
-                <div className="mx-auto flex max-w-7xl items-center justify-between">
+        <div className="min-h-screen bg-[#f5f7fb] px-5 py-6 md:px-8 text-slate-900">
+            <div className="mx-auto max-w-7xl space-y-6">
+
+                {/* ✅ 헤더 */}
+                <section className="rounded-[28px] border border-slate-200 bg-white px-8 py-6 shadow-[0_10px_30px_rgba(15,23,42,0.05)] flex items-center justify-between">
                     <div>
-                        <p className="text-sm font-medium text-white/80">교사용 관리 시스템</p>
-                        <h1 className="mt-1 text-2xl font-bold">AI 로그 확인</h1>
+                        <p className="text-xs font-bold tracking-[0.25em] text-slate-400">
+                            TEACHER DASHBOARD
+                        </p>
+                        <h1 className="mt-2 text-3xl font-black text-slate-900">
+                            AI 로그 관리
+                        </h1>
+                        <p className="mt-2 text-sm text-slate-500">
+                            학생 질문 및 AI 응답 기록 확인
+                        </p>
                     </div>
 
                     <button
                         onClick={() => navigate("/teacher")}
-                        className="rounded-sm bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                        className="rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-slate-800"
                     >
                         과제 목록
                     </button>
-                </div>
-            </div>
+                </section>
 
-            <div className="mx-auto max-w-7xl px-6 py-6">
-                <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
-                    <aside className="overflow-hidden rounded-sm border border-slate-300 bg-[#4a4a4a] text-white shadow-sm">
-                        <div className="border-b border-white/10 px-5 py-6 text-center">
-                            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-sm bg-slate-200 text-2xl font-bold text-slate-700">
+                <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+
+                    {/* ✅ 사이드바 */}
+                    <aside className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm flex flex-col">
+                        <div className="text-center">
+                            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-slate-100 text-xl font-bold">
                                 T
                             </div>
-                            <p className="mt-4 text-lg font-semibold">{teacherName || "교사"}</p>
-                            <p className="mt-1 text-sm text-white/70">
-                                {teacherSubject ? `${teacherSubject} 수업 담당` : "담당 과목 미설정"}
+                            <p className="mt-4 font-semibold text-slate-900">
+                                {teacherName || "교사"}
+                            </p>
+                            <p className="text-sm text-slate-500">
+                                {teacherSubject || "과목 미설정"}
                             </p>
                         </div>
 
-                        <div className="space-y-2 px-3 py-4">
+                        <div className="mt-6 space-y-2">
                             <button
                                 onClick={() => navigate("/teacher")}
-                                className="flex w-full items-center gap-3 rounded-sm px-4 py-3 text-left text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
+                                className="w-full rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100"
                             >
-                                <ClipboardList size={18} />
                                 과제 관리
                             </button>
 
-                            <button className="flex w-full items-center gap-3 rounded-sm bg-white/10 px-4 py-3 text-left text-sm font-medium text-white">
-                                <Sparkles size={18} />
-                                AI 로그 확인
+                            <button className="w-full rounded-xl bg-slate-900 px-4 py-3 text-sm text-white">
+                                AI 로그
                             </button>
 
                             <button
                                 onClick={() => navigate("/teacher/similarity")}
-                                className="flex w-full items-center gap-3 rounded-sm px-4 py-3 text-left text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
+                                className="w-full rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100"
                             >
-                                <Search size={18} />
                                 유사도 분석
                             </button>
+
                             <button
                                 onClick={() => navigate("/teacher/students")}
-                                className="flex w-full items-center gap-3 rounded-sm px-4 py-3 text-left text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
+                                className="w-full rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100"
                             >
-                                <UserRound size={18} />
                                 학생 관리
                             </button>
                         </div>
                     </aside>
 
-                    <main className="space-y-5">
-                        <section className="overflow-hidden rounded-sm border border-slate-300 bg-white shadow-sm">
-                            <div className="border-b border-slate-300 bg-slate-50 px-5 py-4">
-                                <h2 className="text-lg font-semibold text-slate-900">로그 조회 조건</h2>
-                            </div>
+                    {/* ✅ 메인 */}
+                    <main className="space-y-6">
 
-                            <div className="grid grid-cols-1 gap-4 px-5 py-4 md:grid-cols-3">
-                                <div>
-                                    <label className="mb-1 block text-sm font-medium text-slate-700">
-                                        과제 선택
-                                    </label>
-                                    <select
-                                        value={selectedTaskId}
-                                        onChange={(e) => {
-                                            setSelectedTaskId(e.target.value);
-                                        }}
-                                        className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600"
-                                    >
-                                        <option value="">과제를 선택하세요</option>
-                                        {tasks.map((task) => (
-                                            <option key={task.id} value={task.id}>
-                                                {task.title} ({task.className})
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
+                        {/* 🔍 필터 */}
+                        <section className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm">
+                            <h2 className="text-lg font-bold text-slate-900">조회 조건</h2>
 
-                                <div>
-                                    <label className="mb-1 block text-sm font-medium text-slate-700">
-                                        학생 선택
-                                    </label>
-                                    <select
-                                        value={selectedStudentName}
-                                        onChange={(e) => setSelectedStudentName(e.target.value)}
-                                        disabled={!selectedTaskId || studentLoading}
-                                        className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600 disabled:bg-slate-100"
-                                    >
-                                        <option value="">
-                                            {!selectedTaskId
-                                                ? "먼저 과제를 선택하세요"
-                                                : studentLoading
-                                                    ? "학생 목록 불러오는 중..."
-                                                    : "학생을 선택하세요"}
+                            <div className="mt-4 grid gap-4 md:grid-cols-3">
+                                <select
+                                    value={selectedTaskId}
+                                    onChange={(e) => setSelectedTaskId(e.target.value)}
+                                    className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                                >
+                                    <option value="">과제 선택</option>
+                                    {tasks.map((task) => (
+                                        <option key={task.id} value={task.id}>
+                                            {task.title} ({task.className})
                                         </option>
-                                        {students.map((student) => (
-                                            <option key={student.id} value={student.studentName}>
-                                                {student.studentName}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
+                                    ))}
+                                </select>
 
-                                <div className="flex items-end">
-                                    <button
-                                        onClick={() => {
-                                            setSelectedTaskId("");
-                                            setSelectedStudentName("");
-                                            setStudents([]);
-                                            setLogs([]);
-                                            setExpandedQuestionIds([]);
-                                            setExpandedAnswerIds([]);
-                                        }}
-                                        className="w-full border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                                    >
-                                        필터 초기화
-                                    </button>
-                                </div>
+                                <select
+                                    value={selectedStudentName}
+                                    onChange={(e) => setSelectedStudentName(e.target.value)}
+                                    disabled={!selectedTaskId || studentLoading}
+                                    className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm disabled:bg-slate-100"
+                                >
+                                    <option value="">학생 선택</option>
+                                    {students.map((s) => (
+                                        <option key={s.id} value={s.studentName}>
+                                            {s.studentName}
+                                        </option>
+                                    ))}
+                                </select>
+
+                                <button
+                                    onClick={() => {
+                                        setSelectedTaskId("");
+                                        setSelectedStudentName("");
+                                        setStudents([]);
+                                        setLogs([]);
+                                        setExpandedQuestionIds([]);
+                                        setExpandedAnswerIds([]);
+                                    }}
+                                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                                >
+                                    초기화
+                                </button>
                             </div>
                         </section>
 
+                        {/* 📊 요약 */}
                         <section className="grid gap-4 md:grid-cols-3">
-                            <div className="rounded-sm border border-slate-300 bg-white shadow-sm">
-                                <div className="border-b border-slate-200 bg-[#f7f2c8] px-4 py-3 text-sm font-semibold">
-                                    선택 과제
-                                </div>
-                                <div className="px-4 py-5 text-base font-semibold text-slate-900">
-                                    {selectedTask ? selectedTask.title : taskLoading ? "불러오는 중..." : "-"}
-                                </div>
+                            <div className="rounded-[20px] border border-slate-200 bg-white p-5 shadow-sm">
+                                <p className="text-sm text-slate-500">선택 과제</p>
+                                <p className="mt-2 font-semibold text-slate-900">
+                                    {selectedTask ? selectedTask.title : "-"}
+                                </p>
                             </div>
 
-                            <div className="rounded-sm border border-slate-300 bg-white shadow-sm">
-                                <div className="border-b border-slate-200 bg-[#dff3ea] px-4 py-3 text-sm font-semibold">
-                                    선택 학생
-                                </div>
-                                <div className="px-4 py-5 text-base font-semibold text-slate-900">
+                            <div className="rounded-[20px] border border-slate-200 bg-white p-5 shadow-sm">
+                                <p className="text-sm text-slate-500">선택 학생</p>
+                                <p className="mt-2 font-semibold text-slate-900">
                                     {selectedStudentName || "-"}
-                                </div>
+                                </p>
                             </div>
 
-                            <div className="rounded-sm border border-slate-300 bg-white shadow-sm">
-                                <div className="border-b border-slate-200 bg-[#e5ecff] px-4 py-3 text-sm font-semibold">
-                                    조회 로그 수
-                                </div>
-                                <div className="px-4 py-5 text-2xl font-bold text-slate-900">
-                                    {selectedTaskId && selectedStudentName ? `${logs.length}개` : "-"}
-                                </div>
+                            <div className="rounded-[20px] border border-slate-200 bg-white p-5 shadow-sm">
+                                <p className="text-sm text-slate-500">로그 수</p>
+                                <p className="mt-2 text-2xl font-bold text-slate-900">
+                                    {logs.length}개
+                                </p>
                             </div>
                         </section>
 
-                        <section className="overflow-hidden rounded-sm border border-slate-300 bg-white shadow-sm">
-                            <div className="border-b border-slate-300 bg-slate-50 px-5 py-4">
-                                <h2 className="text-lg font-semibold text-slate-900">AI 로그 목록</h2>
+                        {/* 📋 테이블 */}
+                        <section className="rounded-[24px] border border-slate-200 bg-white shadow-sm overflow-hidden">
+                            <div className="border-b px-6 py-4 bg-slate-50">
+                                <h2 className="font-bold text-slate-900">AI 로그 목록</h2>
                             </div>
 
-                            <div className="max-h-[640px] overflow-auto">
-                                <table className="min-w-full border-collapse text-sm">
-                                    <thead>
-                                        <tr className="bg-slate-100 text-slate-700">
-                                            <th className="w-[70px] whitespace-nowrap border border-slate-300 px-4 py-3 text-center font-semibold">
-                                                번호
-                                            </th>
-                                            <th className="w-[120px] whitespace-nowrap border border-slate-300 px-4 py-3 text-center font-semibold">
-                                                학생명
-                                            </th>
-                                            <th className="border border-slate-300 px-4 py-3 text-center font-semibold">
-                                                질문
-                                            </th>
-                                            <th className="border border-slate-300 px-4 py-3 text-center font-semibold">
-                                                응답
-                                            </th>
-                                            <th className="w-[150px] whitespace-nowrap border border-slate-300 px-4 py-3 text-center font-semibold">
-                                                질문 시각
-                                            </th>
-                                            <th className="w-[90px] whitespace-nowrap border border-slate-300 px-4 py-3 text-center font-semibold">
-                                                상태
-                                            </th>
+                            <div className="overflow-auto max-h-[600px]">
+                                <table className="min-w-full text-sm">
+                                    <thead className="bg-slate-50 text-slate-500">
+                                        <tr>
+                                            <th className="px-4 py-3 text-left font-medium">번호</th>
+                                            <th className="px-4 py-3 text-left font-medium">학생</th>
+                                            <th className="px-4 py-3 text-left font-medium">질문</th>
+                                            <th className="px-4 py-3 text-left font-medium">응답</th>
+                                            <th className="px-4 py-3 text-left font-medium">시간</th>
+                                            <th className="px-4 py-3 text-left font-medium">상태</th>
                                         </tr>
                                     </thead>
 
-                                    <tbody>
-                                        {!selectedTaskId ? (
-                                            <tr>
-                                                <td
-                                                    colSpan={6}
-                                                    className="border border-slate-300 px-4 py-8 text-center text-slate-500"
-                                                >
-                                                    과제를 먼저 선택하세요.
+                                    <tbody className="divide-y">
+                                        {logs.map((log, index) => (
+                                            <tr key={log.id} className="hover:bg-slate-50 transition">
+                                                <td className="px-4 py-4 text-slate-500">
+                                                    {index + 1}
+                                                </td>
+
+                                                <td className="px-4 py-4 font-semibold text-slate-900">
+                                                    {log.studentName}
+                                                </td>
+
+                                                <td className="px-4 py-4 text-slate-700">
+                                                    {isQuestionExpanded(log.id)
+                                                        ? log.question
+                                                        : shortenText(log.question, 30)}
+                                                </td>
+
+                                                <td className="px-4 py-4 text-slate-700">
+                                                    {isAnswerExpanded(log.id)
+                                                        ? log.answer
+                                                        : shortenText(log.answer, 40)}
+                                                </td>
+
+                                                <td className="px-4 py-4 text-slate-400 text-xs">
+                                                    {log.createdAt?.replace("T", " ").slice(0, 16)}
+                                                </td>
+
+                                                <td className="px-4 py-4">
+                                                    <span
+                                                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${log.status === "주의"
+                                                                ? "bg-rose-100 text-rose-600"
+                                                                : "bg-emerald-100 text-emerald-600"
+                                                            }`}
+                                                    >
+                                                        {log.status}
+                                                    </span>
                                                 </td>
                                             </tr>
-                                        ) : !selectedStudentName ? (
-                                            <tr>
-                                                <td
-                                                    colSpan={6}
-                                                    className="border border-slate-300 px-4 py-8 text-center text-slate-500"
-                                                >
-                                                    학생을 선택하세요.
-                                                </td>
-                                            </tr>
-                                        ) : logLoading ? (
-                                            <tr>
-                                                <td
-                                                    colSpan={6}
-                                                    className="border border-slate-300 px-4 py-8 text-center text-slate-500"
-                                                >
-                                                    AI 로그 불러오는 중...
-                                                </td>
-                                            </tr>
-                                        ) : logs.length === 0 ? (
-                                            <tr>
-                                                <td
-                                                    colSpan={6}
-                                                    className="border border-slate-300 px-4 py-8 text-center text-slate-500"
-                                                >
-                                                    조회된 로그가 없습니다.
-                                                </td>
-                                            </tr>
-                                        ) : (
-                                            logs.map((log, index) => {
-                                                const questionExpanded = isQuestionExpanded(log.id);
-                                                const answerExpanded = isAnswerExpanded(log.id);
-
-                                                return (
-                                                    <tr key={log.id} className="align-top hover:bg-slate-50">
-                                                        <td className="w-[70px] whitespace-nowrap border border-slate-300 px-4 py-4 text-center">
-                                                            {index + 1}
-                                                        </td>
-
-                                                        <td className="w-[120px] whitespace-nowrap border border-slate-300 px-4 py-4 text-center font-medium text-slate-900">
-                                                            {log.studentName}
-                                                        </td>
-
-                                                        <td className="border border-slate-300 px-4 py-4 text-left text-slate-700">
-                                                            <div className="max-w-[260px] whitespace-normal break-words leading-6">
-                                                                {questionExpanded ? log.question : shortenText(log.question, 26)}
-                                                            </div>
-                                                            {shouldShowMoreButton(log.question, 26) && (
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => toggleQuestionExpand(log.id)}
-                                                                    className="mt-2 text-xs font-semibold text-teal-700 hover:underline"
-                                                                >
-                                                                    {questionExpanded ? "접기" : "더보기"}
-                                                                </button>
-                                                            )}
-                                                        </td>
-
-                                                        <td className="border border-slate-300 px-4 py-4 text-left text-slate-700">
-                                                            <div className="max-w-[360px] whitespace-normal break-words leading-6">
-                                                                {answerExpanded ? log.answer : shortenText(log.answer, 40)}
-                                                            </div>
-                                                            {shouldShowMoreButton(log.answer, 40) && (
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => toggleAnswerExpand(log.id)}
-                                                                    className="mt-2 text-xs font-semibold text-teal-700 hover:underline"
-                                                                >
-                                                                    {answerExpanded ? "접기" : "더보기"}
-                                                                </button>
-                                                            )}
-                                                        </td>
-
-                                                        <td className="w-[150px] whitespace-nowrap border border-slate-300 px-4 py-4 text-center text-slate-700">
-                                                            {log.createdAt?.replace("T", " ").slice(0, 16)}
-                                                        </td>
-
-                                                        <td className="w-[90px] whitespace-nowrap border border-slate-300 px-4 py-4 text-center">
-                                                            <span
-                                                                className={`inline-block rounded-sm px-3 py-1 text-xs font-semibold ${log.status === "주의"
-                                                                    ? "bg-rose-50 text-rose-700"
-                                                                    : "bg-emerald-50 text-emerald-700"
-                                                                    }`}
-                                                            >
-                                                                {log.status}
-                                                            </span>
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            })
-                                        )}
+                                        ))}
                                     </tbody>
                                 </table>
                             </div>
                         </section>
+
                     </main>
                 </div>
             </div>

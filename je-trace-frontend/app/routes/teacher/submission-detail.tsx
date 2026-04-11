@@ -145,301 +145,221 @@ export default function TeacherSubmissionDetailPage() {
     return <div className="p-6">제출 상세 정보를 찾을 수 없습니다.</div>;
   }
 
-  return (
-    <div className="min-h-screen bg-[#eef1f5] text-slate-800">
-      <div className="border-b border-slate-300 bg-gradient-to-r from-teal-600 to-cyan-500 px-6 py-4 text-white shadow-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-white/80">교사용 관리 시스템</p>
-            <h1 className="mt-1 text-2xl font-bold">제출 상세 보기</h1>
+return (
+  <div className="min-h-screen bg-[#f5f7fb] px-5 py-6 md:px-8 text-slate-900">
+    <div className="mx-auto max-w-7xl space-y-6">
+
+      {/* 헤더 */}
+      <section className="rounded-[28px] border border-slate-200 bg-white px-8 py-6 shadow-[0_10px_30px_rgba(15,23,42,0.05)] flex items-center justify-between">
+        <div>
+          <p className="text-xs font-bold tracking-[0.25em] text-slate-400">
+            TEACHER SYSTEM
+          </p>
+          <h1 className="mt-2 text-3xl font-black text-slate-900">
+            제출 상세 보기
+          </h1>
+        </div>
+
+        <button
+          onClick={() => navigate(`/teacher/tasks/${taskId}`)}
+          className="rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-slate-800"
+        >
+          제출 현황으로
+        </button>
+      </section>
+
+      <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+
+        {/* 사이드바 */}
+        <aside className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm flex flex-col">
+          <div className="text-center">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-slate-100 text-xl font-bold">
+              T
+            </div>
+            <p className="mt-4 font-semibold text-slate-900">{teacherName || "교사"}</p>
+            <p className="text-sm text-slate-500">
+              {teacherSubject ? `${teacherSubject} 수업 담당` : "담당 과목 미설정"}
+            </p>
           </div>
 
-          <button
-            onClick={() => navigate(`/teacher/tasks/${taskId}`)}
-            className="rounded-sm bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
-          >
-            제출 현황으로
-          </button>
-        </div>
-      </div>
+          <div className="mt-6 space-y-2">
+            <button onClick={() => navigate(`/teacher/tasks/${taskId}`)} className="w-full rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100">
+              제출 현황으로
+            </button>
+            <button onClick={() => navigate("/teacher")} className="w-full rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100">
+              과제 관리
+            </button>
+            <button onClick={() => navigate("/teacher/logs")} className="w-full rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100">
+              AI 로그 확인
+            </button>
+            <button onClick={() => navigate("/teacher/similarity")} className="w-full rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100">
+              유사도 분석
+            </button>
+            <button onClick={() => navigate("/teacher/students")} className="w-full rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100">
+              학생 관리
+            </button>
+          </div>
+        </aside>
 
-      <div className="mx-auto max-w-7xl px-6 py-6">
-        <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
-          <aside className="overflow-hidden rounded-sm border border-slate-300 bg-[#4a4a4a] text-white shadow-sm">
-            <div className="border-b border-white/10 px-5 py-6 text-center">
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-sm bg-slate-200 text-2xl font-bold text-slate-700">
-                T
-              </div>
-              <p className="mt-4 text-lg font-semibold">{teacherName || "교사"}</p>
-              <p className="mt-1 text-sm text-white/70">
-                {teacherSubject ? `${teacherSubject} 수업 담당` : "담당 과목 미설정"}
-              </p>
+        {/* 메인 */}
+        <main className="space-y-6">
+
+          {/* 기본 정보 */}
+          <section className="rounded-[24px] border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b">
+              <h2 className="font-bold text-slate-900">기본 정보</h2>
             </div>
 
-            <div className="space-y-2 px-3 py-4">
-              <button
-                onClick={() => navigate(`/teacher/tasks/${taskId}`)}
-                className="flex w-full items-center gap-3 rounded-sm px-4 py-3 text-left text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
-              >
-                <ArrowLeft size={18} />
-                제출 현황으로
-              </button>
-
-              <button
-                onClick={() => navigate("/teacher")}
-                className="flex w-full items-center gap-3 rounded-sm px-4 py-3 text-left text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
-              >
-                <ClipboardList size={18} />
-                과제 관리
-              </button>
-
-              <button
-                onClick={() => navigate("/teacher/logs")}
-                className="flex w-full items-center gap-3 rounded-sm px-4 py-3 text-left text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
-              >
-                <Sparkles size={18} />
-                AI 로그 확인
-              </button>
-
-              <button
-                onClick={() => navigate("/teacher/similarity")}
-                className="flex w-full items-center gap-3 rounded-sm px-4 py-3 text-left text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
-              >
-                <Search size={18} />
-                유사도 분석
-              </button>
-
-              <button
-                onClick={() => navigate("/teacher/students")}
-                className="flex w-full items-center gap-3 rounded-sm px-4 py-3 text-left text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
-              >
-                <UserRound size={18} />
-                학생 관리
-              </button>
+            <div className="grid grid-cols-2 md:grid-cols-4">
+              {[
+                ["과제명", task.title],
+                ["학생명", submission.studentName],
+                ["반", task.className],
+                ["제출 시각", submission.submittedAt ? submission.submittedAt.replace("T", " ").slice(0, 16) : "-"],
+                ["제출 여부", submission.submitted ? "제출 완료" : "미제출"],
+                ["AI 사용", submission.aiUsed ? "사용" : "미사용"],
+                ["분석 결과", submission.result || "-"],
+              ].map(([label, value], i) => (
+                <div key={i} className="p-4 border-b md:border-r last:border-r-0">
+                  <p className="text-xs text-slate-500">{label}</p>
+                  <p className="mt-1 font-semibold text-slate-900">{value}</p>
+                </div>
+              ))}
             </div>
-          </aside>
+          </section>
 
-          <main className="space-y-5">
-            <section className="overflow-hidden rounded-sm border border-slate-300 bg-white shadow-sm">
-              <div className="border-b border-slate-300 bg-slate-50 px-5 py-4">
-                <h2 className="text-lg font-semibold text-slate-900">기본 정보</h2>
-              </div>
+          {/* AI 분석 */}
+          <section className="rounded-[24px] border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b">
+              <h2 className="font-bold text-slate-900">AI 분석 요약</h2>
+            </div>
 
-              <div className="grid grid-cols-2 border-t border-slate-200 md:grid-cols-4">
-                <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
-                  과제명
+            <div className="grid grid-cols-2 md:grid-cols-4">
+              {[
+                ["학생 간 최고 유사도", `${submission.topStudentSimilarity ?? 0}%`],
+                ["주요 비교 대상", submission.topStudentTargetName || "-"],
+                ["AI 로그 유사도", `${submission.aiLogSimilarity ?? 0}%`],
+                ["최종 분석 결과", submission.result || "-"],
+              ].map(([label, value], i) => (
+                <div key={i} className="p-4 border-b md:border-r last:border-r-0">
+                  <p className="text-xs text-slate-500">{label}</p>
+                  <p className="mt-1 font-semibold text-slate-900">{value}</p>
                 </div>
-                <div className="border-b border-slate-200 px-4 py-4 text-center text-sm">{task.title}</div>
+              ))}
+            </div>
 
-                <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
-                  학생명
-                </div>
-                <div className="border-b border-slate-200 px-4 py-4 text-center text-sm">
-                  {submission.studentName}
-                </div>
-
-                <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
-                  반
-                </div>
-                <div className="border-b border-slate-200 px-4 py-4 text-center text-sm">{task.className}</div>
-
-                <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
-                  제출 시각
-                </div>
-                <div className="border-b border-slate-200 px-4 py-4 text-center text-sm">
-                  {submission.submittedAt ? submission.submittedAt.replace("T", " ").slice(0, 16) : "-"}
-                </div>
-
-                <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
-                  제출 여부
-                </div>
-                <div className="border-b border-slate-200 px-4 py-4 text-center text-sm">
-                  {submission.submitted ? "제출 완료" : "미제출"}
-                </div>
-
-                <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
-                  AI 사용
-                </div>
-                <div className="border-b border-slate-200 px-4 py-4 text-center text-sm">
-                  {submission.aiUsed ? "사용" : "미사용"}
-                </div>
-
-                <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
-                  분석 결과
-                </div>
-                <div className="border-b border-slate-200 px-4 py-4 text-center text-sm">
-                  {submission.result || "-"}
-                </div>
-              </div>
-            </section>
-
-            <section className="overflow-hidden rounded-sm border border-slate-300 bg-white shadow-sm">
-              <div className="border-b border-slate-300 bg-slate-50 px-5 py-4">
-                <h2 className="text-lg font-semibold text-slate-900">AI 분석 요약</h2>
-              </div>
-
-              <div className="grid grid-cols-2 border-t border-slate-200 md:grid-cols-4">
-                <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
-                  학생 간 최고 유사도
-                </div>
-                <div className="border-b border-slate-200 px-4 py-4 text-center text-sm">
-                  {submission.topStudentSimilarity ?? 0}%
-                </div>
-
-                <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
-                  주요 비교 대상
-                </div>
-                <div className="border-b border-slate-200 px-4 py-4 text-center text-sm">
-                  {submission.topStudentTargetName || "-"}
-                </div>
-
-                <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
-                  학생 간 판정
-                </div>
-                <div className="border-b border-slate-200 px-4 py-4 text-center text-sm">
-                  <span
-                    className={`inline-block rounded-sm px-3 py-1 text-xs font-semibold ${getJudgeBadgeClass(
-                      submission.topStudentJudge
-                    )}`}
-                  >
-                    {submission.topStudentJudge || "-"}
-                  </span>
-                </div>
-
-                <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
-                  AI 로그 유사도
-                </div>
-                <div className="border-b border-slate-200 px-4 py-4 text-center text-sm">
-                  {submission.aiLogSimilarity ?? 0}%
-                </div>
-
-                <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
-                  AI 로그 판정
-                </div>
-                <div className="border-b border-slate-200 px-4 py-4 text-center text-sm">
-                  <span
-                    className={`inline-block rounded-sm px-3 py-1 text-xs font-semibold ${getJudgeBadgeClass(
-                      submission.aiLogJudge
-                    )}`}
-                  >
-                    {submission.aiLogJudge || "-"}
-                  </span>
-                </div>
-
-                <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
-                  최종 분석 결과
-                </div>
-                <div className="border-b border-slate-200 px-4 py-4 text-center text-sm">
-                  {submission.result || "-"}
+            <div className="grid gap-4 px-6 py-5 md:grid-cols-2">
+              <div>
+                <p className="mb-2 text-sm font-semibold text-slate-700">학생 간 분석 사유</p>
+                <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm whitespace-pre-wrap">
+                  {submission.topStudentReason || "학생 간 유사도 분석 결과가 없습니다."}
                 </div>
               </div>
 
-              <div className="grid gap-4 border-t border-slate-200 px-5 py-5 md:grid-cols-2">
-                <div>
-                  <p className="mb-2 text-sm font-semibold text-slate-700">학생 간 분석 사유</p>
-                  <div className="rounded-sm border border-slate-200 bg-slate-50 px-4 py-4 text-sm whitespace-pre-wrap">
-                    {submission.topStudentReason || "학생 간 유사도 분석 결과가 없습니다."}
-                  </div>
-                </div>
-
-                <div>
-                  <p className="mb-2 text-sm font-semibold text-slate-700">AI 로그 분석 사유</p>
-                  <div className="rounded-sm border border-slate-200 bg-slate-50 px-4 py-4 text-sm whitespace-pre-wrap">
-                    {submission.aiLogReason || "AI 로그 유사도 분석 결과가 없습니다."}
-                  </div>
+              <div>
+                <p className="mb-2 text-sm font-semibold text-slate-700">AI 로그 분석 사유</p>
+                <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm whitespace-pre-wrap">
+                  {submission.aiLogReason || "AI 로그 유사도 분석 결과가 없습니다."}
                 </div>
               </div>
-            </section>
+            </div>
+          </section>
 
-            <section className="overflow-hidden rounded-sm border border-slate-300 bg-white shadow-sm">
-              <div className="border-b border-slate-300 bg-slate-50 px-5 py-4">
-                <h2 className="text-lg font-semibold text-slate-900">과제 안내</h2>
-              </div>
-              <div className="px-5 py-5 text-sm whitespace-pre-wrap">{task.description || "과제 안내가 없습니다."}</div>
-            </section>
+          {/* 과제 안내 */}
+          <section className="rounded-[24px] border border-slate-200 bg-white shadow-sm">
+            <div className="px-6 py-4 border-b">
+              <h2 className="font-bold text-slate-900">과제 안내</h2>
+            </div>
+            <div className="px-6 py-5 text-sm whitespace-pre-wrap">
+              {task.description || "과제 안내가 없습니다."}
+            </div>
+          </section>
 
-            <section className="overflow-hidden rounded-sm border border-slate-300 bg-white shadow-sm">
-              <div className="border-b border-slate-300 bg-slate-50 px-5 py-4">
-                <h2 className="text-lg font-semibold text-slate-900">학생 제출 내용</h2>
-              </div>
-              <div className="px-5 py-5 text-sm whitespace-pre-wrap">
-                {submission.content || "제출 내용이 없습니다."}
-              </div>
-            </section>
+          {/* 제출 내용 */}
+          <section className="rounded-[24px] border border-slate-200 bg-white shadow-sm">
+            <div className="px-6 py-4 border-b">
+              <h2 className="font-bold text-slate-900">학생 제출 내용</h2>
+            </div>
+            <div className="px-6 py-5 text-sm whitespace-pre-wrap">
+              {submission.content || "제출 내용이 없습니다."}
+            </div>
+          </section>
 
-            <section className="overflow-hidden rounded-sm border border-slate-300 bg-white shadow-sm">
-              <div className="border-b border-slate-300 bg-slate-50 px-5 py-4">
-                <h2 className="text-lg font-semibold text-slate-900">평가 결과</h2>
-              </div>
+          {/* 평가 */}
+          <section className="rounded-[24px] border border-slate-200 bg-white shadow-sm">
+            <div className="px-6 py-4 border-b">
+              <h2 className="font-bold text-slate-900">평가 결과</h2>
+            </div>
 
-              <div className="space-y-4 px-5 py-5">
-                <div>
-                  <label className="mb-1 block text-sm font-semibold text-slate-700">점수</label>
-                  <div className="rounded-sm border border-slate-300 bg-slate-50 px-3 py-3 text-sm">
-                    {submission.score ?? 0}점
-                  </div>
-                </div>
-
-                <div>
-                  <label className="mb-1 block text-sm font-semibold text-slate-700">평가 코멘트</label>
-                  <div className="min-h-[120px] rounded-sm border border-slate-300 bg-slate-50 px-3 py-3 text-sm whitespace-pre-wrap">
-                    {submission.teacherComment || "저장된 평가 코멘트가 없습니다."}
-                  </div>
-                </div>
-
-                <div className="flex justify-end">
-                  <button
-                    onClick={() => navigate(`/teacher/tasks/${taskId}/submissions/${submissionId}/evaluation`)}
-                    className="inline-flex items-center gap-2 rounded-sm bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
-                  >
-                    <FileText size={16} />
-                    평가하기
-                  </button>
+            <div className="space-y-4 px-6 py-5">
+              <div>
+                <label className="text-sm text-slate-500">점수</label>
+                <div className="mt-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm">
+                  {submission.score ?? 0}점
                 </div>
               </div>
-            </section>
 
-            <section className="overflow-hidden rounded-sm border border-slate-300 bg-white shadow-sm">
-              <div className="border-b border-slate-300 bg-slate-50 px-5 py-4">
-                <h2 className="text-lg font-semibold text-slate-900">AI 로그 참고</h2>
+              <div>
+                <label className="text-sm text-slate-500">평가 코멘트</label>
+                <div className="mt-1 min-h-[120px] rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm whitespace-pre-wrap">
+                  {submission.teacherComment || "저장된 평가 코멘트가 없습니다."}
+                </div>
               </div>
 
-              <div className="divide-y divide-slate-200">
-                {logs.length === 0 ? (
-                  <div className="px-5 py-8 text-center text-slate-500">AI 로그가 없습니다.</div>
-                ) : (
-                  logs.map((log) => (
-                    <div key={log.id} className="space-y-3 px-5 py-5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-slate-500">
-                          {log.createdAt?.replace("T", " ").slice(0, 16)}
-                        </span>
-                        <span className="rounded-sm bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700">
-                          {log.status}
-                        </span>
-                      </div>
+              <div className="flex justify-end">
+                <button
+                  onClick={() => navigate(`/teacher/tasks/${taskId}/submissions/${submissionId}/evaluation`)}
+                  className="rounded-xl bg-slate-900 px-4 py-2 text-sm text-white hover:bg-slate-800"
+                >
+                  평가하기
+                </button>
+              </div>
+            </div>
+          </section>
 
-                      <div>
-                        <p className="mb-1 text-xs font-semibold text-slate-500">질문</p>
-                        <div className="rounded-sm border border-slate-200 bg-slate-50 px-3 py-3 text-sm whitespace-pre-wrap">
-                          {log.question}
-                        </div>
-                      </div>
+          {/* AI 로그 */}
+          <section className="rounded-[24px] border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b">
+              <h2 className="font-bold text-slate-900">AI 로그 참고</h2>
+            </div>
 
-                      <div>
-                        <p className="mb-1 block text-xs font-semibold text-slate-500">응답</p>
-                        <div className="rounded-sm border border-slate-200 bg-slate-50 px-3 py-3 text-sm whitespace-pre-wrap">
-                          {log.answer}
-                        </div>
+            <div className="divide-y">
+              {logs.length === 0 ? (
+                <div className="px-6 py-10 text-center text-slate-400">
+                  AI 로그가 없습니다.
+                </div>
+              ) : (
+                logs.map((log) => (
+                  <div key={log.id} className="space-y-3 px-6 py-5">
+                    <div className="flex justify-between text-xs text-slate-400">
+                      <span>{log.createdAt?.replace("T", " ").slice(0, 16)}</span>
+                      <span className="px-2 py-1 bg-slate-100 rounded-lg text-slate-600">
+                        {log.status}
+                      </span>
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-slate-500 mb-1">질문</p>
+                      <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm whitespace-pre-wrap">
+                        {log.question}
                       </div>
                     </div>
-                  ))
-                )}
-              </div>
-            </section>
-          </main>
-        </div>
+
+                    <div>
+                      <p className="text-xs text-slate-500 mb-1">응답</p>
+                      <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm whitespace-pre-wrap">
+                        {log.answer}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
+
+        </main>
       </div>
     </div>
-  );
+  </div>
+);
 }

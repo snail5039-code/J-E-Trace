@@ -100,17 +100,20 @@ export default function TeacherCreateTaskPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#eef1f5] text-slate-800">
-      <div className="border-b border-slate-300 bg-gradient-to-r from-teal-600 to-cyan-500 px-6 py-4 text-white shadow-sm">
+    <div className="min-h-screen bg-[#f5f7fb] text-slate-800">
+      {/* HEADER */}
+      <div className="border-b border-slate-200 bg-white px-6 py-5 shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-white/80">교사용 관리 시스템</p>
-            <h1 className="mt-1 text-2xl font-bold">과제 등록</h1>
+            <h1 className="text-2xl font-bold text-slate-900">과제 등록</h1>
+            <p className="text-sm text-slate-500">
+              새로운 과제를 생성합니다.
+            </p>
           </div>
 
           <button
             onClick={() => navigate("/teacher")}
-            className="rounded-sm bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+            className="rounded-xl bg-slate-900 px-5 py-2 text-sm font-semibold text-white hover:bg-slate-800"
           >
             목록으로
           </button>
@@ -119,122 +122,136 @@ export default function TeacherCreateTaskPage() {
 
       <div className="mx-auto max-w-7xl px-6 py-6">
         <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
-          <aside className="overflow-hidden rounded-sm border border-slate-300 bg-[#4a4a4a] text-white shadow-sm">
-            <div className="border-b border-white/10 px-5 py-6 text-center">
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-sm bg-slate-200 text-2xl font-bold text-slate-700">
+
+          {/* SIDEBAR */}
+          <aside className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-lg bg-slate-100 text-slate-700 font-bold">
                 T
               </div>
-              <p className="mt-4 text-lg font-semibold">{teacherName || "교사"}</p>
-              <p className="mt-1 text-sm text-white/70">
-                {teacherSubject ? `${teacherSubject} 수업 담당` : "담당 과목 미설정"}
+              <p className="mt-3 font-semibold text-slate-900">
+                {teacherName || "교사"}
+              </p>
+              <p className="text-sm text-slate-500">
+                {teacherSubject || "과목 미설정"}
               </p>
             </div>
 
-            <div className="space-y-2 px-3 py-4">
+            <div className="mt-6 space-y-2">
               <button
                 onClick={() => navigate("/teacher")}
-                className="flex w-full items-center gap-3 rounded-sm px-4 py-3 text-left text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
               >
-                <ArrowLeft size={18} />
-                과제 목록으로
+                <ArrowLeft size={16} />
+                과제 목록
               </button>
 
-              <button className="flex w-full items-center gap-3 rounded-sm bg-white/10 px-4 py-3 text-left text-sm font-medium text-white">
-                <FilePlus2 size={18} />
+              <button className="flex w-full items-center gap-2 rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white">
+                <FilePlus2 size={16} />
                 과제 등록
               </button>
             </div>
           </aside>
 
-          <main className="space-y-5">
-            <section className="overflow-hidden rounded-sm border border-slate-300 bg-white shadow-sm">
-              <div className="border-b border-slate-300 bg-slate-50 px-5 py-4">
+          {/* MAIN */}
+          <main className="space-y-6">
+
+            {/* FORM */}
+            <section className="rounded-xl border border-slate-200 bg-white shadow-sm">
+              <div className="border-b px-5 py-4 bg-slate-50">
                 <h2 className="text-lg font-semibold text-slate-900">
                   새 과제 정보 입력
                 </h2>
-                <p className="mt-1 text-sm text-slate-500">
-                  과제명, 대상 반, 마감일, AI 허용 여부를 설정하세요.
+                <p className="text-sm text-slate-500 mt-1">
+                  과제 기본 정보를 설정하세요.
                 </p>
               </div>
 
               <form onSubmit={handleSubmit} className="p-5">
-                <div className="overflow-hidden border border-slate-300">
-                  <div className="grid grid-cols-1 md:grid-cols-[180px_minmax(0,1fr)]">
-                    <div className="border-b border-r border-slate-300 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700">
+                <div className="overflow-hidden rounded-lg border border-slate-200">
+
+                  {/* 과제명 */}
+                  <div className="grid md:grid-cols-[180px_1fr] border-b">
+                    <div className="bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700 border-r">
                       과제명
                     </div>
-                    <div className="border-b border-slate-300 px-4 py-3">
+                    <div className="px-4 py-3">
                       <input
                         type="text"
                         name="title"
                         value={form.title}
                         onChange={handleChange}
-                        placeholder="예: 정보처리기사 서술형 정리 과제"
-                        className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600"
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 outline-none"
                         required
                       />
                     </div>
+                  </div>
 
-                    <div className="border-b border-r border-slate-300 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700">
+                  {/* 반 */}
+                  <div className="grid md:grid-cols-[180px_1fr] border-b">
+                    <div className="bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700 border-r">
                       대상 반
                     </div>
-                    <div className="border-b border-slate-300 px-4 py-3">
+                    <div className="px-4 py-3">
                       <select
                         name="className"
                         value={form.className}
                         onChange={handleChange}
-                        className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600"
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                         required
                       >
-                        <option value="">반을 선택하세요</option>
+                        <option value="">반 선택</option>
                         <option value="A">A</option>
                         <option value="B">B</option>
                         <option value="C">C</option>
                         <option value="D">D</option>
                       </select>
                     </div>
+                  </div>
 
-                    <div className="border-b border-r border-slate-300 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700">
+                  {/* 설명 */}
+                  <div className="grid md:grid-cols-[180px_1fr] border-b">
+                    <div className="bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700 border-r">
                       과제 설명
                     </div>
-                    <div className="border-b border-slate-300 px-4 py-3">
+                    <div className="px-4 py-3">
                       <textarea
                         name="description"
                         value={form.description}
                         onChange={handleChange}
-                        rows={8}
-                        placeholder="과제 목적, 작성 방식, 제출 형식 등을 입력하세요."
-                        className="w-full resize-none border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600"
+                        rows={6}
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm resize-none"
                       />
                     </div>
+                  </div>
 
-                    <div className="border-b border-r border-slate-300 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700">
+                  {/* 마감일 */}
+                  <div className="grid md:grid-cols-[180px_1fr] border-b">
+                    <div className="bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700 border-r">
                       마감일
                     </div>
-                    <div className="border-b border-slate-300 px-4 py-3">
+                    <div className="px-4 py-3">
                       <input
                         type="date"
                         name="dueDate"
                         value={form.dueDate}
                         onChange={handleChange}
-                        className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600"
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                         required
                       />
                     </div>
+                  </div>
 
-                    <div className="border-r border-slate-300 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700">
-                      AI 사용 허용
+                  {/* AI 허용 */}
+                  <div className="grid md:grid-cols-[180px_1fr]">
+                    <div className="bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700 border-r">
+                      AI 사용
                     </div>
                     <div className="px-4 py-3">
-                      <label className="flex items-center justify-between gap-4 border border-slate-300 bg-slate-50 px-4 py-3">
-                        <div>
-                          <p className="text-sm font-medium text-slate-800">
-                            학생 AI 사용 허용
-                          </p>
-                          <p className="mt-1 text-xs text-slate-500">
-                            과제 수행 중 AI 질문 및 답변 기능 사용 허용 여부
-                          </p>
-                        </div>
+                      <label className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+                        <span className="text-sm text-slate-800">
+                          AI 사용 허용
+                        </span>
                         <input
                           type="checkbox"
                           name="aiAllowed"
@@ -247,34 +264,36 @@ export default function TeacherCreateTaskPage() {
                   </div>
                 </div>
 
-                <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-end">
+                {/* 버튼 */}
+                <div className="mt-5 flex justify-end gap-3">
                   <button
                     type="button"
                     onClick={() => navigate("/teacher")}
-                    className="border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                    className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
                   >
                     취소
                   </button>
 
                   <button
                     type="submit"
-                    className="inline-flex items-center justify-center gap-2 bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                    className="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
                   >
                     <FilePlus2 size={16} />
-                    과제 등록
+                    등록
                   </button>
                 </div>
               </form>
             </section>
 
-            <section className="overflow-hidden rounded-sm border border-slate-300 bg-white shadow-sm">
-              <div className="border-b border-slate-300 bg-[#f7f2c8] px-5 py-3 text-sm font-semibold text-slate-800">
-                등록 안내
+            {/* 안내 */}
+            <section className="rounded-xl border border-slate-200 bg-white shadow-sm">
+              <div className="border-b px-5 py-3 bg-slate-50 text-sm font-semibold text-slate-800">
+                안내
               </div>
-              <div className="px-5 py-4 text-sm leading-7 text-slate-700">
-                <p>1. 과제 등록 시 대상 반과 마감일을 반드시 설정하세요.</p>
-                <p>2. AI 사용 허용 시 학생 질문/응답 로그 및 유사도 분석 기능이 활성화됩니다.</p>
-                <p>3. 추후 제출 현황 페이지에서 학생별 제출물과 분석 결과를 확인할 수 있습니다.</p>
+              <div className="px-5 py-4 text-sm text-slate-600 space-y-1">
+                <p>• 반과 마감일은 필수입니다.</p>
+                <p>• AI 허용 시 로그 및 분석 기능 활성화됩니다.</p>
+                <p>• 제출 후 결과는 관리 페이지에서 확인 가능합니다.</p>
               </div>
             </section>
           </main>

@@ -385,386 +385,240 @@ export default function TeacherStudentsPage() {
         return "border-sky-200 bg-sky-50 text-sky-700";
     }, [notice]);
 
-    return (
-        <div className="min-h-screen bg-[#eef1f5] text-slate-800">
-            <div className="border-b border-slate-300 bg-gradient-to-r from-teal-600 to-cyan-500 px-6 py-4 text-white shadow-sm">
-                <div className="mx-auto flex max-w-7xl items-center justify-between">
+ return (
+  <div className="min-h-screen bg-[#f5f7fb] px-5 py-6 md:px-8 text-slate-800">
+    <div className="mx-auto max-w-7xl space-y-6">
+
+      {/* ✅ 헤더 */}
+      <section className="rounded-[28px] border border-slate-200 bg-white px-8 py-6 shadow-[0_10px_30px_rgba(15,23,42,0.05)] flex items-center justify-between">
+        <div>
+          <p className="text-xs font-bold tracking-[0.25em] text-slate-400">
+            STUDENT MANAGEMENT
+          </p>
+          <h1 className="mt-2 text-3xl font-black text-slate-900">
+            학생 관리
+          </h1>
+          <p className="mt-2 text-sm text-slate-500">
+            학생 승인, 정보 수정, 성적을 관리합니다.
+          </p>
+        </div>
+
+        <button
+          onClick={() => navigate("/teacher")}
+          className="rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-slate-800"
+        >
+          과제 목록
+        </button>
+      </section>
+
+      {notice && (
+        <div className={`rounded-xl border px-5 py-4 text-sm font-medium ${noticeClassName}`}>
+          {notice.text}
+        </div>
+      )}
+
+      <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+
+        {/* ✅ 사이드바 */}
+        <aside className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm flex flex-col">
+          <div className="text-center">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-slate-100 text-xl font-bold">
+              T
+            </div>
+            <p className="mt-4 font-semibold text-slate-900">{teacherName || "교사"}</p>
+            <p className="text-sm text-slate-500">{teacherSubject || "과목 미설정"}</p>
+          </div>
+
+          <div className="mt-6 space-y-2">
+            <button
+              onClick={() => navigate("/teacher")}
+              className="w-full rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100"
+            >
+              과제 관리
+            </button>
+
+            <button
+              onClick={() => navigate("/teacher/logs")}
+              className="w-full rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100"
+            >
+              AI 로그
+            </button>
+
+            <button
+              onClick={() => navigate("/teacher/similarity")}
+              className="w-full rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100"
+            >
+              유사도 분석
+            </button>
+
+            <button className="w-full rounded-xl bg-slate-900 px-4 py-3 text-sm text-white">
+              학생 관리
+            </button>
+          </div>
+        </aside>
+
+        {/* ✅ 메인 */}
+        <main className="space-y-6">
+
+          {/* 신청 */}
+          <section className="rounded-[24px] border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b">
+              <h2 className="font-bold text-slate-900">승인 대기 신청</h2>
+            </div>
+
+            <div className="divide-y">
+              {requestLoading ? (
+                <div className="px-6 py-10 text-center text-slate-400">불러오는 중...</div>
+              ) : requests.length === 0 ? (
+                <div className="px-6 py-10 text-center text-slate-400">신청 없음</div>
+              ) : (
+                requests.map((r) => (
+                  <div key={r.id} className="flex items-center justify-between px-6 py-4 hover:bg-slate-50">
                     <div>
-                        <p className="text-sm font-medium text-white/80">교사용 관리 시스템</p>
-                        <h1 className="mt-1 text-2xl font-bold">학생 관리</h1>
+                      <p className="font-semibold text-slate-900">{r.studentName}</p>
+                      <p className="text-sm text-slate-500">{r.className}</p>
+                      <p className="text-xs text-slate-400 mt-1">
+                        {formatDateTime(r.requestedAt)}
+                      </p>
                     </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleApprove(r.id)}
+                        className="rounded-lg bg-emerald-500 px-4 py-2 text-xs text-white"
+                      >
+                        승인
+                      </button>
+                      <button
+                        onClick={() => handleReject(r.id)}
+                        className="rounded-lg bg-rose-500 px-4 py-2 text-xs text-white"
+                      >
+                        거절
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
+
+          {/* 학생 + 상세 */}
+          <section className="rounded-[24px] border border-slate-200 bg-white shadow-sm p-5">
+            <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
+
+              {/* 리스트 */}
+              <div className="space-y-2 max-h-[700px] overflow-y-auto">
+                {studentLoading ? (
+                  <div className="text-center text-slate-400 py-10">불러오는 중...</div>
+                ) : students.map((s) => {
+                  const isSelected = s.id === selectedStudentId;
+                  return (
+                    <button
+                      key={s.id}
+                      onClick={() => setSelectedStudentId(s.id)}
+                      className={`w-full text-left rounded-xl p-4 border transition ${
+                        isSelected ? "bg-slate-900 text-white" : "bg-white hover:bg-slate-50"
+                      }`}
+                    >
+                      <p className="font-semibold">{s.studentName}</p>
+                      <p className="text-xs opacity-70">{s.className}</p>
+                      <p className="text-xs mt-2">평균 {s.finalScore}점</p>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* 상세 */}
+              <div className="space-y-4">
+                {!studentDetail ? (
+                  <div className="text-center text-slate-400 py-20">학생 선택</div>
+                ) : (
+                  <>
+                    <div className="grid md:grid-cols-3 gap-4">
+
+                      <div className="rounded-xl bg-slate-50 p-4">
+                        <p className="text-sm text-slate-500">과제</p>
+                        <p>{studentDetail.submittedTasks}/{studentDetail.totalTasks}</p>
+                      </div>
+
+                      <div className="rounded-xl bg-slate-50 p-4">
+                        <p className="text-sm text-slate-500">평균</p>
+                        <p>{studentDetail.finalScore}</p>
+                      </div>
+
+                      <div className="rounded-xl bg-slate-50 p-4">
+                        <p className="text-sm text-slate-500">AI 로그</p>
+                        <p>{studentDetail.aiLogCount}</p>
+                      </div>
+
+                    </div>
+
+                    {/* 수정 */}
+                    <div className="rounded-xl border p-4 space-y-3">
+                      <input
+                        name="studentName"
+                        value={editForm.studentName}
+                        onChange={handleEditFormChange}
+                        className="w-full rounded-lg border px-3 py-2"
+                      />
+                      <input
+                        name="className"
+                        value={editForm.className}
+                        onChange={handleEditFormChange}
+                        className="w-full rounded-lg border px-3 py-2"
+                      />
+
+                      <button
+                        onClick={handleUpdateStudentInfo}
+                        className="w-full rounded-lg bg-slate-900 text-white py-2"
+                      >
+                        저장
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+
+            </div>
+          </section>
+
+          {/* 점수 */}
+          <section className="rounded-[24px] border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b">
+              <h2 className="font-bold text-slate-900">과제별 점수</h2>
+            </div>
+
+            <div className="divide-y">
+              {taskScores.map((t) => (
+                <div key={t.id} className="flex items-center justify-between px-6 py-4 hover:bg-slate-50">
+                  <div>
+                    <p className="font-semibold">{t.taskTitle}</p>
+                    <p className="text-xs text-slate-500">{t.className}</p>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="number"
+                      value={t.score}
+                      onChange={(e) => handleScoreChange(t.id, e.target.value)}
+                      className="w-16 rounded-lg border px-2 py-1 text-center"
+                    />
 
                     <button
-                        onClick={() => navigate("/teacher")}
-                        className="rounded-sm bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                      onClick={() => handleUpdateTaskScore(t.id, t.score)}
+                      className="rounded-lg bg-slate-900 px-3 py-2 text-xs text-white"
                     >
-                        과제 목록
+                      저장
                     </button>
+                  </div>
                 </div>
+              ))}
             </div>
+          </section>
 
-            <div className="mx-auto max-w-7xl px-6 py-6">
-                {notice && (
-                    <div className={`mb-5 rounded-sm border px-4 py-3 text-sm font-medium ${noticeClassName}`}>
-                        {notice.text}
-                    </div>
-                )}
-
-                <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
-                    <aside className="overflow-hidden rounded-sm border border-slate-300 bg-[#4a4a4a] text-white shadow-sm">
-                        <div className="border-b border-white/10 px-5 py-6 text-center">
-                            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-sm bg-slate-200 text-2xl font-bold text-slate-700">
-                                T
-                            </div>
-                            <p className="mt-4 text-lg font-semibold">{teacherName || "교사"}</p>
-                            <p className="mt-1 text-sm text-white/70">
-                                {teacherSubject ? `${teacherSubject} 수업 담당` : "담당 과목 미설정"}
-                            </p>
-                        </div>
-
-                        <div className="space-y-2 px-3 py-4">
-                            <button
-                                onClick={() => navigate("/teacher")}
-                                className="flex w-full items-center gap-3 rounded-sm px-4 py-3 text-left text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
-                            >
-                                <ClipboardList size={18} />
-                                과제 관리
-                            </button>
-
-                            <button
-                                onClick={() => navigate("/teacher/logs")}
-                                className="flex w-full items-center gap-3 rounded-sm px-4 py-3 text-left text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
-                            >
-                                <Sparkles size={18} />
-                                AI 로그 확인
-                            </button>
-
-                            <button
-                                onClick={() => navigate("/teacher/similarity")}
-                                className="flex w-full items-center gap-3 rounded-sm px-4 py-3 text-left text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
-                            >
-                                <Search size={18} />
-                                유사도 분석
-                            </button>
-
-                            <button className="flex w-full items-center gap-3 rounded-sm bg-white/10 px-4 py-3 text-left text-sm font-medium text-white">
-                                <UserRound size={18} />
-                                학생 관리
-                            </button>
-                        </div>
-                    </aside>
-
-                    <main className="space-y-5">
-                        <section className="overflow-hidden rounded-sm border border-slate-300 bg-white shadow-sm">
-                            <div className="border-b border-slate-300 bg-slate-50 px-5 py-4">
-                                <h2 className="text-lg font-semibold text-slate-900">승인 대기 신청</h2>
-                            </div>
-
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full border-collapse text-sm">
-                                    <thead>
-                                        <tr className="bg-slate-100 text-slate-700">
-                                            <th className="border border-slate-300 px-4 py-3 text-center font-semibold">학생명</th>
-                                            <th className="border border-slate-300 px-4 py-3 text-center font-semibold">반</th>
-                                            <th className="border border-slate-300 px-4 py-3 text-center font-semibold">신청 시각</th>
-                                            <th className="border border-slate-300 px-4 py-3 text-center font-semibold">관리</th>
-                                        </tr>
-                                    </thead>
-
-                                    <tbody>
-                                        {requestLoading ? (
-                                            <tr>
-                                                <td colSpan={4} className="border border-slate-300 px-4 py-8 text-center text-slate-500">
-                                                    학생 신청 목록 불러오는 중...
-                                                </td>
-                                            </tr>
-                                        ) : requests.length === 0 ? (
-                                            <tr>
-                                                <td colSpan={4} className="border border-slate-300 px-4 py-8 text-center text-slate-500">
-                                                    승인 대기 학생 신청이 없습니다.
-                                                </td>
-                                            </tr>
-                                        ) : (
-                                            requests.map((request) => (
-                                                <tr key={request.id} className="hover:bg-slate-50">
-                                                    <td className="border border-slate-300 px-4 py-4 text-center">{request.studentName}</td>
-                                                    <td className="border border-slate-300 px-4 py-4 text-center">{request.className}</td>
-                                                    <td className="border border-slate-300 px-4 py-4 text-center">
-                                                        {formatDateTime(request.requestedAt)}
-                                                    </td>
-                                                    <td className="border border-slate-300 px-4 py-4 text-center">
-                                                        <div className="flex justify-center gap-2">
-                                                            <button
-                                                                onClick={() => handleApprove(request.id)}
-                                                                disabled={processingRequestId === request.id}
-                                                                className="rounded-sm bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
-                                                            >
-                                                                {processingRequestId === request.id ? "처리 중..." : "승인"}
-                                                            </button>
-
-                                                            <button
-                                                                onClick={() => handleReject(request.id)}
-                                                                disabled={processingRequestId === request.id}
-                                                                className="rounded-sm bg-rose-600 px-4 py-2 text-xs font-semibold text-white hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
-                                                            >
-                                                                {processingRequestId === request.id ? "처리 중..." : "거절"}
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </section>
-
-                        <section className="overflow-hidden rounded-sm border border-slate-300 bg-white shadow-sm">
-                            <div className="border-b border-slate-300 bg-slate-50 px-5 py-4">
-                                <h2 className="text-lg font-semibold text-slate-900">승인된 학생 목록</h2>
-                            </div>
-
-                            <div className="grid gap-6 p-5 lg:grid-cols-[380px_minmax(0,1fr)]">
-                                <div className="overflow-hidden rounded-sm border border-slate-300">
-                                    <div className="border-b border-slate-300 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700">
-                                        학생 목록
-                                    </div>
-
-                                    <div className="max-h-[760px] overflow-y-auto">
-                                        {studentLoading ? (
-                                            <div className="px-4 py-8 text-center text-sm text-slate-500">
-                                                학생 목록 불러오는 중...
-                                            </div>
-                                        ) : students.length === 0 ? (
-                                            <div className="px-4 py-8 text-center text-sm text-slate-500">
-                                                승인된 학생이 없습니다.
-                                            </div>
-                                        ) : (
-                                            students.map((student) => {
-                                                const isSelected = student.id === selectedStudentId;
-
-                                                return (
-                                                    <button
-                                                        key={student.id}
-                                                        onClick={() => setSelectedStudentId(student.id)}
-                                                        className={`block w-full border-b border-slate-200 px-4 py-4 text-left transition ${isSelected ? "bg-teal-50" : "bg-white hover:bg-slate-50"
-                                                            }`}
-                                                    >
-                                                        <div className="flex items-start justify-between gap-3">
-                                                            <div>
-                                                                <p className="font-semibold text-slate-900">{student.studentName}</p>
-                                                                <p className="mt-1 text-xs text-slate-500">{student.className}</p>
-                                                            </div>
-
-                                                            <div className="whitespace-nowrap rounded-sm bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">
-                                                                평균 {student.finalScore}점
-                                                            </div>
-                                                        </div>
-
-                                                        <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-600">
-                                                            <p>제출 {student.submittedTasks}/{student.totalTasks}</p>
-                                                            <p>주의 로그 {student.cautionLogCount}건</p>
-                                                        </div>
-                                                    </button>
-                                                );
-                                            })
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className="overflow-hidden rounded-sm border border-slate-300 bg-slate-50">
-                                    <div className="border-b border-slate-300 bg-slate-100 px-5 py-4">
-                                        <h3 className="text-base font-semibold text-slate-900">학생 상세 / 수정</h3>
-                                        {selectedStudent && (
-                                            <p className="mt-1 text-sm text-slate-500">
-                                                선택 학생: {selectedStudent.studentName} / {selectedStudent.className}
-                                            </p>
-                                        )}
-                                    </div>
-
-                                    {detailLoading ? (
-                                        <div className="px-5 py-8 text-center text-slate-500">학생 상세 정보를 불러오는 중...</div>
-                                    ) : !studentDetail ? (
-                                        <div className="px-5 py-8 text-center text-slate-500">학생을 선택하세요.</div>
-                                    ) : (
-                                        <div className="p-5">
-                                            <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-                                                <div className="rounded-sm border border-slate-300 bg-white">
-                                                    <div className="border-b border-slate-200 bg-[#f7f2c8] px-4 py-3 text-sm font-semibold">
-                                                        기본 정보 수정
-                                                    </div>
-
-                                                    <div className="space-y-3 px-4 py-4 text-sm">
-                                                        <div>
-                                                            <label className="mb-1 block text-xs font-semibold text-slate-600">학생명</label>
-                                                            <input
-                                                                name="studentName"
-                                                                value={editForm.studentName}
-                                                                onChange={handleEditFormChange}
-                                                                className="w-full rounded-sm border border-slate-300 px-3 py-2"
-                                                            />
-                                                        </div>
-
-                                                        <div>
-                                                            <label className="mb-1 block text-xs font-semibold text-slate-600">반</label>
-                                                            <input
-                                                                name="className"
-                                                                value={editForm.className}
-                                                                onChange={handleEditFormChange}
-                                                                className="w-full rounded-sm border border-slate-300 px-3 py-2"
-                                                            />
-                                                        </div>
-
-                                                        <div>
-                                                            <label className="mb-1 block text-xs font-semibold text-slate-600">승인일</label>
-                                                            <div className="rounded-sm border border-slate-200 bg-slate-50 px-3 py-2 text-slate-700">
-                                                                {studentDetail.approvedAt?.replace("T", " ").slice(0, 10)}
-                                                            </div>
-                                                        </div>
-
-                                                        <button
-                                                            onClick={handleUpdateStudentInfo}
-                                                            disabled={savingInfo}
-                                                            className="w-full whitespace-nowrap rounded-sm bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-                                                        >
-                                                            {savingInfo ? "저장 중..." : "학생 정보 저장"}
-                                                        </button>
-                                                    </div>
-                                                </div>
-
-                                                <div className="rounded-sm border border-slate-300 bg-white">
-                                                    <div className="border-b border-slate-200 bg-[#dff3ea] px-4 py-3 text-sm font-semibold">
-                                                        성적 / 과제 현황
-                                                    </div>
-
-                                                    <div className="space-y-3 px-4 py-4 text-sm">
-                                                        <p>최종 성적(평균): {studentDetail.finalScore}점</p>
-                                                        <p>총 과제 수: {studentDetail.totalTasks}개</p>
-                                                        <p>제출 완료: {studentDetail.submittedTasks}개</p>
-                                                        <p>미제출: {studentDetail.notSubmittedTasks}개</p>
-                                                    </div>
-                                                </div>
-
-                                                <div className="rounded-sm border border-slate-300 bg-white">
-                                                    <div className="border-b border-slate-200 bg-[#e5ecff] px-4 py-3 text-sm font-semibold">
-                                                        AI 이용 현황
-                                                    </div>
-
-                                                    <div className="space-y-3 px-4 py-4 text-sm">
-                                                        <p>AI 로그 수: {studentDetail.aiLogCount}개</p>
-                                                        <p>주의 로그 수: {studentDetail.cautionLogCount}개</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </section>
-
-                        <section className="overflow-hidden rounded-sm border border-slate-300 bg-white shadow-sm">
-                            <div className="border-b border-slate-300 bg-slate-50 px-5 py-4">
-                                <h2 className="text-lg font-semibold text-slate-900">과제별 점수</h2>
-                            </div>
-
-                            {!selectedStudentId ? (
-                                <div className="px-5 py-8 text-center text-slate-500">
-                                    학생을 선택하면 과제별 점수가 표시됩니다.
-                                </div>
-                            ) : (
-                                <div className="p-5">
-                                    <table className="w-full table-fixed border-collapse text-sm">
-                                        <thead>
-                                            <tr className="bg-slate-100 text-slate-700">
-                                                <th className="w-[34%] whitespace-nowrap border border-slate-300 px-4 py-3 text-center font-semibold">
-                                                    과제명
-                                                </th>
-                                                <th className="w-[14%] whitespace-nowrap border border-slate-300 px-4 py-3 text-center font-semibold">
-                                                    반
-                                                </th>
-                                                <th className="w-[14%] whitespace-nowrap border border-slate-300 px-4 py-3 text-center font-semibold">
-                                                    제출 여부
-                                                </th>
-                                                <th className="w-[20%] whitespace-nowrap border border-slate-300 px-4 py-3 text-center font-semibold">
-                                                    제출 시각
-                                                </th>
-                                                <th className="w-[9%] whitespace-nowrap border border-slate-300 px-3 py-3 text-center font-semibold">
-                                                    점수
-                                                </th>
-                                                <th className="w-[12%] whitespace-nowrap border border-slate-300 px-3 py-3 text-center font-semibold">
-                                                    관리
-                                                </th>
-                                            </tr>
-                                        </thead>
-
-                                        <tbody>
-                                            {scoreLoading ? (
-                                                <tr>
-                                                    <td colSpan={6} className="border border-slate-300 px-4 py-8 text-center text-slate-500">
-                                                        과제별 점수 불러오는 중...
-                                                    </td>
-                                                </tr>
-                                            ) : taskScores.length === 0 ? (
-                                                <tr>
-                                                    <td colSpan={6} className="border border-slate-300 px-4 py-8 text-center text-slate-500">
-                                                        등록된 과제 점수가 없습니다.
-                                                    </td>
-                                                </tr>
-                                            ) : (
-                                                taskScores.map((taskScore) => (
-                                                    <tr key={taskScore.id} className="hover:bg-slate-50">
-                                                        <td
-                                                            className="border border-slate-300 px-4 py-4 text-center"
-                                                            title={taskScore.taskTitle}
-                                                        >
-                                                            <span className="block overflow-hidden text-ellipsis whitespace-nowrap">
-                                                                {taskScore.taskTitle}
-                                                            </span>
-                                                        </td>
-
-                                                        <td className="whitespace-nowrap border border-slate-300 px-3 py-4 text-center">
-                                                            {taskScore.className}
-                                                        </td>
-
-                                                        <td className="whitespace-nowrap border border-slate-300 px-3 py-4 text-center">
-                                                            {taskScore.submitted ? "제출 완료" : "미제출"}
-                                                        </td>
-
-                                                        <td className="whitespace-nowrap border border-slate-300 px-3 py-4 text-center text-[13px]">
-                                                            {formatDateTime(taskScore.submittedAt)}
-                                                        </td>
-
-                                                        <td className="whitespace-nowrap border border-slate-300 px-3 py-4 text-center">
-                                                            <input
-                                                                type="number"
-                                                                min={0}
-                                                                max={100}
-                                                                value={taskScore.score}
-                                                                onChange={(e) => handleScoreChange(taskScore.id, e.target.value)}
-                                                                className="mx-auto h-9 w-[65px] rounded-sm border border-slate-300 px-2 py-2 text-center"
-                                                            />
-                                                        </td>
-
-                                                        <td className="whitespace-nowrap border border-slate-300 px-3 py-4 text-center">
-                                                            <button
-                                                                onClick={() => handleUpdateTaskScore(taskScore.id, taskScore.score)}
-                                                                disabled={savingScoreId === taskScore.id}
-                                                                className="inline-flex h-9 min-w-[68px] items-center justify-center whitespace-nowrap rounded-sm bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-                                                            >
-                                                                {savingScoreId === taskScore.id ? "저장중" : "저장"}
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                ))
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            )}
-                        </section>
-                    </main>
-                </div>
-            </div>
-        </div>
-    );
+        </main>
+      </div>
+    </div>
+  </div>
+);
 }

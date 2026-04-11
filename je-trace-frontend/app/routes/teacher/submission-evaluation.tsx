@@ -234,288 +234,253 @@ export default function TeacherSubmissionEvaluationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#eef1f5] text-slate-800">
-      <div className="border-b border-slate-300 bg-gradient-to-r from-teal-600 to-cyan-500 px-6 py-4 text-white shadow-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
+    <div className="min-h-screen bg-[#f5f7fb] px-5 py-6 md:px-8 text-slate-900">
+      <div className="mx-auto max-w-7xl space-y-6">
+
+        {/* 헤더 */}
+        <section className="rounded-[28px] border border-slate-200 bg-white px-8 py-6 shadow-[0_10px_30px_rgba(15,23,42,0.05)] flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-white/80">교사용 관리 시스템</p>
-            <h1 className="mt-1 text-2xl font-bold">과제 평가하기</h1>
+            <p className="text-xs font-bold tracking-[0.25em] text-slate-400">
+              TEACHER DASHBOARD
+            </p>
+            <h1 className="mt-2 text-3xl font-black text-slate-900">
+              과제 평가
+            </h1>
+            <p className="mt-2 text-sm text-slate-500">
+              제출된 과제를 분석하고 평가를 진행합니다.
+            </p>
           </div>
 
           <button
             onClick={() => navigate(`/teacher/tasks/${taskId}`)}
-            className="rounded-sm bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+            className="rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-slate-800"
           >
             제출 현황으로
           </button>
-        </div>
-      </div>
+        </section>
 
-      <div className="mx-auto max-w-7xl px-6 py-6">
         {notice && (
-          <div className={`mb-5 rounded-sm border px-4 py-3 text-sm font-medium ${noticeClassName}`}>
+          <div className={`rounded-xl border px-4 py-3 text-sm font-medium ${noticeClassName}`}>
             {notice.text}
           </div>
         )}
 
-        <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
-          <aside className="overflow-hidden rounded-sm border border-slate-300 bg-[#4a4a4a] text-white shadow-sm">
-            <div className="border-b border-white/10 px-5 py-6 text-center">
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-sm bg-slate-200 text-2xl font-bold text-slate-700">
+        <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+
+          {/* 사이드바 */}
+          <aside className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm flex flex-col">
+            <div className="text-center">
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-slate-100 text-xl font-bold">
                 T
               </div>
-              <p className="mt-4 text-lg font-semibold">{teacherName || "교사"}</p>
-              <p className="mt-1 text-sm text-white/70">
-                {teacherSubject ? `${teacherSubject} 수업 담당` : "담당 과목 미설정"}
+              <p className="mt-4 font-semibold text-slate-900">
+                {teacherName || "교사"}
+              </p>
+              <p className="text-sm text-slate-500">
+                {teacherSubject || "과목 미설정"}
               </p>
             </div>
 
-            <div className="space-y-2 px-3 py-4">
+            <div className="mt-6 space-y-2">
               <button
                 onClick={() => navigate(`/teacher/tasks/${taskId}`)}
-                className="flex w-full items-center gap-3 rounded-sm px-4 py-3 text-left text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
+                className="w-full rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100"
               >
-                <ArrowLeft size={18} />
-                제출 현황으로
+                ← 제출 현황
               </button>
 
               <button
                 onClick={() => navigate("/teacher")}
-                className="flex w-full items-center gap-3 rounded-sm px-4 py-3 text-left text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
+                className="w-full rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100"
               >
-                <ClipboardList size={18} />
                 과제 관리
               </button>
 
               <button
                 onClick={() => navigate("/teacher/logs")}
-                className="flex w-full items-center gap-3 rounded-sm px-4 py-3 text-left text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
+                className="w-full rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100"
               >
-                <Sparkles size={18} />
-                AI 로그 확인
+                AI 로그
               </button>
 
               <button
                 onClick={() => navigate("/teacher/similarity")}
-                className="flex w-full items-center gap-3 rounded-sm px-4 py-3 text-left text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
+                className="w-full rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100"
               >
-                <Search size={18} />
                 유사도 분석
               </button>
 
               <button
                 onClick={() => navigate("/teacher/students")}
-                className="flex w-full items-center gap-3 rounded-sm px-4 py-3 text-left text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
+                className="w-full rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100"
               >
-                <UserRound size={18} />
                 학생 관리
               </button>
             </div>
           </aside>
 
-          <main className="space-y-5">
-            <section className="overflow-hidden rounded-sm border border-slate-300 bg-white shadow-sm">
-              <div className="border-b border-slate-300 bg-slate-50 px-5 py-4">
-                <h2 className="text-lg font-semibold text-slate-900">평가 대상 정보</h2>
-              </div>
+          {/* 메인 */}
+          <main className="space-y-6">
 
-              <div className="grid grid-cols-2 border-t border-slate-200 md:grid-cols-4">
-                <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
-                  과제명
-                </div>
-                <div className="border-b border-slate-200 px-4 py-4 text-center text-sm">{task.title}</div>
+            {/* 평가 대상 */}
+            <section className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm">
+              <h2 className="text-lg font-bold text-slate-900">평가 대상 정보</h2>
 
-                <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
-                  학생명
-                </div>
-                <div className="border-b border-slate-200 px-4 py-4 text-center text-sm">
-                  {submission.studentName}
+              <div className="mt-4 grid gap-4 md:grid-cols-4 text-sm">
+                <div className="rounded-xl bg-slate-50 p-4">
+                  <p className="text-slate-500">과제명</p>
+                  <p className="font-semibold">{task.title}</p>
                 </div>
 
-                <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
-                  반
+                <div className="rounded-xl bg-slate-50 p-4">
+                  <p className="text-slate-500">학생</p>
+                  <p className="font-semibold">{submission.studentName}</p>
                 </div>
-                <div className="border-b border-slate-200 px-4 py-4 text-center text-sm">{task.className}</div>
 
-                <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
-                  분석 결과
+                <div className="rounded-xl bg-slate-50 p-4">
+                  <p className="text-slate-500">반</p>
+                  <p className="font-semibold">{task.className}</p>
                 </div>
-                <div className="border-b border-slate-200 px-4 py-4 text-center text-sm">
-                  {submission.result || "-"}
+
+                <div className="rounded-xl bg-slate-50 p-4">
+                  <p className="text-slate-500">결과</p>
+                  <p className="font-semibold">{submission.result || "-"}</p>
                 </div>
               </div>
             </section>
 
-            <section className="grid gap-5 lg:grid-cols-[1.3fr_0.9fr]">
-              <div className="space-y-5">
-                <div className="overflow-hidden rounded-sm border border-slate-300 bg-white shadow-sm">
-                  <div className="border-b border-slate-300 bg-slate-50 px-5 py-4">
-                    <h2 className="text-lg font-semibold text-slate-900">제출 내용</h2>
-                  </div>
-                  <div className="px-5 py-5 text-sm whitespace-pre-wrap">
-                    {submission.content || "제출 내용이 없습니다."}
+            <section className="grid gap-6 lg:grid-cols-[1.3fr_0.9fr]">
+
+              {/* 좌측 */}
+              <div className="space-y-6">
+
+                {/* 제출 내용 */}
+                <div className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm">
+                  <h2 className="text-lg font-bold">제출 내용</h2>
+                  <div className="mt-4 text-sm whitespace-pre-wrap">
+                    {submission.content || "제출 내용 없음"}
                   </div>
                 </div>
 
-                <div className="overflow-hidden rounded-sm border border-slate-300 bg-white shadow-sm">
-                  <div className="border-b border-slate-300 bg-slate-50 px-5 py-4">
-                    <h2 className="text-lg font-semibold text-slate-900">AI 분석 참고</h2>
+                {/* AI 분석 */}
+                <div className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm">
+                  <h2 className="text-lg font-bold">AI 분석 참고</h2>
+
+                  <div className="mt-4 grid gap-4 md:grid-cols-4 text-sm">
+                    <div className="rounded-xl bg-slate-50 p-4">
+                      <p className="text-slate-500">학생 간 유사도</p>
+                      <p className="font-semibold">{submission.topStudentSimilarity ?? 0}%</p>
+                    </div>
+
+                    <div className="rounded-xl bg-slate-50 p-4">
+                      <p className="text-slate-500">비교 대상</p>
+                      <p className="font-semibold">{submission.topStudentTargetName || "-"}</p>
+                    </div>
+
+                    <div className="rounded-xl bg-slate-50 p-4">
+                      <p className="text-slate-500">AI 로그 유사도</p>
+                      <p className="font-semibold">{submission.aiLogSimilarity ?? 0}%</p>
+                    </div>
+
+                    <div className="rounded-xl bg-slate-50 p-4">
+                      <p className="text-slate-500">AI 사용 여부</p>
+                      <p className="font-semibold">{submission.aiUsed ? "사용" : "미사용"}</p>
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-2 border-t border-slate-200 md:grid-cols-4">
-                    <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
-                      학생 간 최고 유사도
-                    </div>
-                    <div className="border-b border-slate-200 px-4 py-4 text-center text-sm">
-                      {submission.topStudentSimilarity ?? 0}%
-                    </div>
-
-                    <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
-                      비교 대상 학생
-                    </div>
-                    <div className="border-b border-slate-200 px-4 py-4 text-center text-sm">
-                      {submission.topStudentTargetName || "-"}
-                    </div>
-
-                    <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
-                      AI 로그 유사도
-                    </div>
-                    <div className="border-b border-slate-200 px-4 py-4 text-center text-sm">
-                      {submission.aiLogSimilarity ?? 0}%
-                    </div>
-
-                    <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
-                      AI 사용 여부
-                    </div>
-                    <div className="border-b border-slate-200 px-4 py-4 text-center text-sm">
-                      {submission.aiUsed ? "사용" : "미사용"}
-                    </div>
-
-                    <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
-                      학생 간 판정
-                    </div>
-                    <div className="border-b border-slate-200 px-4 py-4 text-center text-sm">
+                  <div className="mt-4 grid gap-4 md:grid-cols-2 text-sm">
+                    <div className="rounded-xl bg-slate-50 p-4">
+                      <p className="text-slate-500 mb-2">학생 간 판정</p>
                       <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getJudgeBadgeClass(submission.topStudentJudge)}`}>
                         {submission.topStudentJudge || "-"}
                       </span>
                     </div>
 
-                    <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium">
-                      AI 로그 판정
-                    </div>
-                    <div className="border-b border-slate-200 px-4 py-4 text-center text-sm">
+                    <div className="rounded-xl bg-slate-50 p-4">
+                      <p className="text-slate-500 mb-2">AI 로그 판정</p>
                       <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getJudgeBadgeClass(submission.aiLogJudge)}`}>
                         {submission.aiLogJudge || "-"}
                       </span>
                     </div>
                   </div>
 
-                  <div className="grid gap-4 border-t border-slate-200 p-5 md:grid-cols-2">
-                    <div className="rounded-sm border border-slate-200 bg-slate-50 p-4">
+                  <div className="mt-4 grid gap-4 md:grid-cols-2">
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                       <p className="mb-2 text-sm font-semibold text-slate-800">학생 간 판정 사유</p>
-                      <p className="text-sm leading-6 text-slate-700">{submission.topStudentReason || "없음"}</p>
+                      <p className="text-sm text-slate-700">{submission.topStudentReason || "없음"}</p>
                     </div>
 
-                    <div className="rounded-sm border border-slate-200 bg-slate-50 p-4">
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                       <p className="mb-2 text-sm font-semibold text-slate-800">AI 로그 판정 사유</p>
-                      <p className="text-sm leading-6 text-slate-700">{submission.aiLogReason || "없음"}</p>
+                      <p className="text-sm text-slate-700">{submission.aiLogReason || "없음"}</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="overflow-hidden rounded-sm border border-slate-300 bg-white shadow-sm">
-                  <div className="border-b border-slate-300 bg-slate-50 px-5 py-4">
-                    <h2 className="text-lg font-semibold text-slate-900">AI 로그</h2>
+                {/* AI 로그 */}
+                <div className="rounded-[24px] border border-slate-200 bg-white shadow-sm overflow-hidden">
+                  <div className="px-6 py-4 border-b">
+                    <h2 className="font-bold">AI 로그</h2>
                   </div>
 
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full border-collapse text-sm">
-                      <thead>
-                        <tr className="bg-slate-100 text-slate-700">
-                          <th className="border border-slate-300 px-4 py-3 text-center font-semibold">시각</th>
-                          <th className="border border-slate-300 px-4 py-3 text-center font-semibold">질문</th>
-                          <th className="border border-slate-300 px-4 py-3 text-center font-semibold">응답</th>
-                          <th className="border border-slate-300 px-4 py-3 text-center font-semibold">상태</th>
-                        </tr>
-                      </thead>
-
-                      <tbody>
-                        {logs.length === 0 ? (
-                          <tr>
-                            <td colSpan={4} className="border border-slate-300 px-4 py-8 text-center text-slate-500">
-                              AI 로그가 없습니다.
-                            </td>
-                          </tr>
-                        ) : (
-                          logs.map((log) => (
-                            <tr key={log.id} className="hover:bg-slate-50">
-                              <td className="border border-slate-300 px-4 py-4 text-center">
-                                {formatDateTime(log.createdAt)}
-                              </td>
-                              <td className="border border-slate-300 px-4 py-4 align-top">
-                                <div className="whitespace-pre-wrap break-words">{log.question}</div>
-                              </td>
-                              <td className="border border-slate-300 px-4 py-4 align-top">
-                                <div className="whitespace-pre-wrap break-words">{log.answer}</div>
-                              </td>
-                              <td className="border border-slate-300 px-4 py-4 text-center">
-                                <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getJudgeBadgeClass(log.status)}`}>
-                                  {log.status}
-                                </span>
-                              </td>
-                            </tr>
-                          ))
-                        )}
-                      </tbody>
-                    </table>
+                  <div className="divide-y">
+                    {logs.length === 0 ? (
+                      <div className="p-6 text-center text-slate-500">로그 없음</div>
+                    ) : (
+                      logs.map((log) => (
+                        <div key={log.id} className="p-6 hover:bg-slate-50">
+                          <p className="text-xs text-slate-400">
+                            {formatDateTime(log.createdAt)}
+                          </p>
+                          <p className="mt-2 font-medium">Q. {log.question}</p>
+                          <p className="mt-2 text-sm text-slate-600">{log.answer}</p>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
+
               </div>
 
-              <div className="overflow-hidden rounded-sm border border-slate-300 bg-white shadow-sm">
-                <div className="border-b border-slate-300 bg-slate-50 px-5 py-4">
-                  <h2 className="text-lg font-semibold text-slate-900">평가 입력</h2>
-                </div>
+              {/* 우측 평가 */}
+              <div className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm">
+                <h2 className="text-lg font-bold">평가 입력</h2>
 
-                <div className="space-y-5 p-5">
+                <div className="mt-5 space-y-5">
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">점수</label>
+                    <label className="text-sm font-semibold">점수</label>
                     <input
                       type="number"
-                      min={0}
-                      max={100}
                       value={score}
                       onChange={(e) => setScore(e.target.value)}
-                      className="w-full rounded-sm border border-slate-300 px-3 py-3 text-sm outline-none focus:border-teal-600"
-                      placeholder="0~100"
+                      className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
                     />
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">교사 코멘트</label>
+                    <label className="text-sm font-semibold">코멘트</label>
                     <textarea
-                      rows={10}
+                      rows={8}
                       value={teacherComment}
                       onChange={(e) => setTeacherComment(e.target.value)}
-                      className="w-full resize-none rounded-sm border border-slate-300 px-3 py-3 text-sm outline-none focus:border-teal-600"
-                      placeholder="평가 코멘트를 입력하세요."
+                      className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
                     />
                   </div>
 
-                  <div className="rounded-sm border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">
-                    <p>현재 점수: {submission.score ?? 0}점</p>
-                    <p className="mt-1">최종 수정 시각: {formatDateTime(submission.updatedAt)}</p>
+                  <div className="rounded-xl bg-slate-50 p-4 text-sm">
+                    현재 점수: {submission.score ?? 0}
                   </div>
 
                   <button
                     onClick={handleSaveEvaluation}
                     disabled={saving}
-                    className="w-full rounded-sm bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800"
                   >
                     {saving ? "저장 중..." : "평가 저장"}
                   </button>
                 </div>
               </div>
+
             </section>
           </main>
         </div>

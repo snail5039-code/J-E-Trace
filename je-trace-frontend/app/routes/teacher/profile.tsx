@@ -124,32 +124,42 @@ export default function TeacherProfilePage() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-100 px-6 py-10">
-            <div className="mx-auto max-w-4xl">
-                <div className="rounded-3xl border-4 border-slate-900 bg-white p-8">
-                    <div className="flex items-start justify-between gap-4">
-                        <div>
-                            <p className="text-sm font-semibold text-slate-500">TEACHER</p>
-                            <h1 className="mt-2 text-4xl font-extrabold text-slate-900">
-                                회원정보 수정
-                            </h1>
-                            <p className="mt-2 text-slate-500">
-                                담당 과목과 관리 반 수정은 관리자 승인 후 반영됩니다.
-                            </p>
-                        </div>
+        <div className="min-h-screen bg-[#f5f7fb] px-5 py-6 md:px-8">
+            <div className="mx-auto max-w-4xl space-y-6">
 
-                        <button
-                            onClick={() => navigate("/teacher")}
-                            className="rounded-xl bg-slate-100 px-5 py-3 text-slate-800"
-                        >
-                            대시보드로
-                        </button>
+                {/* ✅ 상단 헤더 카드 */}
+                <section className="rounded-[28px] border border-slate-200 bg-white px-8 py-6 shadow-[0_10px_30px_rgba(15,23,42,0.05)] flex items-center justify-between">
+                    <div>
+                        <p className="text-xs font-bold tracking-[0.25em] text-slate-400">
+                            TEACHER PROFILE
+                        </p>
+                        <h1 className="mt-2 text-3xl font-black text-slate-900">
+                            회원정보 수정
+                        </h1>
+                        <p className="mt-2 text-sm text-slate-500">
+                            담당 과목과 관리 반 수정은 관리자 승인 후 반영됩니다.
+                        </p>
                     </div>
 
+                    <button
+                        onClick={() => navigate("/teacher")}
+                        className="rounded-xl bg-slate-100 px-5 py-3 text-slate-700 hover:bg-slate-200"
+                    >
+                        대시보드
+                    </button>
+                </section>
+
+                {/* ✅ 본문 카드 */}
+                <section className="rounded-[28px] border border-slate-200 bg-white p-8 shadow-sm">
+
                     {loading ? (
-                        <div className="mt-10 text-center text-slate-500">불러오는 중...</div>
+                        <div className="text-center text-slate-500 py-10">
+                            불러오는 중...
+                        </div>
                     ) : (
-                        <div className="mt-8 space-y-6">
+                        <div className="space-y-6">
+
+                            {/* 기본 정보 */}
                             <div className="grid gap-5 md:grid-cols-2">
                                 <div>
                                     <label className="mb-2 block text-sm font-semibold text-slate-700">
@@ -158,7 +168,7 @@ export default function TeacherProfilePage() {
                                     <input
                                         value={loginId}
                                         disabled
-                                        className="w-full rounded-xl border border-slate-300 bg-slate-100 px-4 py-3 text-slate-500 outline-none"
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-500"
                                     />
                                 </div>
 
@@ -169,11 +179,12 @@ export default function TeacherProfilePage() {
                                     <input
                                         value={email}
                                         disabled
-                                        className="w-full rounded-xl border border-slate-300 bg-slate-100 px-4 py-3 text-slate-500 outline-none"
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-500"
                                     />
                                 </div>
                             </div>
 
+                            {/* 이름 */}
                             <div>
                                 <label className="mb-2 block text-sm font-semibold text-slate-700">
                                     이름
@@ -181,11 +192,12 @@ export default function TeacherProfilePage() {
                                 <input
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none"
+                                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-slate-900 outline-none focus:ring-2 focus:ring-slate-300"
                                     placeholder="이름 입력"
                                 />
                             </div>
 
+                            {/* 과목 */}
                             <div>
                                 <label className="mb-2 block text-sm font-semibold text-slate-700">
                                     담당 과목
@@ -193,15 +205,17 @@ export default function TeacherProfilePage() {
                                 <input
                                     value={subject}
                                     onChange={(e) => setSubject(e.target.value)}
-                                    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none"
+                                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-slate-900 outline-none focus:ring-2 focus:ring-slate-300"
                                     placeholder="담당 과목 입력"
                                 />
                             </div>
 
+                            {/* 관리 반 */}
                             <div>
                                 <label className="mb-3 block text-sm font-semibold text-slate-700">
                                     관리 반
                                 </label>
+
                                 <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                                     {CLASS_OPTIONS.map((option) => {
                                         const checked = managedClasses.includes(option);
@@ -209,9 +223,10 @@ export default function TeacherProfilePage() {
                                         return (
                                             <label
                                                 key={option}
-                                                className={`flex cursor-pointer items-center justify-center rounded-xl border px-4 py-3 text-sm font-semibold transition ${checked
-                                                        ? "border-slate-900 bg-slate-900 text-white"
-                                                        : "border-slate-300 bg-white text-slate-800"
+                                                className={`flex cursor-pointer items-center justify-center rounded-xl border px-4 py-3 text-sm font-semibold transition
+                        ${checked
+                                                        ? "bg-slate-900 text-white border-slate-900"
+                                                        : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
                                                     }`}
                                             >
                                                 <input
@@ -225,30 +240,33 @@ export default function TeacherProfilePage() {
                                         );
                                     })}
                                 </div>
+
                                 <p className="mt-3 text-sm text-slate-500">
                                     현재 선택: {managedClassText}
                                 </p>
                             </div>
 
-                            <div className="flex gap-3">
+                            {/* 버튼 */}
+                            <div className="flex gap-3 pt-2">
                                 <button
                                     onClick={handleSubmit}
                                     disabled={saving}
-                                    className="rounded-xl bg-slate-900 px-5 py-3 text-white disabled:opacity-60"
+                                    className="rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-slate-800 disabled:opacity-60"
                                 >
-                                    {saving ? "요청 등록 중..." : "수정 요청하기"}
+                                    {saving ? "요청 등록 중..." : "수정 요청"}
                                 </button>
 
                                 <button
                                     onClick={() => navigate("/teacher")}
-                                    className="rounded-xl bg-slate-100 px-5 py-3 text-slate-800"
+                                    className="rounded-xl bg-slate-100 px-6 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-200"
                                 >
                                     취소
                                 </button>
                             </div>
+
                         </div>
                     )}
-                </div>
+                </section>
             </div>
         </div>
     );

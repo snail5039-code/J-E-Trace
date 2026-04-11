@@ -144,266 +144,184 @@ export default function TeacherPage() {
   }, [tasks]);
 
   return (
-    <div className="min-h-screen bg-[#eef1f5] text-slate-800">
-      <div className="border-b border-slate-300 bg-gradient-to-r from-teal-600 to-cyan-500 px-6 py-4 text-white shadow-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
+    <div className="min-h-screen bg-[#f5f7fb] px-5 py-6 md:px-8 text-slate-900">
+      <div className="mx-auto max-w-7xl space-y-6">
+
+        {/* ✅ 상단 헤더 카드 */}
+        <section className="rounded-[28px] border border-slate-200 bg-white px-8 py-6 shadow-[0_10px_30px_rgba(15,23,42,0.05)] flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-white/80">교사용 관리 시스템</p>
-            <h1 className="mt-1 text-2xl font-bold">과제 관리 대시보드</h1>
+            <p className="text-xs font-bold tracking-[0.25em] text-slate-400">
+              TEACHER DASHBOARD
+            </p>
+            <h1 className="mt-2 text-3xl font-black text-slate-900">
+              과제 관리
+            </h1>
+            <p className="mt-2 text-sm text-slate-500">
+              과제 생성, 제출 현황, AI 로그를 한눈에 관리합니다.
+            </p>
           </div>
 
           <button
             onClick={() => navigate("/teacher/create-task")}
-            className="rounded-sm bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+            className="rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-slate-800"
           >
             과제 등록
           </button>
-        </div>
-      </div>
+        </section>
 
-      <div className="mx-auto max-w-7xl px-6 py-6">
-        <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
-          <aside className="flex min-h-[700px] flex-col overflow-hidden rounded-sm border border-slate-300 bg-[#4a4a4a] text-white shadow-sm">
-            <div className="border-b border-white/10 px-5 py-6 text-center">
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-sm bg-slate-200 text-2xl font-bold text-slate-700">
+        <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+
+          {/* ✅ 사이드바 */}
+          <aside className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm flex flex-col">
+            <div className="text-center">
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-slate-100 text-xl font-bold">
                 T
               </div>
-              <p className="mt-4 text-lg font-semibold">{teacherName || "교사"}</p>
-              <p className="mt-1 text-sm text-white/70">
-                {teacherSubject ? `${teacherSubject} 수업 담당` : "담당 과목 미설정"}
+              <p className="mt-4 font-semibold text-slate-900">
+                {teacherName || "교사"}
+              </p>
+              <p className="text-sm text-slate-500">
+                {teacherSubject || "과목 미설정"}
               </p>
             </div>
 
-            <div className="space-y-2 px-3 py-4">
-              <button className="flex w-full items-center gap-3 rounded-sm bg-white/10 px-4 py-3 text-left text-sm font-medium text-white">
-                <ClipboardList size={18} />
+            <div className="mt-6 space-y-2">
+              <button className="w-full rounded-xl bg-slate-900 px-4 py-3 text-sm text-white">
                 과제 관리
               </button>
 
               <button
                 onClick={() => navigate("/teacher/logs")}
-                className="flex w-full items-center gap-3 rounded-sm px-4 py-3 text-left text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
+                className="w-full rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100"
               >
-                <Sparkles size={18} />
-                AI 로그 확인
+                AI 로그
               </button>
 
               <button
                 onClick={() => navigate("/teacher/similarity")}
-                className="flex w-full items-center gap-3 rounded-sm px-4 py-3 text-left text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
+                className="w-full rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100"
               >
-                <Search size={18} />
                 유사도 분석
               </button>
 
               <button
                 onClick={() => navigate("/teacher/students")}
-                className="flex w-full items-center gap-3 rounded-sm px-4 py-3 text-left text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
+                className="w-full rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100"
               >
-                <UserRound size={18} />
                 학생 관리
               </button>
-              <div className="mt-auto border-t border-white/10 px-4 py-6">
-                <button
-                  onClick={() => navigate("/teacher/profile")}
-                  className="flex w-full items-center justify-center rounded-xl bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/20"
-                >
-                  회원정보 수정
-                </button>
-              </div>
             </div>
 
+            <div className="mt-auto space-y-3 pt-6">
+              <button
+                onClick={() => navigate("/teacher/profile")}
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-800 hover:bg-slate-100"
+              >
+                회원정보 수정
+              </button>
 
-
-            <div className="mt-auto px-3 py-4">
               <button
                 onClick={handleLogout}
-                className="flex w-full items-center gap-3 rounded-sm border border-white/10 bg-red-500/90 px-4 py-3 text-left text-sm font-medium text-white transition hover:bg-red-500"
+                className="w-full rounded-xl bg-red-500 px-4 py-3 text-sm text-white"
               >
-                <LogOut size={18} />
                 로그아웃
               </button>
             </div>
           </aside>
 
-          <main className="space-y-5">
-            <section className="overflow-hidden rounded-sm border border-slate-300 bg-white shadow-sm">
-              <div className="border-b border-slate-300 bg-slate-50 px-5 py-4">
-                <h2 className="text-lg font-semibold text-slate-900">담당 수업 정보</h2>
-              </div>
+          {/* ✅ 메인 */}
+          <main className="space-y-6">
 
-              <div className="grid grid-cols-2 border-t border-slate-200 md:grid-cols-4">
-                <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium text-slate-600">
-                  담당 교사
-                </div>
-                <div className="border-b border-slate-200 px-4 py-4 text-center text-sm text-slate-800">
-                  {teacherName || "-"}
-                </div>
-                <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium text-slate-600">
-                  담당 과목
-                </div>
-                <div className="border-b border-slate-200 px-4 py-4 text-center text-sm text-slate-800">
-                  {teacherSubject || "-"}
+            {/* 교사 정보 */}
+            <section className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm">
+              <h2 className="text-lg font-bold text-slate-900">담당 정보</h2>
+
+              <div className="mt-4 grid gap-4 md:grid-cols-3 text-sm">
+                <div className="rounded-xl bg-slate-50 p-4">
+                  <p className="text-slate-500">교사</p>
+                  <p className="font-semibold text-slate-800">{teacherName}</p>
                 </div>
 
-                <div className="border-r border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-medium text-slate-600">
-                  관리 반
+                <div className="rounded-xl bg-slate-50 p-4">
+                  <p className="text-slate-500">과목</p>
+                  <p className="font-semibold text-slate-800">{teacherSubject}</p>
                 </div>
-                <div className="col-span-3 border-b border-slate-200 px-4 py-4 text-center text-sm text-slate-800">
-                  {teacherManagedClasses
-                    ? teacherManagedClasses
-                      .split(",")
-                      .map((value) => `${value.trim()}반`)
-                      .join(", ")
-                    : "-"}
+
+                <div className="rounded-xl bg-slate-50 p-4">
+                  <p className="text-slate-500">관리 반</p>
+                  <p className="font-semibold text-slate-800">
+                    {teacherManagedClasses || "-"}
+                  </p>
                 </div>
               </div>
             </section>
 
+            {/* 통계 카드 */}
             <section className="grid gap-4 md:grid-cols-4">
-              <div className="rounded-sm border border-slate-300 bg-white shadow-sm">
-                <div className="border-b border-slate-200 bg-[#f7f2c8] px-4 py-3 text-sm font-semibold">
-                  전체 과제 수
+              {[
+                { title: "전체 과제", value: `${totalTaskCount}개` },
+                { title: "제출 수", value: `${totalSubmittedCount}건` },
+                { title: "미제출", value: `${totalNotSubmittedCount}건` },
+                { title: "AI 허용", value: `${aiAllowedTaskCount}개` },
+              ].map((item) => (
+                <div
+                  key={item.title}
+                  className="rounded-[20px] border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1"
+                >
+                  <p className="text-sm text-slate-500">{item.title}</p>
+                  <p className="mt-2 text-2xl font-bold text-slate-900">
+                    {loading ? "-" : item.value}
+                  </p>
                 </div>
-                <div className="px-4 py-5 text-2xl font-bold text-slate-900">
-                  {loading ? "-" : `${totalTaskCount}개`}
-                </div>
-              </div>
-
-              <div className="rounded-sm border border-slate-300 bg-white shadow-sm">
-                <div className="border-b border-slate-200 bg-[#dff3ea] px-4 py-3 text-sm font-semibold">
-                  누적 제출 수
-                </div>
-                <div className="px-4 py-5 text-2xl font-bold text-slate-900">
-                  {loading ? "-" : `${totalSubmittedCount}건`}
-                </div>
-              </div>
-
-              <div className="rounded-sm border border-slate-300 bg-white shadow-sm">
-                <div className="border-b border-slate-200 bg-[#fbe4e4] px-4 py-3 text-sm font-semibold">
-                  미제출 수
-                </div>
-                <div className="px-4 py-5 text-2xl font-bold text-slate-900">
-                  {loading ? "-" : `${totalNotSubmittedCount}건`}
-                </div>
-              </div>
-
-              <div className="rounded-sm border border-slate-300 bg-white shadow-sm">
-                <div className="border-b border-slate-200 bg-[#e5ecff] px-4 py-3 text-sm font-semibold">
-                  AI 허용 과제
-                </div>
-                <div className="px-4 py-5 text-2xl font-bold text-slate-900">
-                  {loading ? "-" : `${aiAllowedTaskCount}개`}
-                </div>
-              </div>
+              ))}
             </section>
 
-            <section className="overflow-hidden rounded-sm border border-slate-300 bg-white shadow-sm">
-              <div className="flex items-center justify-between border-b border-slate-300 bg-slate-50 px-5 py-4">
-                <h2 className="text-lg font-semibold text-slate-900">과제 목록</h2>
+            {/* 과제 목록 */}
+            <section className="rounded-[24px] border border-slate-200 bg-white shadow-sm overflow-hidden">
+              <div className="flex justify-between px-6 py-4 border-b">
+                <h2 className="font-bold text-slate-900">과제 목록</h2>
 
                 <button
                   onClick={() => navigate("/teacher/create-task")}
-                  className="rounded-sm bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+                  className="rounded-lg bg-slate-900 px-4 py-2 text-sm text-white"
                 >
-                  새 과제 등록
+                  새 과제
                 </button>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="min-w-full border-collapse text-sm">
-                  <thead>
-                    <tr className="bg-slate-100 text-slate-700">
-                      <th className="border border-slate-300 px-4 py-3 text-center font-semibold">
-                        과제명
-                      </th>
-                      <th className="border border-slate-300 px-4 py-3 text-center font-semibold">
-                        반
-                      </th>
-                      <th className="border border-slate-300 px-4 py-3 text-center font-semibold">
-                        마감일
-                      </th>
-                      <th className="border border-slate-300 px-4 py-3 text-center font-semibold">
-                        AI 허용
-                      </th>
-                      <th className="border border-slate-300 px-4 py-3 text-center font-semibold">
-                        제출 현황
-                      </th>
-                      <th className="border border-slate-300 px-4 py-3 text-center font-semibold">
-                        상태
-                      </th>
-                      <th className="border border-slate-300 px-4 py-3 text-center font-semibold">
-                        관리
-                      </th>
-                    </tr>
-                  </thead>
+              <div className="divide-y">
+                {taskRows.map((task) => (
+                  <div
+                    key={task.id}
+                    className="flex items-center justify-between px-6 py-4 hover:bg-slate-50"
+                  >
+                    <div>
+                      <p className="font-semibold text-slate-900">
+                        {task.title}
+                      </p>
+                      <p className="text-sm text-slate-500">
+                        {task.className} · {task.deadlineText}
+                      </p>
+                    </div>
 
-                  <tbody>
-                    {loading ? (
-                      <tr>
-                        <td
-                          colSpan={7}
-                          className="border border-slate-300 px-4 py-8 text-center text-slate-500"
-                        >
-                          과제 목록 불러오는 중...
-                        </td>
-                      </tr>
-                    ) : taskRows.length === 0 ? (
-                      <tr>
-                        <td
-                          colSpan={7}
-                          className="border border-slate-300 px-4 py-8 text-center text-slate-500"
-                        >
-                          등록된 과제가 없습니다.
-                        </td>
-                      </tr>
-                    ) : (
-                      taskRows.map((task) => (
-                        <tr key={task.id} className="hover:bg-slate-50">
-                          <td className="border border-slate-300 px-4 py-4 text-center font-medium text-slate-900">
-                            {task.title}
-                          </td>
+                    <div className="flex items-center gap-4 text-sm">
+                      <span>{task.submissionRateText}</span>
 
-                          <td className="border border-slate-300 px-4 py-4 text-center text-slate-700">
-                            {task.className}
-                          </td>
+                      <span className={task.statusClass}>
+                        {task.statusText}
+                      </span>
 
-                          <td className="border border-slate-300 px-4 py-4 text-center text-slate-700">
-                            {task.deadlineText}
-                          </td>
-
-                          <td className="border border-slate-300 px-4 py-4 text-center">
-                            <span
-                              className={`inline-block rounded-sm px-3 py-1 text-xs font-semibold ${task.aiAllowed
-                                ? "bg-blue-50 text-blue-700"
-                                : "bg-slate-100 text-slate-600"
-                                }`}
-                            >
-                              {task.aiAllowed ? "허용" : "비허용"}
-                            </span>
-                          </td>
-
-                          <td className="border border-slate-300 px-4 py-4 text-center text-slate-700">
-                            {task.submissionRateText}
-                          </td>
-
-                          <td className="border border-slate-300 px-4 py-4 text-center">
-                            <span className={task.statusClass}>{task.statusText}</span>
-                          </td>
-
-                          <td className="border border-slate-300 px-4 py-4 text-center">
-                            <button
-                              onClick={() => navigate(`/teacher/tasks/${task.id}`)}
-                              className="inline-flex items-center gap-2 rounded-sm border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
-                            >
-                              상세 보기
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+                      <button
+                        onClick={() =>
+                          navigate(`/teacher/tasks/${task.id}`)
+                        }
+                        className="rounded-lg border px-3 py-2"
+                      >
+                        상세
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </section>
           </main>
