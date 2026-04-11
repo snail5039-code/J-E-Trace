@@ -1,7 +1,7 @@
 import { ClipboardList, Search, Sparkles, UserRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import axios from "axios";
+import api from "../../lib/axios";
 
 type AiLog = {
     id: number;
@@ -65,7 +65,7 @@ export default function TeacherSimilarityDetailPage() {
             if (!loginId || loginRole !== "TEACHER") return;
 
             try {
-                const response = await axios.get("/teacher/profile", {
+                const response = await api.get("/teacher/profile", {
                     params: { loginId },
                 });
 
@@ -87,7 +87,7 @@ export default function TeacherSimilarityDetailPage() {
 
         const fetchDetail = async () => {
             try {
-                const detailResponse = await axios.get(
+                const detailResponse = await api.get(
                     `/teacher/tasks/similarity/${similarityId}`,
                     { params: { loginId } }
                 );
@@ -95,14 +95,14 @@ export default function TeacherSimilarityDetailPage() {
                 const detailData = detailResponse.data;
                 setDetail(detailData);
 
-                const studentLogResponse = await axios.get(
+                const studentLogResponse = await api.get(
                     `/teacher/tasks/${detailData.taskId}/logs`,
                     { params: { loginId, studentName: detailData.studentName } }
                 );
                 setStudentLogs(studentLogResponse.data);
 
                 if (detailData.comparisonType === "STUDENT_TO_STUDENT") {
-                    const targetLogResponse = await axios.get(
+                    const targetLogResponse = await api.get(
                         `/teacher/tasks/${detailData.taskId}/logs`,
                         { params: { loginId, studentName: detailData.targetName } }
                     );
