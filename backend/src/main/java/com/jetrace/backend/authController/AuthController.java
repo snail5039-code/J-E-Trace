@@ -35,6 +35,11 @@ public class AuthController {
         return result;
     }
 
+    @GetMapping("/check-login-id")
+    public boolean checkLoginId(@RequestParam String loginId) {
+        return authService.isAvailableLoginId(loginId);
+    }
+
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignupRequestDto dto) {
         try {
@@ -44,7 +49,7 @@ public class AuthController {
             e.printStackTrace();
 
             Map<String, Object> error = new HashMap<>();
-            error.put("message", e.getClass().getSimpleName() + ": " + e.getMessage());
+            error.put("message", buildCauseMessage(e));
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
@@ -58,13 +63,24 @@ public class AuthController {
             e.printStackTrace();
 
             Map<String, Object> error = new HashMap<>();
-            error.put("message", e.getClass().getSimpleName() + ": " + e.getMessage());
+            error.put("message", buildCauseMessage(e));
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
 
-    @GetMapping("/check-login-id")
-    public boolean checkLoginId(@RequestParam String loginId) {
-        return authService.isAvailableLoginId(loginId);
+    private String buildCauseMessage(Throwable e) {
+        StringBuilder sb = new StringBuilder();
+        int depth = 0;
+
+        while (e != null && depth < 10) {
+            sb.append(e.getClass().getName())
+              .append(": ")
+              .append(e.getMessage())
+              .append("\n\n");
+            e = e.getCause();
+            depth++;
+        }
+
+        return sb.toString();
     }
 }
