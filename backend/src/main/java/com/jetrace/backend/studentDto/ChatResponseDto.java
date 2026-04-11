@@ -1,20 +1,20 @@
+// backend/src/main/java/com/jetrace/backend/studentDto/ChatResponseDto.java
 package com.jetrace.backend.studentDto;
 
 public class ChatResponseDto {
-
     private boolean relevant;
     private int score;
     private String answer;
-    private String message;
+    private String status;
 
     public ChatResponseDto() {
     }
 
-    public ChatResponseDto(boolean relevant, int score, String answer, String message) {
+    public ChatResponseDto(boolean relevant, int score, String answer, String status) {
         this.relevant = relevant;
         this.score = score;
         this.answer = answer;
-        this.message = message;
+        this.status = status;
     }
 
     public boolean isRelevant() {
@@ -41,11 +41,11 @@ public class ChatResponseDto {
         this.answer = answer;
     }
 
-    public String getMessage() {
-        return message;
+    public String getStatus() {
+        return status;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
