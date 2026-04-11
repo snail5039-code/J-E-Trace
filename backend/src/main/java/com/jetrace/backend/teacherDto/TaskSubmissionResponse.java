@@ -9,19 +9,15 @@ public class TaskSubmissionResponse {
     private String submittedAt;
     private Boolean aiUsed;
     private String result;
-
     private String content;
     private Integer score;
     private String teacherComment;
-
     private String createdAt;
     private String updatedAt;
-
     private Integer topStudentSimilarity;
     private String topStudentTargetName;
     private String topStudentJudge;
     private String topStudentReason;
-
     private Integer aiLogSimilarity;
     private String aiLogJudge;
     private String aiLogReason;

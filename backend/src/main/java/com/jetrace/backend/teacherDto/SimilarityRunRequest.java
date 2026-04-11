@@ -1,12 +1,21 @@
+// backend/src/main/java/com/jetrace/backend/teacherDto/SimilarityRunRequest.java
 package com.jetrace.backend.teacherDto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class SimilarityRunRequest {
     private Long taskId;
+
+    public SimilarityRunRequest() {
+    }
+
+    public SimilarityRunRequest(Long taskId) {
+        this.taskId = taskId;
+    }
+
+    public Long getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(Long taskId) {
+        this.taskId = taskId;
+    }
 }

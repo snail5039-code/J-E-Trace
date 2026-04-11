@@ -50,92 +50,92 @@ public class SimilarityResponse {
         return id;
     }
 
-    public Long getTaskId() {
-        return taskId;
-    }
-
-    public String getTaskTitle() {
-        return taskTitle;
-    }
-
-    public String getStudentName() {
-        return studentName;
-    }
-
-    public String getTargetName() {
-        return targetName;
-    }
-
-    public String getComparisonType() {
-        return comparisonType;
-    }
-
-    public Integer getSimilarity() {
-        return similarity;
-    }
-
-    public String getJudge() {
-        return judge;
-    }
-
-    public String getReason() {
-        return reason;
-    }
-
-    public String getStudentContent() {
-        return studentContent;
-    }
-
-    public String getTargetContent() {
-        return targetContent;
-    }
-
-    public String getCheckedAt() {
-        return checkedAt;
-    }
-
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getTaskId() {
+        return taskId;
     }
 
     public void setTaskId(Long taskId) {
         this.taskId = taskId;
     }
 
+    public String getTaskTitle() {
+        return taskTitle;
+    }
+
     public void setTaskTitle(String taskTitle) {
         this.taskTitle = taskTitle;
+    }
+
+    public String getStudentName() {
+        return studentName;
     }
 
     public void setStudentName(String studentName) {
         this.studentName = studentName;
     }
 
+    public String getTargetName() {
+        return targetName;
+    }
+
     public void setTargetName(String targetName) {
         this.targetName = targetName;
+    }
+
+    public String getComparisonType() {
+        return comparisonType;
     }
 
     public void setComparisonType(String comparisonType) {
         this.comparisonType = comparisonType;
     }
 
+    public Integer getSimilarity() {
+        return similarity;
+    }
+
     public void setSimilarity(Integer similarity) {
         this.similarity = similarity;
+    }
+
+    public String getJudge() {
+        return judge;
     }
 
     public void setJudge(String judge) {
         this.judge = judge;
     }
 
+    public String getReason() {
+        return reason;
+    }
+
     public void setReason(String reason) {
         this.reason = reason;
+    }
+
+    public String getStudentContent() {
+        return studentContent;
     }
 
     public void setStudentContent(String studentContent) {
         this.studentContent = studentContent;
     }
 
+    public String getTargetContent() {
+        return targetContent;
+    }
+
     public void setTargetContent(String targetContent) {
         this.targetContent = targetContent;
+    }
+
+    public String getCheckedAt() {
+        return checkedAt;
     }
 
     public void setCheckedAt(String checkedAt) {

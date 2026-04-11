@@ -6,14 +6,11 @@ public class StudentResponse {
     private String studentName;
     private String className;
     private Integer finalScore;
-
     private Integer totalTasks;
     private Integer submittedTasks;
     private Integer notSubmittedTasks;
-
     private Integer aiLogCount;
     private Integer cautionLogCount;
-
     private String approvedAt;
 
     public StudentResponse() {
@@ -47,76 +44,76 @@ public class StudentResponse {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getStudentName() {
         return studentName;
-    }
-
-    public void setStudentName(String studentName) {
-        this.studentName = studentName;
     }
 
     public String getClassName() {
         return className;
     }
 
-    public void setClassName(String className) {
-        this.className = className;
-    }
-
     public Integer getFinalScore() {
         return finalScore;
-    }
-
-    public void setFinalScore(Integer finalScore) {
-        this.finalScore = finalScore;
     }
 
     public Integer getTotalTasks() {
         return totalTasks;
     }
 
-    public void setTotalTasks(Integer totalTasks) {
-        this.totalTasks = totalTasks;
-    }
-
     public Integer getSubmittedTasks() {
         return submittedTasks;
-    }
-
-    public void setSubmittedTasks(Integer submittedTasks) {
-        this.submittedTasks = submittedTasks;
     }
 
     public Integer getNotSubmittedTasks() {
         return notSubmittedTasks;
     }
 
-    public void setNotSubmittedTasks(Integer notSubmittedTasks) {
-        this.notSubmittedTasks = notSubmittedTasks;
-    }
-
     public Integer getAiLogCount() {
         return aiLogCount;
-    }
-
-    public void setAiLogCount(Integer aiLogCount) {
-        this.aiLogCount = aiLogCount;
     }
 
     public Integer getCautionLogCount() {
         return cautionLogCount;
     }
 
-    public void setCautionLogCount(Integer cautionLogCount) {
-        this.cautionLogCount = cautionLogCount;
-    }
-
     public String getApprovedAt() {
         return approvedAt;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setStudentName(String studentName) {
+        this.studentName = studentName;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
+    }
+
+    public void setFinalScore(Integer finalScore) {
+        this.finalScore = finalScore;
+    }
+
+    public void setTotalTasks(Integer totalTasks) {
+        this.totalTasks = totalTasks;
+    }
+
+    public void setSubmittedTasks(Integer submittedTasks) {
+        this.submittedTasks = submittedTasks;
+    }
+
+    public void setNotSubmittedTasks(Integer notSubmittedTasks) {
+        this.notSubmittedTasks = notSubmittedTasks;
+    }
+
+    public void setAiLogCount(Integer aiLogCount) {
+        this.aiLogCount = aiLogCount;
+    }
+
+    public void setCautionLogCount(Integer cautionLogCount) {
+        this.cautionLogCount = cautionLogCount;
     }
 
     public void setApprovedAt(String approvedAt) {

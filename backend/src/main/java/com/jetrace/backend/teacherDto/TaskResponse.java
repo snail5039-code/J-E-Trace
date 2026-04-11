@@ -9,7 +9,6 @@ public class TaskResponse {
     private String dueDate;
     private Boolean aiAllowed;
     private String createdAt;
-
     private Integer totalStudentCount;
     private Integer submittedCount;
     private Integer notSubmittedCount;
