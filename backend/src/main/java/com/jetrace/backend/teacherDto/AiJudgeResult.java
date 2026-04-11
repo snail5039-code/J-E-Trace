@@ -1,14 +1,40 @@
 package com.jetrace.backend.teacherDto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class AiJudgeResult {
-    private String judge;             // 정상 / 주의 / 위험
-    private String reason;            // 상세 사유
-    private String submissionResult;  // 자기화 수준 높음 / 일부 재구성 / 복사 가능성 높음
+    private String result;
+    private String judge;
+    private String reason;
+
+    public AiJudgeResult() {
+    }
+
+    public AiJudgeResult(String result, String judge, String reason) {
+        this.result = result;
+        this.judge = judge;
+        this.reason = reason;
+    }
+
+    public String getResult() {
+        return result;
+    }
+
+    public void setResult(String result) {
+        this.result = result;
+    }
+
+    public String getJudge() {
+        return judge;
+    }
+
+    public void setJudge(String judge) {
+        this.judge = judge;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
 }
