@@ -1,41 +1,13 @@
-// backend/src/main/java/com/jetrace/backend/studentDto/AiResponseDto.java
 package com.jetrace.backend.studentDto;
 
-public class AiResponseDto {
-    private String answer;
-    private boolean relevant;
-    private int score;
+import lombok.Data;
 
-    public AiResponseDto() {
-    }
-
-    public AiResponseDto(String answer, boolean relevant, int score) {
-        this.answer = answer;
-        this.relevant = relevant;
-        this.score = score;
-    }
-
-    public String getAnswer() {
-        return answer;
-    }
-
-    public void setAnswer(String answer) {
-        this.answer = answer;
-    }
-
-    public boolean isRelevant() {
-        return relevant;
-    }
-
-    public void setRelevant(boolean relevant) {
-        this.relevant = relevant;
-    }
-
-    public int getScore() {
-        return score;
-    }
-
-    public void setScore(int score) {
-        this.score = score;
-    }
+@Data
+public class StudentDto {
+    private String loginId;
+    private String email;
+    private String password;
+    private String name;
+    private String role;
+    private String className;
 }
