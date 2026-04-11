@@ -6,7 +6,6 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
-import Header from "./components/Header";
 import type { Route } from "./+types/root";
 import "./app.css";
 
@@ -46,8 +45,6 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-50">
 
-      {/* ✅ 공통 헤더 */}
-      <Header />
 
       {/* ✅ 페이지 영역 */}
       <main className="h-[calc(100vh-64px)]">
