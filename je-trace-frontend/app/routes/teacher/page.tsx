@@ -61,7 +61,7 @@ export default function TeacherPage() {
       if (!loginId || loginRole !== "TEACHER") return;
 
       try {
-        const response = await axios.get("/teacher/profile", {
+        const response = await api.get("/teacher/profile", {
           params: { loginId },
         });
 
@@ -83,7 +83,7 @@ export default function TeacherPage() {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const response = await axios.get("/teacher/tasks", {
+        const response = await api.get("/teacher/tasks", {
           params: { loginId },
         });
         setTasks(response.data ?? []);

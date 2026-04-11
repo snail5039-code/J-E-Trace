@@ -1,7 +1,7 @@
 import { ClipboardList, Search, Sparkles, UserRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import axios from "axios";
+import api from "../../lib/axios";
 
 type SimilarityItem = {
     id: number;
@@ -54,7 +54,7 @@ export default function TeacherSimilarityPage() {
             if (!loginId || loginRole !== "TEACHER") return;
 
             try {
-                const response = await axios.get("/teacher/profile", {
+                const response = await api.get("/teacher/profile", {
                     params: { loginId },
                 });
 
@@ -74,7 +74,7 @@ export default function TeacherSimilarityPage() {
     useEffect(() => {
         const fetchSimilarityResults = async () => {
             try {
-                const response = await axios.get("/teacher/tasks/similarity", {
+                const response = await api.get("/teacher/tasks/similarity", {
                     params: { loginId },
                 });
                 setItems(response.data);
