@@ -1,9 +1,9 @@
 package com.jetrace.backend.testController;
 
+import java.util.Map;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Map;
 
 @RestController
 public class TestController {
@@ -12,7 +12,7 @@ public class TestController {
     public Map<String, Object> test() {
         return Map.of(
                 "message", "백엔드 연결 성공",
-                "status", true
-        );
+                "status", true);
     }
+
 }

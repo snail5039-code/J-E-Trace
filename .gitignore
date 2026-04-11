@@ -33,6 +33,7 @@ out/
 bin/
 .gradle/
 build/
+ai.yml
 
 # IntelliJ / Eclipse
 *.iml
