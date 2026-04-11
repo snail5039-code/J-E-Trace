@@ -122,8 +122,8 @@ export default function TeacherTaskDetailPage() {
 
     try {
       const [taskResponse, studentResponse] = await Promise.all([
-        axios.get(`http://localhost:8080/teacher/tasks/${taskId}`),
-        axios.get(`http://localhost:8080/teacher/tasks/${taskId}/taskSubmissions`),
+        axios.get(`http://localhost:8080/teacher/tasks/${taskId}`, { params: { loginId } }),
+        axios.get(`http://localhost:8080/teacher/tasks/${taskId}/taskSubmissions`, { params: { loginId } }),
       ]);
 
       setAssignment(taskResponse.data);
@@ -141,7 +141,7 @@ export default function TeacherTaskDetailPage() {
 
   useEffect(() => {
     fetchData();
-  }, [taskId]);
+  }, [taskId, loginId]);
 
   const handleRunSimilarityAnalysis = async () => {
     if (!taskId) return;
@@ -150,7 +150,7 @@ export default function TeacherTaskDetailPage() {
     setNotice({ type: "info", text: "유사도 분석 실행 중..." });
 
     try {
-      await axios.post(`http://localhost:8080/teacher/tasks/${taskId}/similarity/run`);
+      await axios.post(`http://localhost:8080/teacher/tasks/${taskId}/similarity/run`, null, { params: { loginId } });
       await fetchData();
 
       setNotice({

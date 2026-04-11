@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TaskCreateRequest {
     private Long id;
+    private String loginId;
     private String title;
     private String className;
     private String description;

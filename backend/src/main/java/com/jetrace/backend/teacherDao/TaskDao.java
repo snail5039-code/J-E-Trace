@@ -710,4 +710,14 @@ public interface TaskDao {
             )
             """)
     void syncAiUsedByLogs();
+
+    @Select("""
+        SELECT managed_classes
+        FROM users
+        WHERE login_id = #{loginId}
+          AND role = 'TEACHER'
+          AND approved = TRUE
+        LIMIT 1
+        """)
+    String findManagedClassesByLoginId(@Param("loginId") String loginId);
 }

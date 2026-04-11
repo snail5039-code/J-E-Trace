@@ -113,9 +113,10 @@ export default function TeacherSubmissionDetailPage() {
 
     const fetchData = async () => {
       try {
-        const taskResponse = await axios.get(`http://localhost:8080/teacher/tasks/${taskId}`);
+        const taskResponse = await axios.get(`http://localhost:8080/teacher/tasks/${taskId}`, { params: { loginId } });
         const submissionResponse = await axios.get(
-          `http://localhost:8080/teacher/tasks/submissions/${submissionId}`
+          `http://localhost:8080/teacher/tasks/submissions/${submissionId}`,
+          { params: { loginId } }
         );
 
         setTask(taskResponse.data);
@@ -123,7 +124,7 @@ export default function TeacherSubmissionDetailPage() {
 
         if (submissionResponse.data?.studentName) {
           const logResponse = await axios.get(`http://localhost:8080/teacher/tasks/${taskId}/logs`, {
-            params: { studentName: submissionResponse.data.studentName },
+            params: { loginId, studentName: submissionResponse.data.studentName },
           });
           setLogs(logResponse.data);
         }
@@ -135,7 +136,7 @@ export default function TeacherSubmissionDetailPage() {
     };
 
     fetchData();
-  }, [taskId, submissionId]);
+  }, [taskId, submissionId, loginId]);
 
   if (loading) {
     return <div className="p-6">제출 상세 정보를 불러오는 중...</div>;

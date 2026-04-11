@@ -3,6 +3,13 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import axios from "axios";
 
+type TeacherProfileResponse = {
+  name?: string;
+  subject?: string;
+  managedClasses?: string;
+  className?: string;
+};
+
 export default function TeacherCreateTaskPage() {
   const navigate = useNavigate();
 
@@ -10,34 +17,41 @@ export default function TeacherCreateTaskPage() {
     typeof window !== "undefined" ? localStorage.getItem("loginId") ?? "" : "";
   const loginRole =
     typeof window !== "undefined" ? localStorage.getItem("loginRole") ?? "" : "";
+
   const [teacherName, setTeacherName] = useState(
     typeof window !== "undefined" ? localStorage.getItem("loginName") ?? "" : ""
   );
   const [teacherSubject, setTeacherSubject] = useState(
     typeof window !== "undefined" ? localStorage.getItem("subject") ?? "" : ""
   );
-  useEffect(() => {
-    const fetchTeacherProfile = async () => {
-      if (!loginId || loginRole !== "TEACHER") return;
 
-      try {
-        const response = await axios.get("http://localhost:8080/teacher/profile", {
-          params: { loginId },
-        });
+  const [managedClasses, setManagedClasses] = useState<string[]>([]);
 
-        const data = response.data;
-        setTeacherName(data?.name ?? "");
-        setTeacherSubject(data?.subject ?? "");
+  const [form, setForm] = useState({
+    title: "",
+    className: "",
+    description: "",
+    dueDate: "",
+    aiAllowed: true,
+  });
 
-        localStorage.setItem("loginName", data?.name ?? "");
-        localStorage.setItem("subject", data?.subject ?? "");
-      } catch (error) {
-        console.error("교사 프로필 조회 실패:", error);
-      }
-    };
+  const parseManagedClasses = (data: TeacherProfileResponse) => {
+    const raw = data?.managedClasses?.trim();
 
-    fetchTeacherProfile();
-  }, [loginId, loginRole]);
+    if (raw) {
+      return raw
+        .split(",")
+        .map((v) => v.trim())
+        .filter(Boolean);
+    }
+
+    if (data?.className?.trim()) {
+      return [data.className.trim()];
+    }
+
+    return [];
+  };
+
   useEffect(() => {
     if (!loginId) {
       alert("로그인이 필요합니다.");
@@ -51,13 +65,47 @@ export default function TeacherCreateTaskPage() {
       return;
     }
   }, [loginId, loginRole, navigate]);
-  const [form, setForm] = useState({
-    title: "",
-    className: "",
-    description: "",
-    dueDate: "",
-    aiAllowed: true,
-  });
+
+  useEffect(() => {
+    const fetchTeacherProfile = async () => {
+      if (!loginId || loginRole !== "TEACHER") return;
+
+      try {
+        const response = await axios.get<TeacherProfileResponse>(
+          "http://localhost:8080/teacher/profile",
+          {
+            params: { loginId },
+          }
+        );
+
+        const data = response.data ?? {};
+
+        setTeacherName(data.name ?? "");
+        setTeacherSubject(data.subject ?? "");
+
+        localStorage.setItem("loginName", data.name ?? "");
+        localStorage.setItem("subject", data.subject ?? "");
+
+        const classes = parseManagedClasses(data);
+        setManagedClasses(classes);
+
+        setForm((prev) => ({
+          ...prev,
+          className:
+            classes.length > 0
+              ? classes.includes(prev.className)
+                ? prev.className
+                : classes[0]
+              : "",
+        }));
+      } catch (error) {
+        console.error("교사 프로필 조회 실패:", error);
+        alert("교사 정보를 불러오지 못했습니다.");
+      }
+    };
+
+    fetchTeacherProfile();
+  }, [loginId, loginRole]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -82,8 +130,19 @@ export default function TeacherCreateTaskPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    if (!form.className) {
+      alert("담당 반 정보를 확인할 수 없습니다.");
+      return;
+    }
+
+    if (managedClasses.length > 0 && !managedClasses.includes(form.className)) {
+      alert("담당 반의 과제만 등록할 수 있습니다.");
+      return;
+    }
+
     try {
       await axios.post("http://localhost:8080/teacher/tasks", {
+        loginId,
         title: form.title,
         className: form.className,
         description: form.description,
@@ -101,14 +160,11 @@ export default function TeacherCreateTaskPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f7fb] text-slate-800">
-      {/* HEADER */}
       <div className="border-b border-slate-200 bg-white px-6 py-5 shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-slate-900">과제 등록</h1>
-            <p className="text-sm text-slate-500">
-              새로운 과제를 생성합니다.
-            </p>
+            <p className="text-sm text-slate-500">새로운 과제를 생성합니다.</p>
           </div>
 
           <button
@@ -122,8 +178,6 @@ export default function TeacherCreateTaskPage() {
 
       <div className="mx-auto max-w-7xl px-6 py-6">
         <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
-
-          {/* SIDEBAR */}
           <aside className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="text-center">
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-lg bg-slate-100 text-slate-700 font-bold">
@@ -153,26 +207,21 @@ export default function TeacherCreateTaskPage() {
             </div>
           </aside>
 
-          {/* MAIN */}
           <main className="space-y-6">
-
-            {/* FORM */}
             <section className="rounded-xl border border-slate-200 bg-white shadow-sm">
-              <div className="border-b px-5 py-4 bg-slate-50">
+              <div className="border-b bg-slate-50 px-5 py-4">
                 <h2 className="text-lg font-semibold text-slate-900">
                   새 과제 정보 입력
                 </h2>
-                <p className="text-sm text-slate-500 mt-1">
+                <p className="mt-1 text-sm text-slate-500">
                   과제 기본 정보를 설정하세요.
                 </p>
               </div>
 
               <form onSubmit={handleSubmit} className="p-5">
                 <div className="overflow-hidden rounded-lg border border-slate-200">
-
-                  {/* 과제명 */}
-                  <div className="grid md:grid-cols-[180px_1fr] border-b">
-                    <div className="bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700 border-r">
+                  <div className="grid border-b md:grid-cols-[180px_1fr]">
+                    <div className="border-r bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700">
                       과제명
                     </div>
                     <div className="px-4 py-3">
@@ -181,15 +230,14 @@ export default function TeacherCreateTaskPage() {
                         name="title"
                         value={form.title}
                         onChange={handleChange}
-                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 outline-none"
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900"
                         required
                       />
                     </div>
                   </div>
 
-                  {/* 반 */}
-                  <div className="grid md:grid-cols-[180px_1fr] border-b">
-                    <div className="bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700 border-r">
+                  <div className="grid border-b md:grid-cols-[180px_1fr]">
+                    <div className="border-r bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700">
                       대상 반
                     </div>
                     <div className="px-4 py-3">
@@ -199,19 +247,23 @@ export default function TeacherCreateTaskPage() {
                         onChange={handleChange}
                         className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                         required
+                        disabled={managedClasses.length <= 1}
                       >
-                        <option value="">반 선택</option>
-                        <option value="A">A</option>
-                        <option value="B">B</option>
-                        <option value="C">C</option>
-                        <option value="D">D</option>
+                        {managedClasses.length === 0 ? (
+                          <option value="">반 정보 없음</option>
+                        ) : (
+                          managedClasses.map((className) => (
+                            <option key={className} value={className}>
+                              {className}
+                            </option>
+                          ))
+                        )}
                       </select>
                     </div>
                   </div>
 
-                  {/* 설명 */}
-                  <div className="grid md:grid-cols-[180px_1fr] border-b">
-                    <div className="bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700 border-r">
+                  <div className="grid border-b md:grid-cols-[180px_1fr]">
+                    <div className="border-r bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700">
                       과제 설명
                     </div>
                     <div className="px-4 py-3">
@@ -220,14 +272,13 @@ export default function TeacherCreateTaskPage() {
                         value={form.description}
                         onChange={handleChange}
                         rows={6}
-                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm resize-none"
+                        className="w-full resize-none rounded-lg border border-slate-300 px-3 py-2 text-sm"
                       />
                     </div>
                   </div>
 
-                  {/* 마감일 */}
-                  <div className="grid md:grid-cols-[180px_1fr] border-b">
-                    <div className="bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700 border-r">
+                  <div className="grid border-b md:grid-cols-[180px_1fr]">
+                    <div className="border-r bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700">
                       마감일
                     </div>
                     <div className="px-4 py-3">
@@ -242,58 +293,51 @@ export default function TeacherCreateTaskPage() {
                     </div>
                   </div>
 
-                  {/* AI 허용 */}
                   <div className="grid md:grid-cols-[180px_1fr]">
-                    <div className="bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700 border-r">
+                    <div className="border-r bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700">
                       AI 사용
                     </div>
                     <div className="px-4 py-3">
                       <label className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-                        <span className="text-sm text-slate-800">
-                          AI 사용 허용
-                        </span>
+                        <span className="text-sm text-slate-800">AI 사용 허용</span>
                         <input
                           type="checkbox"
                           name="aiAllowed"
                           checked={form.aiAllowed}
                           onChange={handleChange}
-                          className="h-5 w-5"
                         />
                       </label>
                     </div>
                   </div>
                 </div>
 
-                {/* 버튼 */}
                 <div className="mt-5 flex justify-end gap-3">
                   <button
                     type="button"
                     onClick={() => navigate("/teacher")}
-                    className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                    className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
                   >
                     취소
                   </button>
-
                   <button
                     type="submit"
-                    className="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+                    className="rounded-lg bg-slate-900 px-5 py-2 text-sm font-semibold text-white hover:bg-slate-800"
                   >
-                    <FilePlus2 size={16} />
                     등록
                   </button>
                 </div>
               </form>
             </section>
 
-            {/* 안내 */}
             <section className="rounded-xl border border-slate-200 bg-white shadow-sm">
-              <div className="border-b px-5 py-3 bg-slate-50 text-sm font-semibold text-slate-800">
-                안내
+              <div className="border-b px-5 py-4">
+                <h2 className="text-base font-semibold text-slate-900">안내</h2>
               </div>
-              <div className="px-5 py-4 text-sm text-slate-600 space-y-1">
-                <p>• 반과 마감일은 필수입니다.</p>
-                <p>• AI 허용 시 로그 및 분석 기능 활성화됩니다.</p>
-                <p>• 제출 후 결과는 관리 페이지에서 확인 가능합니다.</p>
+              <div className="px-5 py-4 text-sm text-slate-600">
+                <ul className="list-disc space-y-1 pl-5">
+                  <li>반과 마감일은 필수입니다.</li>
+                  <li>담당 반에만 과제를 등록할 수 있습니다.</li>
+                </ul>
               </div>
             </section>
           </main>

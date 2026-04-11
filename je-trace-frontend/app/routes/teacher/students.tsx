@@ -130,7 +130,9 @@ export default function TeacherStudentsPage() {
 
     const fetchRequests = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/teacher/tasks/studentRequests");
+            const response = await axios.get("http://localhost:8080/teacher/tasks/studentRequests", {
+                params: { loginId },
+            });
             setRequests(response.data);
         } catch (error) {
             console.error("학생 신청 목록 조회 실패:", error);
@@ -145,7 +147,9 @@ export default function TeacherStudentsPage() {
 
     const fetchStudents = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/teacher/tasks/students");
+            const response = await axios.get("http://localhost:8080/teacher/tasks/students", {
+                params: { loginId },
+            });
             setStudents(response.data);
         } catch (error) {
             console.error("학생 목록 조회 실패:", error);
@@ -162,7 +166,9 @@ export default function TeacherStudentsPage() {
         setDetailLoading(true);
 
         try {
-            const response = await axios.get(`http://localhost:8080/teacher/tasks/students/${studentId}`);
+            const response = await axios.get(`http://localhost:8080/teacher/tasks/students/${studentId}`, {
+                params: { loginId },
+            });
             const data = response.data;
 
             setStudentDetail(data);
@@ -186,7 +192,9 @@ export default function TeacherStudentsPage() {
         setScoreLoading(true);
 
         try {
-            const response = await axios.get(`http://localhost:8080/teacher/tasks/students/${studentId}/taskScores`);
+            const response = await axios.get(`http://localhost:8080/teacher/tasks/students/${studentId}/taskScores`, {
+                params: { loginId },
+            });
             setTaskScores(response.data);
         } catch (error) {
             console.error("학생 과제별 점수 조회 실패:", error);
@@ -212,7 +220,7 @@ export default function TeacherStudentsPage() {
     useEffect(() => {
         fetchRequests();
         fetchStudents();
-    }, []);
+    }, [loginId]);
 
     useEffect(() => {
         if (!selectedStudentId) {
@@ -230,7 +238,9 @@ export default function TeacherStudentsPage() {
         setNotice({ type: "info", text: "학생 신청 승인 중..." });
 
         try {
-            await axios.post(`http://localhost:8080/teacher/tasks/studentRequests/${requestId}/approve`);
+            await axios.post(`http://localhost:8080/teacher/tasks/studentRequests/${requestId}/approve`, null, {
+                params: { loginId },
+            });
             await Promise.all([fetchRequests(), fetchStudents()]);
 
             setNotice({
@@ -253,7 +263,9 @@ export default function TeacherStudentsPage() {
         setNotice({ type: "info", text: "학생 신청 거절 처리 중..." });
 
         try {
-            await axios.post(`http://localhost:8080/teacher/tasks/studentRequests/${requestId}/reject`);
+            await axios.post(`http://localhost:8080/teacher/tasks/studentRequests/${requestId}/reject`, null, {
+                params: { loginId },
+            });
             await fetchRequests();
 
             setNotice({
@@ -302,6 +314,9 @@ export default function TeacherStudentsPage() {
                 {
                     studentName: editForm.studentName.trim(),
                     className: editForm.className.trim(),
+                },
+                {
+                    params: { loginId },
                 }
             );
 
@@ -353,7 +368,10 @@ export default function TeacherStudentsPage() {
         try {
             await axios.put(
                 `http://localhost:8080/teacher/tasks/students/${selectedStudentId}/taskScores/${submissionId}`,
-                { score }
+                { score },
+                {
+                    params: { loginId },
+                }
             );
 
             await refreshSelectedStudent(selectedStudentId);

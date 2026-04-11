@@ -96,7 +96,9 @@ export default function TeacherLogsPage() {
     useEffect(() => {
         const fetchTasks = async () => {
             try {
-                const response = await axios.get("http://localhost:8080/teacher/tasks");
+                const response = await axios.get("http://localhost:8080/teacher/tasks", {
+                    params: { loginId },
+                });
                 setTasks(response.data);
             } catch (error) {
                 console.error("과제 목록 조회 실패:", error);
@@ -106,7 +108,7 @@ export default function TeacherLogsPage() {
         };
 
         fetchTasks();
-    }, []);
+    }, [loginId]);
 
     useEffect(() => {
         if (!selectedTaskId) {
@@ -120,7 +122,8 @@ export default function TeacherLogsPage() {
             setStudentLoading(true);
             try {
                 const response = await axios.get(
-                    `http://localhost:8080/teacher/tasks/${selectedTaskId}/taskSubmissions`
+                    `http://localhost:8080/teacher/tasks/${selectedTaskId}/taskSubmissions`,
+                    { params: { loginId } }
                 );
                 setStudents(response.data);
                 setSelectedStudentName("");
@@ -136,7 +139,7 @@ export default function TeacherLogsPage() {
         };
 
         fetchStudents();
-    }, [selectedTaskId]);
+    }, [selectedTaskId, loginId]);
 
     useEffect(() => {
         if (!selectedTaskId || !selectedStudentName) {
@@ -151,6 +154,7 @@ export default function TeacherLogsPage() {
                     `http://localhost:8080/teacher/tasks/${selectedTaskId}/logs`,
                     {
                         params: {
+                            loginId,
                             studentName: selectedStudentName,
                         },
                     }
@@ -167,7 +171,7 @@ export default function TeacherLogsPage() {
         };
 
         fetchLogs();
-    }, [selectedTaskId, selectedStudentName]);
+    }, [selectedTaskId, selectedStudentName, loginId]);
 
     const selectedTask = tasks.find((task) => String(task.id) === selectedTaskId);
 

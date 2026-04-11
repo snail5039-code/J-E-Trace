@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.jetrace.backend.teacherDao.TaskDao;
+import com.jetrace.backend.teacherDao.TeacherProfileDao;
 import com.jetrace.backend.teacherDto.AiJudgeResult;
 import com.jetrace.backend.teacherDto.SimilarityResponse;
 import com.jetrace.backend.teacherDto.StudentRequestResponse;
@@ -24,6 +26,7 @@ import com.jetrace.backend.teacherDto.TaskAiLogResponse;
 import com.jetrace.backend.teacherDto.TaskCreateRequest;
 import com.jetrace.backend.teacherDto.TaskResponse;
 import com.jetrace.backend.teacherDto.TaskSubmissionResponse;
+import com.jetrace.backend.teacherDto.TeacherProfileResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,11 +35,13 @@ import lombok.RequiredArgsConstructor;
 public class TaskService {
 
     private final TaskDao taskDao;
+    private final TeacherProfileDao teacherProfileDao;
     private final AiJudgeService aiJudgeService;
 
     @Transactional
     public void createTask(TaskCreateRequest request) {
         validateTaskCreateRequest(request);
+        validateTeacherAccessToClass(request.getLoginId(), request.getClassName());
 
         if (request.getDueDate() != null) {
             request.setDueDate(request.getDueDate().replace("T", " "));
@@ -50,12 +55,16 @@ public class TaskService {
         }
     }
 
-    public List<TaskResponse> getTaskList() {
-        return taskDao.findAllTasks();
+    public List<TaskResponse> getTaskList(String loginId) {
+        Set<String> managedClasses = getManagedClassSet(loginId);
+
+        return taskDao.findAllTasks().stream()
+                .filter(task -> managedClasses.contains(normalizeClassName(task.getClassName())))
+                .collect(Collectors.toList());
     }
 
-    public TaskResponse getTaskDetail(Long taskId) {
-        TaskResponse task = taskDao.findTaskById(taskId);
+    public TaskResponse getTaskDetail(String loginId, Long taskId) {
+        TaskResponse task = getAccessibleTask(loginId, taskId);
 
         if (task == null) {
             throw new RuntimeException("과제 정보를 찾을 수 없습니다.");
@@ -64,35 +73,39 @@ public class TaskService {
         return task;
     }
 
-    public List<TaskSubmissionResponse> getTaskSubmissions(Long taskId) {
-        TaskResponse task = taskDao.findTaskById(taskId);
-
-        if (task == null) {
-            throw new RuntimeException("과제 정보를 찾을 수 없습니다.");
-        }
-
+    public List<TaskSubmissionResponse> getTaskSubmissions(String loginId, Long taskId) {
+        getAccessibleTask(loginId, taskId);
         return taskDao.findTaskSubmissionsByTaskId(taskId);
     }
 
-    public List<TaskAiLogResponse> getTaskAiLogs(Long taskId, String studentName) {
+    public List<TaskAiLogResponse> getTaskAiLogs(String loginId, Long taskId, String studentName) {
         if (studentName == null || studentName.isBlank()) {
             throw new RuntimeException("학생명이 필요합니다.");
         }
 
+        TaskResponse task = getAccessibleTask(loginId, taskId);
+        validateStudentAccessByTaskClass(task.getClassName(), studentName);
+
         return taskDao.findTaskAiLogsByTaskIdAndStudentName(taskId, studentName);
     }
 
-    public List<StudentRequestResponse> getPendingStudentRequests() {
-        return taskDao.findPendingStudentRequests();
+    public List<StudentRequestResponse> getPendingStudentRequests(String loginId) {
+        Set<String> managedClasses = getManagedClassSet(loginId);
+
+        return taskDao.findPendingStudentRequests().stream()
+                .filter(request -> managedClasses.contains(normalizeClassName(request.getClassName())))
+                .collect(Collectors.toList());
     }
 
     @Transactional
-    public void approveStudentRequest(Long requestId) {
+    public void approveStudentRequest(String loginId, Long requestId) {
         StudentRequestResponse request = taskDao.findStudentRequestById(requestId);
 
         if (request == null) {
             throw new RuntimeException("학생 신청 정보를 찾을 수 없습니다.");
         }
+
+        validateTeacherAccessToClass(loginId, request.getClassName());
 
         if ("APPROVED".equalsIgnoreCase(request.getStatus())) {
             throw new RuntimeException("이미 승인된 신청입니다.");
@@ -118,12 +131,15 @@ public class TaskService {
         syncStudentSubmissionsByClass(request.getStudentName(), request.getClassName());
     }
 
-    public void rejectStudentRequest(Long requestId) {
+    @Transactional
+    public void rejectStudentRequest(String loginId, Long requestId) {
         StudentRequestResponse request = taskDao.findStudentRequestById(requestId);
 
         if (request == null) {
             throw new RuntimeException("학생 신청 정보를 찾을 수 없습니다.");
         }
+
+        validateTeacherAccessToClass(loginId, request.getClassName());
 
         if ("APPROVED".equalsIgnoreCase(request.getStatus())) {
             throw new RuntimeException("이미 승인된 신청은 거절할 수 없습니다.");
@@ -136,27 +152,34 @@ public class TaskService {
         taskDao.rejectStudentRequest(requestId);
     }
 
-    public List<StudentResponse> getStudentList() {
-        return taskDao.findAllStudents();
+    public List<StudentResponse> getStudentList(String loginId) {
+        Set<String> managedClasses = getManagedClassSet(loginId);
+
+        return taskDao.findAllStudents().stream()
+                .filter(student -> managedClasses.contains(normalizeClassName(student.getClassName())))
+                .collect(Collectors.toList());
     }
 
-    public StudentResponse getStudentDetail(Long studentId) {
+    public StudentResponse getStudentDetail(String loginId, Long studentId) {
         StudentResponse student = taskDao.findStudentById(studentId);
 
         if (student == null) {
             throw new RuntimeException("학생 정보를 찾을 수 없습니다.");
         }
 
+        validateTeacherAccessToClass(loginId, student.getClassName());
         return student;
     }
 
     @Transactional
-    public void updateStudentInfo(Long studentId, StudentResponse request) {
+    public void updateStudentInfo(String loginId, Long studentId, StudentResponse request) {
         StudentResponse currentStudent = taskDao.findStudentById(studentId);
 
         if (currentStudent == null) {
             throw new RuntimeException("학생 정보를 찾을 수 없습니다.");
         }
+
+        validateTeacherAccessToClass(loginId, currentStudent.getClassName());
 
         if (request.getStudentName() == null || request.getStudentName().isBlank()) {
             throw new RuntimeException("학생명을 입력해주세요.");
@@ -165,6 +188,8 @@ public class TaskService {
         if (request.getClassName() == null || request.getClassName().isBlank()) {
             throw new RuntimeException("반 정보를 입력해주세요.");
         }
+
+        validateTeacherAccessToClass(loginId, request.getClassName());
 
         int duplicateCount = taskDao.countOtherStudentByNameAndClassName(
                 studentId,
@@ -194,24 +219,18 @@ public class TaskService {
         taskDao.syncStudentFinalScore(studentId);
     }
 
-    public List<StudentTaskScoreResponse> getStudentTaskScores(Long studentId) {
-        StudentResponse student = taskDao.findStudentById(studentId);
+    public List<StudentTaskScoreResponse> getStudentTaskScores(String loginId, Long studentId) {
+        StudentResponse student = getStudentDetail(loginId, studentId);
+        String studentClassName = normalizeClassName(student.getClassName());
 
-        if (student == null) {
-            throw new RuntimeException("학생 정보를 찾을 수 없습니다.");
-        }
-
-        return taskDao.findStudentTaskScoresByStudentName(student.getStudentName());
+        return taskDao.findStudentTaskScoresByStudentName(student.getStudentName()).stream()
+                .filter(score -> studentClassName.equals(normalizeClassName(score.getClassName())))
+                .collect(Collectors.toList());
     }
 
     @Transactional
-    public void updateStudentTaskScore(Long studentId, Long submissionId, Integer score) {
-        StudentResponse student = taskDao.findStudentById(studentId);
-
-        if (student == null) {
-            throw new RuntimeException("학생 정보를 찾을 수 없습니다.");
-        }
-
+    public void updateStudentTaskScore(String loginId, Long studentId, Long submissionId, Integer score) {
+        StudentResponse student = getStudentDetail(loginId, studentId);
         TaskSubmissionResponse submission = taskDao.findTaskSubmissionDetailById(submissionId);
 
         if (submission == null) {
@@ -222,18 +241,26 @@ public class TaskService {
             throw new RuntimeException("해당 학생의 제출 정보가 아닙니다.");
         }
 
+        TaskResponse task = getAccessibleTask(loginId, submission.getTaskId());
+        if (!normalizeClassName(student.getClassName()).equals(normalizeClassName(task.getClassName()))) {
+            throw new RuntimeException("해당 학생 반의 과제만 수정할 수 있습니다.");
+        }
+
         validateScore(score);
 
         taskDao.updateTaskSubmissionScore(submissionId, score);
         taskDao.syncStudentFinalScore(studentId);
     }
 
-    public TaskSubmissionResponse getTaskSubmissionDetail(Long submissionId) {
+    public TaskSubmissionResponse getTaskSubmissionDetail(String loginId, Long submissionId) {
         TaskSubmissionResponse submission = taskDao.findTaskSubmissionDetailById(submissionId);
 
         if (submission == null) {
             throw new RuntimeException("제출 정보를 찾을 수 없습니다.");
         }
+
+        TaskResponse task = getAccessibleTask(loginId, submission.getTaskId());
+        validateStudentAccessByTaskClass(task.getClassName(), submission.getStudentName());
 
         SimilarityResponse topStudentSimilarity = taskDao.findTopStudentSimilarity(
                 submission.getTaskId(),
@@ -262,13 +289,15 @@ public class TaskService {
     }
 
     @Transactional
-    public void updateTaskSubmissionEvaluation(Long submissionId, TaskSubmissionResponse request) {
+    public void updateTaskSubmissionEvaluation(String loginId, Long submissionId, TaskSubmissionResponse request) {
         TaskSubmissionResponse submission = taskDao.findTaskSubmissionDetailById(submissionId);
 
         if (submission == null) {
             throw new RuntimeException("제출 정보를 찾을 수 없습니다.");
         }
 
+        TaskResponse task = getAccessibleTask(loginId, submission.getTaskId());
+        validateStudentAccessByTaskClass(task.getClassName(), submission.getStudentName());
         validateScore(request.getScore());
 
         taskDao.updateTaskSubmissionEvaluation(
@@ -277,20 +306,19 @@ public class TaskService {
                 request.getTeacherComment()
         );
 
-        StudentResponse student = findStudentByName(submission.getStudentName());
+        StudentResponse student = findStudentByNameAndClassName(
+                submission.getStudentName(),
+                task.getClassName()
+        );
+
         if (student != null) {
             taskDao.syncStudentFinalScore(student.getId());
         }
     }
 
     @Transactional
-    public void runSimilarityAnalysis(Long taskId) {
-        TaskResponse task = taskDao.findTaskById(taskId);
-
-        if (task == null) {
-            throw new RuntimeException("과제 정보를 찾을 수 없습니다.");
-        }
-
+    public void runSimilarityAnalysis(String loginId, Long taskId) {
+        TaskResponse task = getAccessibleTask(loginId, taskId);
         List<TaskSubmissionResponse> submissions = taskDao.findTaskSubmissionsByTaskId(taskId);
 
         taskDao.deleteSimilarityResultsByTaskId(taskId);
@@ -305,11 +333,14 @@ public class TaskService {
 
         for (int i = 0; i < submittedList.size(); i++) {
             TaskSubmissionResponse a = submittedList.get(i);
+            validateStudentAccessByTaskClass(task.getClassName(), a.getStudentName());
+
             List<TaskAiLogResponse> aLogs =
                     taskDao.findTaskAiLogsByTaskIdAndStudentName(taskId, a.getStudentName());
 
             for (int j = i + 1; j < submittedList.size(); j++) {
                 TaskSubmissionResponse b = submittedList.get(j);
+                validateStudentAccessByTaskClass(task.getClassName(), b.getStudentName());
 
                 int similarity = calculateSimilarity(a.getContent(), b.getContent());
 
@@ -407,15 +438,31 @@ public class TaskService {
         }
     }
 
-    public List<SimilarityResponse> getSimilarityResults() {
-        return taskDao.findAllSimilarityResults();
+    public List<SimilarityResponse> getSimilarityResults(String loginId) {
+        Set<String> managedClasses = getManagedClassSet(loginId);
+
+        return taskDao.findAllSimilarityResults().stream()
+                .filter(result -> {
+                    TaskResponse task = taskDao.findTaskById(result.getTaskId());
+                    return task != null && managedClasses.contains(normalizeClassName(task.getClassName()));
+                })
+                .collect(Collectors.toList());
     }
 
-    public SimilarityResponse getSimilarityResultDetail(Long similarityId) {
+    public SimilarityResponse getSimilarityResultDetail(String loginId, Long similarityId) {
         SimilarityResponse result = taskDao.findSimilarityResultById(similarityId);
 
         if (result == null) {
             throw new RuntimeException("유사도 분석 결과를 찾을 수 없습니다.");
+        }
+
+        TaskResponse task = getAccessibleTask(loginId, result.getTaskId());
+
+        if ("STUDENT_TO_STUDENT".equals(result.getCompareType())) {
+            validateStudentAccessByTaskClass(task.getClassName(), result.getStudentName());
+            validateStudentAccessByTaskClass(task.getClassName(), result.getTargetName());
+        } else if ("STUDENT_TO_AI_LOG".equals(result.getCompareType())) {
+            validateStudentAccessByTaskClass(task.getClassName(), result.getStudentName());
         }
 
         return result;
@@ -437,6 +484,10 @@ public class TaskService {
             throw new RuntimeException("과제 정보가 없습니다.");
         }
 
+        if (request.getLoginId() == null || request.getLoginId().isBlank()) {
+            throw new RuntimeException("교사 로그인 아이디가 필요합니다.");
+        }
+
         if (request.getTitle() == null || request.getTitle().isBlank()) {
             throw new RuntimeException("과제명을 입력해주세요.");
         }
@@ -447,6 +498,10 @@ public class TaskService {
 
         if (request.getDueDate() == null || request.getDueDate().isBlank()) {
             throw new RuntimeException("마감일을 입력해주세요.");
+        }
+
+        if (request.getAiAllowed() == null) {
+            request.setAiAllowed(Boolean.TRUE);
         }
     }
 
@@ -468,11 +523,84 @@ public class TaskService {
         }
     }
 
-    private StudentResponse findStudentByName(String studentName) {
+    private StudentResponse findStudentByNameAndClassName(String studentName, String className) {
+        String normalizedClassName = normalizeClassName(className);
+
         return taskDao.findAllStudents().stream()
                 .filter(student -> studentName.equals(student.getStudentName()))
+                .filter(student -> normalizedClassName.equals(normalizeClassName(student.getClassName())))
                 .findFirst()
                 .orElse(null);
+    }
+
+    private void validateStudentAccessByTaskClass(String taskClassName, String studentName) {
+        if (studentName == null || studentName.isBlank()) {
+            throw new RuntimeException("학생명이 필요합니다.");
+        }
+
+        StudentResponse student = taskDao.findAllStudents().stream()
+                .filter(item -> studentName.equals(item.getStudentName()))
+                .filter(item -> normalizeClassName(taskClassName).equals(normalizeClassName(item.getClassName())))
+                .findFirst()
+                .orElse(null);
+
+        if (student == null) {
+            throw new RuntimeException("해당 반 학생 정보에만 접근할 수 있습니다.");
+        }
+    }
+
+    private TaskResponse getAccessibleTask(String loginId, Long taskId) {
+        TaskResponse task = taskDao.findTaskById(taskId);
+
+        if (task == null) {
+            throw new RuntimeException("과제 정보를 찾을 수 없습니다.");
+        }
+
+        validateTeacherAccessToClass(loginId, task.getClassName());
+        return task;
+    }
+
+    private Set<String> getManagedClassSet(String loginId) {
+        if (loginId == null || loginId.isBlank()) {
+            throw new RuntimeException("교사 로그인 아이디가 필요합니다.");
+        }
+
+        TeacherProfileResponse profile = teacherProfileDao.findTeacherProfile(loginId);
+        if (profile == null) {
+            throw new RuntimeException("교사 정보를 찾을 수 없습니다.");
+        }
+
+        String managedClasses = profile.getManagedClasses();
+        if (managedClasses == null || managedClasses.isBlank()) {
+            throw new RuntimeException("관리 반 정보가 없습니다.");
+        }
+
+        Set<String> managedClassSet = Arrays.stream(managedClasses.split(","))
+                .map(this::normalizeClassName)
+                .filter(value -> !value.isBlank())
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        if (managedClassSet.isEmpty()) {
+            throw new RuntimeException("관리 반 정보가 없습니다.");
+        }
+
+        return managedClassSet;
+    }
+
+    private void validateTeacherAccessToClass(String loginId, String className) {
+        Set<String> managedClasses = getManagedClassSet(loginId);
+        String normalizedClassName = normalizeClassName(className);
+
+        if (!managedClasses.contains(normalizedClassName)) {
+            throw new RuntimeException("해당 반 정보에 접근할 수 없습니다.");
+        }
+    }
+
+    private String normalizeClassName(String className) {
+        if (className == null) {
+            return "";
+        }
+        return className.trim().toUpperCase();
     }
 
     private int calculateSimilarity(String textA, String textB) {
@@ -481,18 +609,18 @@ public class TaskService {
         }
 
         Set<String> setA = Arrays.stream(
-                        textA.replaceAll("[^가-힣a-zA-Z0-9 ]", " ")
-                                .toLowerCase()
-                                .split("\\s+")
-                )
+                textA.replaceAll("[^가-힣a-zA-Z0-9 ]", " ")
+                        .toLowerCase()
+                        .split("\\s+")
+        )
                 .filter(s -> !s.isBlank())
                 .collect(Collectors.toSet());
 
         Set<String> setB = Arrays.stream(
-                        textB.replaceAll("[^가-힣a-zA-Z0-9 ]", " ")
-                                .toLowerCase()
-                                .split("\\s+")
-                )
+                textB.replaceAll("[^가-힣a-zA-Z0-9 ]", " ")
+                        .toLowerCase()
+                        .split("\\s+")
+        )
                 .filter(s -> !s.isBlank())
                 .collect(Collectors.toSet());
 

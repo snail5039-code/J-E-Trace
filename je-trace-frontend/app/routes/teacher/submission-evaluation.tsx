@@ -139,9 +139,10 @@ export default function TeacherSubmissionEvaluationPage() {
     if (!taskId || !submissionId) return;
 
     try {
-      const taskResponse = await axios.get(`http://localhost:8080/teacher/tasks/${taskId}`);
+      const taskResponse = await axios.get(`http://localhost:8080/teacher/tasks/${taskId}`, { params: { loginId } });
       const submissionResponse = await axios.get(
-        `http://localhost:8080/teacher/tasks/submissions/${submissionId}`
+        `http://localhost:8080/teacher/tasks/submissions/${submissionId}`,
+        { params: { loginId } }
       );
 
       setTask(taskResponse.data);
@@ -155,7 +156,7 @@ export default function TeacherSubmissionEvaluationPage() {
 
       if (submissionResponse.data?.studentName) {
         const logResponse = await axios.get(`http://localhost:8080/teacher/tasks/${taskId}/logs`, {
-          params: { studentName: submissionResponse.data.studentName },
+          params: { loginId, studentName: submissionResponse.data.studentName },
         });
         setLogs(logResponse.data);
       } else {
@@ -196,10 +197,16 @@ export default function TeacherSubmissionEvaluationPage() {
     setNotice({ type: "info", text: "평가 저장 중..." });
 
     try {
-      await axios.put(`http://localhost:8080/teacher/tasks/submissions/${submissionId}/evaluation`, {
-        score: numericScore,
-        teacherComment,
-      });
+      await axios.put(
+        `http://localhost:8080/teacher/tasks/submissions/${submissionId}/evaluation`,
+        {
+          score: numericScore,
+          teacherComment,
+        },
+        {
+          params: { loginId },
+        }
+      );
 
       await fetchData();
 

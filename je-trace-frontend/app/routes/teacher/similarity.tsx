@@ -74,7 +74,9 @@ export default function TeacherSimilarityPage() {
     useEffect(() => {
         const fetchSimilarityResults = async () => {
             try {
-                const response = await axios.get("http://localhost:8080/teacher/tasks/similarity");
+                const response = await axios.get("http://localhost:8080/teacher/tasks/similarity", {
+                    params: { loginId },
+                });
                 setItems(response.data);
             } catch (error) {
                 console.error("유사도 분석 목록 조회 실패:", error);
@@ -84,7 +86,7 @@ export default function TeacherSimilarityPage() {
         };
 
         fetchSimilarityResults();
-    }, []);
+    }, [loginId]);
 
     const filteredData = useMemo(() => {
         return items.filter((item) => {

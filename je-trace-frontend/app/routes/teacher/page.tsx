@@ -83,7 +83,9 @@ export default function TeacherPage() {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/teacher/tasks");
+        const response = await axios.get("http://localhost:8080/teacher/tasks", {
+          params: { loginId },
+        });
         setTasks(response.data ?? []);
       } catch (error) {
         console.error("과제 목록 조회 실패:", error);
@@ -93,7 +95,7 @@ export default function TeacherPage() {
     };
 
     fetchTasks();
-  }, []);
+  }, [loginId]);
 
   const handleLogout = () => {
     localStorage.removeItem("loginId");

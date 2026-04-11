@@ -88,7 +88,8 @@ export default function TeacherSimilarityDetailPage() {
         const fetchDetail = async () => {
             try {
                 const detailResponse = await axios.get(
-                    `http://localhost:8080/teacher/tasks/similarity/${similarityId}`
+                    `http://localhost:8080/teacher/tasks/similarity/${similarityId}`,
+                    { params: { loginId } }
                 );
 
                 const detailData = detailResponse.data;
@@ -96,14 +97,14 @@ export default function TeacherSimilarityDetailPage() {
 
                 const studentLogResponse = await axios.get(
                     `http://localhost:8080/teacher/tasks/${detailData.taskId}/logs`,
-                    { params: { studentName: detailData.studentName } }
+                    { params: { loginId, studentName: detailData.studentName } }
                 );
                 setStudentLogs(studentLogResponse.data);
 
                 if (detailData.comparisonType === "STUDENT_TO_STUDENT") {
                     const targetLogResponse = await axios.get(
                         `http://localhost:8080/teacher/tasks/${detailData.taskId}/logs`,
-                        { params: { studentName: detailData.targetName } }
+                        { params: { loginId, studentName: detailData.targetName } }
                     );
                     setTargetLogs(targetLogResponse.data);
                 } else {
@@ -118,7 +119,7 @@ export default function TeacherSimilarityDetailPage() {
         };
 
         fetchDetail();
-    }, [similarityId]);
+    }, [similarityId, loginId]);
 
     if (loading) {
         return <div className="p-6">유사도 상세 정보를 불러오는 중...</div>;
