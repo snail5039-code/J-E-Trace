@@ -1,7 +1,6 @@
 package com.jetrace.backend.studentDto;
 
 public class AiResponseDto {
-
     private String answer;
     private boolean relevant;
     private int score;
