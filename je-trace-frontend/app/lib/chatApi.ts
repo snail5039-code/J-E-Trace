@@ -1,7 +1,7 @@
-import axios from "axios";
+import api from "./axios";
 
 export const sendMessage = async (message: string) => {
-  const res = await axios.post("/api/chat", {
+  const res = await api.post("/api/chat", {
     message,
   });
   return res.data;
