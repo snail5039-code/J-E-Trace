@@ -19,6 +19,7 @@ type TaskSubmission = {
     result: string | null;
     createdAt: string | null;
     updatedAt: string | null;
+    approvedStudent?: boolean;
 };
 
 type AiLog = {
@@ -64,6 +65,7 @@ export default function TeacherLogsPage() {
 
     const [expandedQuestionIds, setExpandedQuestionIds] = useState<number[]>([]);
     const [expandedAnswerIds, setExpandedAnswerIds] = useState<number[]>([]);
+    const [blockedMessage, setBlockedMessage] = useState("");
 
     const [teacherName, setTeacherName] = useState(
         typeof window !== "undefined" ? localStorage.getItem("loginName") ?? "" : ""
@@ -122,7 +124,7 @@ export default function TeacherLogsPage() {
             setStudentLoading(true);
             try {
                 const response = await api.get(
-                    `/teacher/tasks/${selectedTaskId}/taskSubmissions`,
+                    `/teacher/tasks/${selectedTaskId}/submissions`,
                     { params: { loginId } }
                 );
                 setStudents(response.data);
@@ -130,6 +132,7 @@ export default function TeacherLogsPage() {
                 setLogs([]);
                 setExpandedQuestionIds([]);
                 setExpandedAnswerIds([]);
+                setBlockedMessage("");
             } catch (error) {
                 console.error("학생 목록 조회 실패:", error);
                 setStudents([]);
@@ -162,6 +165,7 @@ export default function TeacherLogsPage() {
                 setLogs(response.data);
                 setExpandedQuestionIds([]);
                 setExpandedAnswerIds([]);
+                setBlockedMessage("");
             } catch (error) {
                 console.error("AI 로그 조회 실패:", error);
                 setLogs([]);
@@ -312,6 +316,7 @@ export default function TeacherLogsPage() {
                                         setLogs([]);
                                         setExpandedQuestionIds([]);
                                         setExpandedAnswerIds([]);
+                setBlockedMessage("");
                                     }}
                                     className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
                                 >

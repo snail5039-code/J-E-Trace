@@ -34,6 +34,7 @@ export default function HomePage() {
   const [loginName, setLoginName] = useState("");
   const [loginRole, setLoginRole] = useState("");
   const [className, setClassName] = useState("");
+  const [approved, setApproved] = useState(false);
   const [summary, setSummary] = useState<MyPageSummary>({
     submittedCount: 0,
     notSubmittedCount: 0,
@@ -46,15 +47,18 @@ export default function HomePage() {
     setLoginName(localStorage.getItem("loginName") ?? "");
     setLoginRole(localStorage.getItem("loginRole") ?? "");
     setClassName(localStorage.getItem("className") ?? "");
+    setApproved((localStorage.getItem("approved") ?? "false") === "true");
   }, []);
 
   const isLoggedIn = useMemo(() => {
     return !!loginId && loginRole === "STUDENT";
-  }, [loginId, loginRole]);
+  }, [loginId, loginRole, approved]);
+
+  const isPendingStudent = isLoggedIn && !approved;
 
   useEffect(() => {
     const fetchSummary = async () => {
-      if (!loginId || loginRole !== "STUDENT") {
+      if (!loginId || loginRole !== "STUDENT" || !approved) {
         setSummary({
           submittedCount: 0,
           notSubmittedCount: 0,
@@ -94,6 +98,7 @@ export default function HomePage() {
     localStorage.removeItem("loginName");
     localStorage.removeItem("loginRole");
     localStorage.removeItem("className");
+    localStorage.removeItem("approved");
 
     alert("로그아웃 되었습니다.");
     navigate("/");
@@ -103,6 +108,12 @@ export default function HomePage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-[#f8fafc] to-blue-50 px-4 py-8 md:px-6 md:py-10">
       <div className="mx-auto max-w-6xl">
         <section className="overflow-hidden rounded-[32px] border border-slate-200 bg-white/90 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur">
+        {isPendingStudent && (
+          <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-medium text-amber-700">
+            아직 승인 대기 중인 학생 계정입니다. 학생 관리에서 교사가 승인하면 과제와 제출 기능을 사용할 수 있습니다.
+          </div>
+        )}
+
           <div className="relative px-6 py-8 md:px-10 md:py-10">
             <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-blue-100/60 blur-3xl" />
             <div className="absolute bottom-0 left-0 h-32 w-32 rounded-full bg-slate-200/70 blur-3xl" />

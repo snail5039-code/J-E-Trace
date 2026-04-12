@@ -27,6 +27,7 @@ type TaskSubmission = {
   teacherComment: string | null;
   createdAt: string | null;
   updatedAt: string | null;
+  approvedStudent?: boolean;
 };
 
 type Notice = {
@@ -373,20 +374,42 @@ return (
                         {student.score ?? 0}점
                       </span>
 
+                      {!student.approvedStudent && (
+                        <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
+                          승인 전
+                        </span>
+                      )}
+
                       <button
-                        onClick={() =>
-                          navigate(`/teacher/tasks/${assignment.id}/submissions/${student.id}`)
-                        }
-                        className="rounded-lg border px-3 py-2 text-xs text-slate-700 hover:bg-slate-50"
+                        onClick={() => {
+                          if (!student.approvedStudent) {
+                            alert("아직 승인 전 학생입니다. 학생 관리에서 승인 후 확인할 수 있습니다.");
+                            return;
+                          }
+                          navigate(`/teacher/tasks/${assignment.id}/submissions/${student.id}`);
+                        }}
+                        className={`rounded-lg border px-3 py-2 text-xs ${
+                          student.approvedStudent
+                            ? "text-slate-700 hover:bg-slate-50"
+                            : "cursor-not-allowed bg-slate-100 text-slate-400"
+                        }`}
                       >
                         상세
                       </button>
 
                       <button
-                        onClick={() =>
-                          navigate(`/teacher/tasks/${assignment.id}/submissions/${student.id}/evaluation`)
-                        }
-                        className="rounded-lg bg-slate-900 px-3 py-2 text-xs text-white hover:bg-slate-800"
+                        onClick={() => {
+                          if (!student.approvedStudent) {
+                            alert("아직 승인 전 학생입니다. 학생 관리에서 승인 후 평가할 수 있습니다.");
+                            return;
+                          }
+                          navigate(`/teacher/tasks/${assignment.id}/submissions/${student.id}/evaluation`);
+                        }}
+                        className={`rounded-lg px-3 py-2 text-xs ${
+                          student.approvedStudent
+                            ? "bg-slate-900 text-white hover:bg-slate-800"
+                            : "cursor-not-allowed bg-slate-200 text-slate-400"
+                        }`}
                       >
                         평가
                       </button>

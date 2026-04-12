@@ -72,6 +72,7 @@ export default function AuthPage() {
       localStorage.setItem("loginName", data.name ?? "");
       localStorage.setItem("loginRole", data.role ?? "");
       localStorage.setItem("className", data.className ?? "");
+      localStorage.setItem("approved", String(Boolean(data.approved)));
 
       if (data.role === "ADMIN") {
         navigate("/admin");
@@ -81,6 +82,10 @@ export default function AuthPage() {
       if (data.role === "TEACHER") {
         navigate("/teacher");
         return;
+      }
+
+      if (!data.approved) {
+        alert("아직 승인 대기 중인 학생 계정입니다. 교사 승인 후 과제를 확인할 수 있습니다.");
       }
 
       navigate("/student");

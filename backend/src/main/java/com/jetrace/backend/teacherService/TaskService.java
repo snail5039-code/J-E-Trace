@@ -74,8 +74,13 @@ public class TaskService {
     }
 
     public List<TaskSubmissionResponse> getTaskSubmissions(String loginId, Long taskId) {
-        getAccessibleTask(loginId, taskId);
-        return taskDao.findTaskSubmissionsByTaskId(taskId);
+        TaskResponse task = getAccessibleTask(loginId, taskId);
+
+        return taskDao.findTaskSubmissionsByTaskId(taskId).stream()
+                .peek(submission -> submission.setApprovedStudent(
+                        isApprovedStudentInTaskClass(task.getClassName(), submission.getStudentName())
+                ))
+                .collect(Collectors.toList());
     }
 
     public List<TaskAiLogResponse> getTaskAiLogs(String loginId, Long taskId, String studentName) {
@@ -84,7 +89,10 @@ public class TaskService {
         }
 
         TaskResponse task = getAccessibleTask(loginId, taskId);
-        validateStudentAccessByTaskClass(task.getClassName(), studentName);
+
+        if (!isApprovedStudentInTaskClass(task.getClassName(), studentName)) {
+            throw new RuntimeException("아직 승인 전 학생입니다. 학생 관리에서 승인 후 AI 로그를 확인할 수 있습니다.");
+        }
 
         return taskDao.findTaskAiLogsByTaskIdAndStudentName(taskId, studentName);
     }
@@ -260,7 +268,13 @@ public class TaskService {
         }
 
         TaskResponse task = getAccessibleTask(loginId, submission.getTaskId());
-        validateStudentAccessByTaskClass(task.getClassName(), submission.getStudentName());
+
+        if (!isApprovedStudentInTaskClass(task.getClassName(), submission.getStudentName())) {
+            submission.setApprovedStudent(false);
+            throw new RuntimeException("아직 승인 전 학생입니다. 학생 관리에서 승인 후 제출 상세를 확인할 수 있습니다.");
+        }
+
+        submission.setApprovedStudent(true);
 
         SimilarityResponse topStudentSimilarity = taskDao.findTopStudentSimilarity(
                 submission.getTaskId(),
@@ -297,7 +311,11 @@ public class TaskService {
         }
 
         TaskResponse task = getAccessibleTask(loginId, submission.getTaskId());
-        validateStudentAccessByTaskClass(task.getClassName(), submission.getStudentName());
+
+        if (!isApprovedStudentInTaskClass(task.getClassName(), submission.getStudentName())) {
+            throw new RuntimeException("아직 승인 전 학생입니다. 학생 관리에서 승인 후 평가할 수 있습니다.");
+        }
+
         validateScore(request.getScore());
 
         taskDao.updateTaskSubmissionEvaluation(
@@ -327,20 +345,19 @@ public class TaskService {
         List<TaskSubmissionResponse> submittedList = submissions.stream()
                 .filter(s -> Boolean.TRUE.equals(s.getSubmitted()))
                 .filter(s -> s.getContent() != null && !s.getContent().isBlank())
+                .filter(s -> isApprovedStudentInTaskClass(task.getClassName(), s.getStudentName()))
                 .collect(Collectors.toList());
 
         Map<String, List<SimilarityResponse>> studentResultMap = new HashMap<>();
 
         for (int i = 0; i < submittedList.size(); i++) {
             TaskSubmissionResponse a = submittedList.get(i);
-            validateStudentAccessByTaskClass(task.getClassName(), a.getStudentName());
 
-            List<TaskAiLogResponse> aLogs
-                    = taskDao.findTaskAiLogsByTaskIdAndStudentName(taskId, a.getStudentName());
+            List<TaskAiLogResponse> aLogs =
+                    taskDao.findTaskAiLogsByTaskIdAndStudentName(taskId, a.getStudentName());
 
             for (int j = i + 1; j < submittedList.size(); j++) {
                 TaskSubmissionResponse b = submittedList.get(j);
-                validateStudentAccessByTaskClass(task.getClassName(), b.getStudentName());
 
                 int similarity = calculateSimilarity(a.getContent(), b.getContent());
 
@@ -430,8 +447,8 @@ public class TaskService {
         }
 
         for (TaskSubmissionResponse submission : submittedList) {
-            List<SimilarityResponse> results
-                    = studentResultMap.getOrDefault(submission.getStudentName(), List.of());
+            List<SimilarityResponse> results =
+                    studentResultMap.getOrDefault(submission.getStudentName(), List.of());
 
             String finalResult = decideFinalSubmissionResult(results);
             taskDao.updateTaskSubmissionResult(taskId, submission.getStudentName(), finalResult);
@@ -459,11 +476,16 @@ public class TaskService {
         TaskResponse task = getAccessibleTask(loginId, result.getTaskId());
 
         if ("STUDENT_TO_STUDENT".equals(result.getComparisonType())) {
-            validateStudentAccessByTaskClass(task.getClassName(), result.getStudentName());
-            validateStudentAccessByTaskClass(task.getClassName(), result.getTargetName());
+            if (!isApprovedStudentInTaskClass(task.getClassName(), result.getStudentName())
+                    || !isApprovedStudentInTaskClass(task.getClassName(), result.getTargetName())) {
+                throw new RuntimeException("아직 승인 전 학생이 포함되어 있습니다. 학생 관리에서 승인 후 유사도 결과를 확인할 수 있습니다.");
+            }
         } else if ("STUDENT_TO_AI_LOG".equals(result.getComparisonType())) {
-            validateStudentAccessByTaskClass(task.getClassName(), result.getStudentName());
+            if (!isApprovedStudentInTaskClass(task.getClassName(), result.getStudentName())) {
+                throw new RuntimeException("아직 승인 전 학생입니다. 학생 관리에서 승인 후 유사도 결과를 확인할 수 있습니다.");
+            }
         }
+
         return result;
     }
 
@@ -533,19 +555,18 @@ public class TaskService {
     }
 
     private void validateStudentAccessByTaskClass(String taskClassName, String studentName) {
+        if (!isApprovedStudentInTaskClass(taskClassName, studentName)) {
+            throw new RuntimeException("아직 승인 전 학생입니다. 학생 관리에서 승인 후 확인할 수 있습니다.");
+        }
+    }
+
+    private boolean isApprovedStudentInTaskClass(String taskClassName, String studentName) {
         if (studentName == null || studentName.isBlank()) {
-            throw new RuntimeException("학생명이 필요합니다.");
+            return false;
         }
 
-        StudentResponse student = taskDao.findAllStudents().stream()
-                .filter(item -> studentName.equals(item.getStudentName()))
-                .filter(item -> normalizeClassName(taskClassName).equals(normalizeClassName(item.getClassName())))
-                .findFirst()
-                .orElse(null);
-
-        if (student == null) {
-            throw new RuntimeException("해당 반 학생 정보에만 접근할 수 있습니다.");
-        }
+        StudentResponse student = findStudentByNameAndClassName(studentName, taskClassName);
+        return student != null;
     }
 
     private TaskResponse getAccessibleTask(String loginId, Long taskId) {
@@ -654,12 +675,9 @@ public class TaskService {
         }
 
         return switch (top.getJudge()) {
-            case "위험" ->
-                "복사 가능성 높음";
-            case "주의" ->
-                "일부 재구성";
-            default ->
-                "자기화 수준 높음";
+            case "위험" -> "복사 가능성 높음";
+            case "주의" -> "일부 재구성";
+            default -> "자기화 수준 높음";
         };
     }
 

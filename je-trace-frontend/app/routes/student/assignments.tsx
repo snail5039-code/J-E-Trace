@@ -26,6 +26,10 @@ export default function AssignmentsPage() {
     typeof window !== "undefined" ? localStorage.getItem("loginId") ?? "" : "";
   const loginRole =
     typeof window !== "undefined" ? localStorage.getItem("loginRole") ?? "" : "";
+  const approved =
+    typeof window !== "undefined"
+      ? (localStorage.getItem("approved") ?? "false") === "true"
+      : false;
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,7 +50,7 @@ export default function AssignmentsPage() {
 
   useEffect(() => {
     const fetchTasks = async () => {
-      if (!loginId || loginRole !== "STUDENT") {
+      if (!loginId || loginRole !== "STUDENT" || !approved) {
         setLoading(false);
         return;
       }
@@ -65,7 +69,7 @@ export default function AssignmentsPage() {
     };
 
     fetchTasks();
-  }, [loginId, loginRole]);
+  }, [loginId, loginRole, approved]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-blue-50 px-4 py-8 sm:px-6">
@@ -107,7 +111,18 @@ export default function AssignmentsPage() {
           </div>
         )}
 
-        {!loading && tasks.length === 0 && (
+
+        {!loading && !approved && (
+          <div className="mt-6 rounded-[24px] border border-amber-200 bg-amber-50 px-6 py-14 text-center shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
+              <FileText size={28} />
+            </div>
+            <h2 className="mt-4 text-xl font-bold text-amber-900">아직 승인 대기 중입니다</h2>
+            <p className="mt-2 text-sm leading-6 text-amber-700">학생 관리에서 교사 승인이 완료되면 과제를 확인할 수 있습니다.</p>
+          </div>
+        )}
+
+        {!loading && approved && tasks.length === 0 && (
           <div className="mt-6 rounded-[24px] border border-slate-200 bg-white px-6 py-14 text-center shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-500">
               <FileText size={28} />
@@ -121,7 +136,7 @@ export default function AssignmentsPage() {
           </div>
         )}
 
-        {!loading && tasks.length > 0 && (
+        {!loading && approved && tasks.length > 0 && (
           <section className="mt-6 overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
             <div className="border-b border-slate-200 bg-slate-50/80 px-5 py-4 sm:px-7">
               <div className="grid grid-cols-12 gap-4 text-xs font-bold uppercase tracking-[0.16em] text-slate-400">

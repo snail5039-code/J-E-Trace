@@ -54,6 +54,7 @@ export default function TeacherSimilarityDetailPage() {
     const [studentLogs, setStudentLogs] = useState<AiLog[]>([]);
     const [targetLogs, setTargetLogs] = useState<AiLog[]>([]);
     const [loading, setLoading] = useState(true);
+    const [blockedMessage, setBlockedMessage] = useState("");
     const [teacherName, setTeacherName] = useState(
         typeof window !== "undefined" ? localStorage.getItem("loginName") ?? "" : ""
     );
@@ -112,6 +113,7 @@ export default function TeacherSimilarityDetailPage() {
                 }
             } catch (error) {
                 console.error("유사도 상세 조회 실패:", error);
+                setBlockedMessage(error?.response?.data?.message ?? "유사도 상세 조회 실패");
                 setDetail(null);
             } finally {
                 setLoading(false);
@@ -126,7 +128,7 @@ export default function TeacherSimilarityDetailPage() {
     }
 
     if (!detail) {
-        return <div className="p-6">유사도 상세 정보를 찾을 수 없습니다.</div>;
+        return <div className="p-6">{blockedMessage || "유사도 상세 정보를 찾을 수 없습니다."}</div>;
     }
 
 return (

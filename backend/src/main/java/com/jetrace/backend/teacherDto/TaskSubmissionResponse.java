@@ -1,4 +1,3 @@
-// backend/src/main/java/com/jetrace/backend/teacherDto/TaskSubmissionResponse.java
 package com.jetrace.backend.teacherDto;
 
 public class TaskSubmissionResponse {
@@ -21,6 +20,7 @@ public class TaskSubmissionResponse {
     private Integer aiLogSimilarity;
     private String aiLogJudge;
     private String aiLogReason;
+    private Boolean approvedStudent;
 
     public TaskSubmissionResponse() {
     }
@@ -44,7 +44,8 @@ public class TaskSubmissionResponse {
             String topStudentReason,
             Integer aiLogSimilarity,
             String aiLogJudge,
-            String aiLogReason
+            String aiLogReason,
+            Boolean approvedStudent
     ) {
         this.id = id;
         this.taskId = taskId;
@@ -65,6 +66,7 @@ public class TaskSubmissionResponse {
         this.aiLogSimilarity = aiLogSimilarity;
         this.aiLogJudge = aiLogJudge;
         this.aiLogReason = aiLogReason;
+        this.approvedStudent = approvedStudent;
     }
 
     public Long getId() {
@@ -143,6 +145,10 @@ public class TaskSubmissionResponse {
         return aiLogReason;
     }
 
+    public Boolean getApprovedStudent() {
+        return approvedStudent;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -217,5 +223,9 @@ public class TaskSubmissionResponse {
 
     public void setAiLogReason(String aiLogReason) {
         this.aiLogReason = aiLogReason;
+    }
+
+    public void setApprovedStudent(Boolean approvedStudent) {
+        this.approvedStudent = approvedStudent;
     }
 }
