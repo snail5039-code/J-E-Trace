@@ -256,6 +256,18 @@ public interface TaskDao {
     void approveStudentRequest(Long requestId);
 
     @Update("""
+        UPDATE users
+        SET approved = TRUE
+        WHERE name = #{studentName}
+          AND UPPER(class_name) = UPPER(#{className})
+          AND role = 'STUDENT'
+        """)
+    void approveStudentUser(
+            @Param("studentName") String studentName,
+            @Param("className") String className
+    );
+
+    @Update("""
             UPDATE studentRequest
             SET status = 'REJECTED',
                 processedAt = NOW()

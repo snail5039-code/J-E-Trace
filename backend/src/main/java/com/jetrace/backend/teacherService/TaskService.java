@@ -78,8 +78,8 @@ public class TaskService {
 
         return taskDao.findTaskSubmissionsByTaskId(taskId).stream()
                 .peek(submission -> submission.setApprovedStudent(
-                        isApprovedStudentInTaskClass(task.getClassName(), submission.getStudentName())
-                ))
+                isApprovedStudentInTaskClass(task.getClassName(), submission.getStudentName())
+        ))
                 .collect(Collectors.toList());
     }
 
@@ -130,12 +130,14 @@ public class TaskService {
 
         if (studentCount > 0) {
             taskDao.approveStudentRequest(requestId);
+            taskDao.approveStudentUser(request.getStudentName(), request.getClassName());
             syncStudentSubmissionsByClass(request.getStudentName(), request.getClassName());
             return;
         }
 
         taskDao.approveStudentRequest(requestId);
         taskDao.insertApprovedStudent(request);
+        taskDao.approveStudentUser(request.getStudentName(), request.getClassName());
         syncStudentSubmissionsByClass(request.getStudentName(), request.getClassName());
     }
 
@@ -353,8 +355,8 @@ public class TaskService {
         for (int i = 0; i < submittedList.size(); i++) {
             TaskSubmissionResponse a = submittedList.get(i);
 
-            List<TaskAiLogResponse> aLogs =
-                    taskDao.findTaskAiLogsByTaskIdAndStudentName(taskId, a.getStudentName());
+            List<TaskAiLogResponse> aLogs
+                    = taskDao.findTaskAiLogsByTaskIdAndStudentName(taskId, a.getStudentName());
 
             for (int j = i + 1; j < submittedList.size(); j++) {
                 TaskSubmissionResponse b = submittedList.get(j);
@@ -447,8 +449,8 @@ public class TaskService {
         }
 
         for (TaskSubmissionResponse submission : submittedList) {
-            List<SimilarityResponse> results =
-                    studentResultMap.getOrDefault(submission.getStudentName(), List.of());
+            List<SimilarityResponse> results
+                    = studentResultMap.getOrDefault(submission.getStudentName(), List.of());
 
             String finalResult = decideFinalSubmissionResult(results);
             taskDao.updateTaskSubmissionResult(taskId, submission.getStudentName(), finalResult);
@@ -675,9 +677,12 @@ public class TaskService {
         }
 
         return switch (top.getJudge()) {
-            case "위험" -> "복사 가능성 높음";
-            case "주의" -> "일부 재구성";
-            default -> "자기화 수준 높음";
+            case "위험" ->
+                "복사 가능성 높음";
+            case "주의" ->
+                "일부 재구성";
+            default ->
+                "자기화 수준 높음";
         };
     }
 
