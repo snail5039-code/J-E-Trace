@@ -481,6 +481,6 @@ export default function TeacherLogsPage() {
                     </main>
                 </div>
             </div>
-        </div>
+        </div>       
     );
 }
