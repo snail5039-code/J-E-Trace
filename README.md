@@ -4,10 +4,10 @@
 🔗 서비스 바로가기  
 [https://j-e-trace-2r2vdkihn-snail5039-codes-projects.vercel.app/](https://j-e-trace-9q720ol70-snail5039-codes-projects.vercel.app/)
 
-admin 계정
-
+## admin 계정
 아이디 : admin
 비밀번호 : 1234
+
 ---
 
 ## 1. 프로젝트 개요
