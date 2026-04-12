@@ -55,7 +55,9 @@ public class AuthService {
             throw new RuntimeException("이미 존재하는 이메일입니다.");
         }
 
-        boolean approved = "STUDENT".equals(dto.getRole());
+        // 학생/교사 모두 처음에는 승인 전 상태로 저장
+        boolean approved = false;
+
         String className = "STUDENT".equals(dto.getRole()) ? dto.getClassName() : null;
         String subject = "TEACHER".equals(dto.getRole()) ? dto.getSubject() : null;
         String managedClasses = "TEACHER".equals(dto.getRole())
@@ -93,14 +95,45 @@ public class AuthService {
         LoginResponseDto user = authDao.findLoginUser(dto.getLoginId(), dto.getPassword());
 
         if (user == null) {
-            return new LoginResponseDto(false, "아이디 또는 비밀번호가 올바르지 않습니다.", null, null, null, false, null, null, null);
+            return new LoginResponseDto(
+                    false,
+                    "아이디 또는 비밀번호가 올바르지 않습니다.",
+                    null,
+                    null,
+                    null,
+                    false,
+                    null,
+                    null,
+                    null
+            );
         }
 
         if (!user.isApproved()) {
             if ("TEACHER".equals(user.getRole())) {
-                return new LoginResponseDto(false, "관리자 승인 후 교사 로그인이 가능합니다.", null, null, null, false, null, null, null);
+                return new LoginResponseDto(
+                        false,
+                        "관리자 승인 후 교사 로그인이 가능합니다.",
+                        null,
+                        null,
+                        null,
+                        false,
+                        null,
+                        null,
+                        null
+                );
             }
-            return new LoginResponseDto(false, "아직 승인되지 않은 계정입니다.", null, null, null, false, null, null, null);
+
+            return new LoginResponseDto(
+                    false,
+                    "아직 승인되지 않은 계정입니다.",
+                    null,
+                    null,
+                    null,
+                    false,
+                    null,
+                    null,
+                    null
+            );
         }
 
         user.setSuccess(true);
@@ -142,6 +175,10 @@ public class AuthService {
         if ("TEACHER".equals(dto.getRole())) {
             if (dto.getSubject() == null || dto.getSubject().isBlank()) {
                 throw new RuntimeException("담당 과목 입력은 필수입니다.");
+            }
+
+            if (!ALLOWED_SUBJECTS.contains(dto.getSubject())) {
+                throw new RuntimeException("허용되지 않은 담당 과목입니다.");
             }
 
             String normalizedManagedClasses = normalizeManagedClasses(dto.getManagedClasses());

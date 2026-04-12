@@ -5,75 +5,24 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
-import com.jetrace.backend.authDto.AuthLoginRequest;
-import com.jetrace.backend.authDto.AuthLoginResponse;
-import com.jetrace.backend.authDto.StudentSignupRequest;
-import com.jetrace.backend.authDto.TeacherSignupRequest;
+import com.jetrace.backend.authDto.LoginResponseDto;
 
 @Mapper
 public interface AuthDao {
-
-    @Select("""
-        SELECT
-            login_id AS loginId,
-            name,
-            role,
-            approved,
-            class_name AS className
-        FROM users
-        WHERE login_id = #{loginId}
-          AND password = #{password}
-        LIMIT 1
-    """)
-    AuthLoginResponse findLoginUser(AuthLoginRequest request);
 
     @Select("""
         SELECT COUNT(*)
         FROM users
         WHERE login_id = #{loginId}
     """)
-    int countByLoginId(@Param("loginId") String loginId);
+    int countByLoginId(String loginId);
 
     @Select("""
         SELECT COUNT(*)
         FROM users
         WHERE email = #{email}
     """)
-    int countByEmail(@Param("email") String email);
-
-    @Insert("""
-        INSERT INTO users (
-            login_id,
-            email,
-            password,
-            name,
-            role,
-            approved,
-            class_name
-        ) VALUES (
-            #{loginId},
-            #{email},
-            #{password},
-            #{name},
-            'STUDENT',
-            FALSE,
-            #{className}
-        )
-    """)
-    void insertStudentUser(StudentSignupRequest request);
-
-    @Insert("""
-        INSERT INTO studentRequest (
-            studentName,
-            className,
-            status
-        ) VALUES (
-            #{name},
-            #{className},
-            'PENDING'
-        )
-    """)
-    void insertStudentRequest(StudentSignupRequest request);
+    int countByEmail(String email);
 
     @Insert("""
         INSERT INTO users (
@@ -91,12 +40,62 @@ public interface AuthDao {
             #{email},
             #{password},
             #{name},
-            'TEACHER',
-            FALSE,
-            NULL,
+            #{role},
+            #{approved},
+            #{className},
             #{subject},
             #{managedClasses}
         )
     """)
-    void insertTeacherUser(TeacherSignupRequest request);
+    void insertUser(
+            @Param("loginId") String loginId,
+            @Param("email") String email,
+            @Param("password") String password,
+            @Param("name") String name,
+            @Param("role") String role,
+            @Param("approved") boolean approved,
+            @Param("className") String className,
+            @Param("subject") String subject,
+            @Param("managedClasses") String managedClasses
+    );
+
+    @Select("""
+        SELECT
+            login_id AS loginId,
+            name,
+            role,
+            approved,
+            class_name AS className,
+            subject,
+            managed_classes AS managedClasses
+        FROM users
+        WHERE login_id = #{loginId}
+          AND password = #{password}
+        LIMIT 1
+    """)
+    LoginResponseDto findLoginUser(
+            @Param("loginId") String loginId,
+            @Param("password") String password
+    );
+
+    @Select("""
+        SELECT COUNT(*)
+        FROM studentRequest
+        WHERE studentName = #{studentName}
+          AND className = #{className}
+          AND status = 'PENDING'
+    """)
+    int countPendingStudentRequest(
+            @Param("studentName") String studentName,
+            @Param("className") String className
+    );
+
+    @Insert("""
+        INSERT INTO studentRequest (studentName, className, status)
+        VALUES (#{studentName}, #{className}, 'PENDING')
+    """)
+    void insertStudentRequest(
+            @Param("studentName") String studentName,
+            @Param("className") String className
+    );
 }
