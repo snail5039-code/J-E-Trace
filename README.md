@@ -2,7 +2,7 @@
 ### AI 기반 학습 과정 추적 및 과제 관리 플랫폼
 
 🔗 서비스 바로가기  
-🔗 [서비스 바로가기](https://j-e-trace-git-test-snail5039-codes-projects.vercel.app)
+(https://j-e-trace-git-test-snail5039-codes-projects.vercel.app)
 
 ## admin 계정
 아이디 : admin
