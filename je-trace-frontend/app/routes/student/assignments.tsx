@@ -26,13 +26,10 @@ export default function AssignmentsPage() {
     typeof window !== "undefined" ? localStorage.getItem("loginId") ?? "" : "";
   const loginRole =
     typeof window !== "undefined" ? localStorage.getItem("loginRole") ?? "" : "";
-  const approved =
-    typeof window !== "undefined"
-      ? (localStorage.getItem("approved") ?? "false") === "true"
-      : false;
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+  const [blockedMessage, setBlockedMessage] = useState("");
 
   useEffect(() => {
     if (!loginId) {
@@ -44,13 +41,12 @@ export default function AssignmentsPage() {
     if (loginRole !== "STUDENT") {
       alert("학생 계정만 접근할 수 있습니다.");
       navigate("/");
-      return;
     }
   }, [loginId, loginRole, navigate]);
 
   useEffect(() => {
     const fetchTasks = async () => {
-      if (!loginId || loginRole !== "STUDENT" || !approved) {
+      if (!loginId || loginRole !== "STUDENT") {
         setLoading(false);
         return;
       }
@@ -59,17 +55,22 @@ export default function AssignmentsPage() {
         const res = await api.get("/student/tasks", {
           params: { loginId },
         });
-        setTasks(res.data);
-      } catch (error) {
+        setTasks(res.data ?? []);
+        setBlockedMessage("");
+      } catch (error: any) {
         console.error(error);
-        alert("과제 목록 불러오기 실패");
+        setTasks([]);
+        setBlockedMessage(
+          error?.response?.data?.message ||
+            "아직 승인 대기 중인 학생 계정입니다. 교사 승인 후 과제를 확인할 수 있습니다."
+        );
       } finally {
         setLoading(false);
       }
     };
 
     fetchTasks();
-  }, [loginId, loginRole, approved]);
+  }, [loginId, loginRole]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-blue-50 px-4 py-8 sm:px-6">
@@ -111,18 +112,21 @@ export default function AssignmentsPage() {
           </div>
         )}
 
-
-        {!loading && !approved && (
+        {!loading && blockedMessage && (
           <div className="mt-6 rounded-[24px] border border-amber-200 bg-amber-50 px-6 py-14 text-center shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
               <FileText size={28} />
             </div>
-            <h2 className="mt-4 text-xl font-bold text-amber-900">아직 승인 대기 중입니다</h2>
-            <p className="mt-2 text-sm leading-6 text-amber-700">학생 관리에서 교사 승인이 완료되면 과제를 확인할 수 있습니다.</p>
+            <h2 className="mt-4 text-xl font-bold text-amber-900">
+              아직 승인 대기 중입니다
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-amber-700">
+              {blockedMessage}
+            </p>
           </div>
         )}
 
-        {!loading && approved && tasks.length === 0 && (
+        {!loading && !blockedMessage && tasks.length === 0 && (
           <div className="mt-6 rounded-[24px] border border-slate-200 bg-white px-6 py-14 text-center shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-500">
               <FileText size={28} />
@@ -136,7 +140,7 @@ export default function AssignmentsPage() {
           </div>
         )}
 
-        {!loading && approved && tasks.length > 0 && (
+        {!loading && !blockedMessage && tasks.length > 0 && (
           <section className="mt-6 overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
             <div className="border-b border-slate-200 bg-slate-50/80 px-5 py-4 sm:px-7">
               <div className="grid grid-cols-12 gap-4 text-xs font-bold uppercase tracking-[0.16em] text-slate-400">

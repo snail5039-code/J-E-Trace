@@ -41,6 +41,7 @@ export default function HomePage() {
     recentLogs: [],
   });
   const [summaryLoading, setSummaryLoading] = useState(false);
+  const [blockedMessage, setBlockedMessage] = useState("");
 
   useEffect(() => {
     setLoginId(localStorage.getItem("loginId") ?? "");
@@ -52,23 +53,35 @@ export default function HomePage() {
 
   const isLoggedIn = useMemo(() => {
     return !!loginId && loginRole === "STUDENT";
-  }, [loginId, loginRole, approved]);
-
-  const isPendingStudent = isLoggedIn && !approved;
+  }, [loginId, loginRole]);
 
   useEffect(() => {
     const fetchSummary = async () => {
-      if (!loginId || loginRole !== "STUDENT" || !approved) {
+      if (!loginId || loginRole !== "STUDENT") {
         setSummary({
           submittedCount: 0,
           notSubmittedCount: 0,
           recentLogs: [],
         });
+        setBlockedMessage("");
+        return;
+      }
+
+      if (!approved) {
+        setSummary({
+          submittedCount: 0,
+          notSubmittedCount: 0,
+          recentLogs: [],
+        });
+        setBlockedMessage(
+          "아직 승인 대기 중인 학생 계정입니다. 학생 관리에서 교사가 승인하면 과제와 제출 기능을 사용할 수 있습니다."
+        );
         return;
       }
 
       try {
         setSummaryLoading(true);
+
         const res = await api.get("/student/tasks/summary", {
           params: { loginId },
         });
@@ -78,20 +91,25 @@ export default function HomePage() {
           notSubmittedCount: res.data?.notSubmittedCount ?? 0,
           recentLogs: res.data?.recentLogs ?? [],
         });
-      } catch (error) {
+        setBlockedMessage("");
+      } catch (error: any) {
         console.error(error);
         setSummary({
           submittedCount: 0,
           notSubmittedCount: 0,
           recentLogs: [],
         });
+        setBlockedMessage(
+          error?.response?.data?.message ||
+            "아직 승인 대기 중인 학생 계정입니다. 교사 승인 후 과제를 확인할 수 있습니다."
+        );
       } finally {
         setSummaryLoading(false);
       }
     };
 
     fetchSummary();
-  }, [loginId, loginRole]);
+  }, [loginId, loginRole, approved]);
 
   const handleLogout = () => {
     localStorage.removeItem("loginId");
@@ -108,12 +126,6 @@ export default function HomePage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-[#f8fafc] to-blue-50 px-4 py-8 md:px-6 md:py-10">
       <div className="mx-auto max-w-6xl">
         <section className="overflow-hidden rounded-[32px] border border-slate-200 bg-white/90 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur">
-        {isPendingStudent && (
-          <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-medium text-amber-700">
-            아직 승인 대기 중인 학생 계정입니다. 학생 관리에서 교사가 승인하면 과제와 제출 기능을 사용할 수 있습니다.
-          </div>
-        )}
-
           <div className="relative px-6 py-8 md:px-10 md:py-10">
             <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-blue-100/60 blur-3xl" />
             <div className="absolute bottom-0 left-0 h-32 w-32 rounded-full bg-slate-200/70 blur-3xl" />
@@ -166,6 +178,12 @@ export default function HomePage() {
                 )}
               </div>
             </div>
+
+            {blockedMessage && (
+              <div className="relative mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-medium text-amber-700">
+                {blockedMessage}
+              </div>
+            )}
           </div>
         </section>
 
@@ -240,8 +258,18 @@ export default function HomePage() {
 
             <div className="mt-7">
               <Link
-                to="/student/assignments"
-                className="group relative block overflow-hidden rounded-[28px] bg-gradient-to-r from-slate-900 via-slate-800 to-blue-950 p-6 text-white shadow-xl shadow-slate-900/10 transition hover:-translate-y-1"
+                to={blockedMessage ? "#" : "/student/assignments"}
+                onClick={(e) => {
+                  if (blockedMessage) {
+                    e.preventDefault();
+                    alert(blockedMessage);
+                  }
+                }}
+                className={`group relative block overflow-hidden rounded-[28px] p-6 shadow-xl transition ${
+                  blockedMessage
+                    ? "cursor-not-allowed bg-slate-300 text-slate-500 shadow-none"
+                    : "bg-gradient-to-r from-slate-900 via-slate-800 to-blue-950 text-white shadow-slate-900/10 hover:-translate-y-1"
+                }`}
               >
                 <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/10 blur-2xl" />
                 <div className="absolute bottom-0 right-0 h-20 w-20 rounded-full bg-blue-400/10 blur-2xl" />
@@ -252,101 +280,80 @@ export default function HomePage() {
                       <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/15">
                         <BookOpen size={22} />
                       </div>
-                      <span className="text-xl font-bold">과제 목록 조회</span>
+                      <div>
+                        <p className="text-sm font-semibold tracking-[0.18em] text-white/70">
+                          ASSIGNMENTS
+                        </p>
+                        <h3 className="mt-1 text-2xl font-black tracking-tight">
+                          과제 목록 바로가기
+                        </h3>
+                      </div>
                     </div>
 
-                    <p className="mt-4 text-sm leading-6 text-slate-200">
-                      현재 반에 해당하는 과제를 확인하고 학습을 이어갈 수
-                      있습니다.
+                    <p className="mt-4 max-w-xl text-sm leading-7 text-white/80 md:text-base">
+                      과제를 확인하고 제출 현황과 점수를 빠르게 살펴볼 수 있습니다.
                     </p>
                   </div>
 
-                  <div className="mt-1 text-white/80 transition group-hover:translate-x-1">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/15 transition group-hover:translate-x-0.5">
                     <ChevronRight size={22} />
                   </div>
                 </div>
               </Link>
             </div>
 
-            <div className="mt-6 rounded-[28px] border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-5 md:p-6">
-              <div className="flex items-center justify-between gap-3">
-                <h3 className="text-lg font-black text-slate-900">학습 안내</h3>
-                <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-500 ring-1 ring-slate-200">
-                  SUMMARY
-                </span>
+            <div className="mt-8 grid gap-4 md:grid-cols-2">
+              <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-5">
+                <p className="text-sm font-semibold text-slate-400">제출 완료</p>
+                <div className="mt-3 text-3xl font-black tracking-tight text-slate-900">
+                  {summaryLoading ? "-" : summary.submittedCount}
+                </div>
               </div>
 
-              {!isLoggedIn ? (
-                <p className="mt-4 text-sm leading-6 text-slate-600">
-                  로그인 후 최근 학습 기록과 제출 현황이 표시됩니다.
-                </p>
-              ) : summaryLoading ? (
-                <div className="mt-4 rounded-2xl bg-white px-4 py-5 text-sm text-slate-600 ring-1 ring-slate-200">
-                  불러오는 중...
+              <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-5">
+                <p className="text-sm font-semibold text-slate-400">미제출</p>
+                <div className="mt-3 text-3xl font-black tracking-tight text-slate-900">
+                  {summaryLoading ? "-" : summary.notSubmittedCount}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 rounded-[26px] border border-slate-200 bg-slate-50/70 p-5 md:p-6">
+              <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-slate-500">
+                    RECENT ACTIVITY
+                  </p>
+                  <h3 className="mt-1 text-xl font-black tracking-tight text-slate-900">
+                    최근 AI 학습 로그
+                  </h3>
+                </div>
+              </div>
+
+              {summary.recentLogs.length === 0 ? (
+                <div className="mt-5 rounded-3xl border border-dashed border-slate-300 bg-white p-5 text-sm leading-7 text-slate-500">
+                  최근 AI 로그가 없습니다.
                 </div>
               ) : (
-                <div className="mt-5 space-y-6">
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-                      <p className="text-sm font-semibold text-slate-400">
-                        제출 완료 개수
-                      </p>
-                      <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">
-                        {summary.submittedCount}
-                        <span className="ml-1 text-xl font-bold text-blue-600">
-                          개
+                <div className="mt-5 space-y-3">
+                  {summary.recentLogs.map((log) => (
+                    <div
+                      key={log.id}
+                      className="rounded-3xl border border-slate-200 bg-white p-4"
+                    >
+                      <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+                        <p className="text-sm font-bold text-slate-900">
+                          과제 #{log.taskId}
+                        </p>
+                        <span className="text-xs font-medium text-slate-400">
+                          {log.createdAt}
                         </span>
-                      </p>
-                    </div>
-
-                    <div className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-                      <p className="text-sm font-semibold text-slate-400">
-                        미제출 과제 수
-                      </p>
-                      <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">
-                        {summary.notSubmittedCount}
-                        <span className="ml-1 text-xl font-bold text-rose-500">
-                          개
-                        </span>
-                      </p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="mb-3 flex items-center justify-between">
-                      <p className="text-sm font-bold text-slate-700">
-                        최근 학습 기록
-                      </p>
-                    </div>
-
-                    {summary.recentLogs.length === 0 ? (
-                      <div className="rounded-3xl bg-white px-5 py-5 text-sm text-slate-500 ring-1 ring-slate-200">
-                        아직 학습 기록이 없습니다.
                       </div>
-                    ) : (
-                      <div className="space-y-3">
-                        {summary.recentLogs.map((log) => (
-                          <div
-                            key={log.id}
-                            className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 transition hover:shadow-md"
-                          >
-                            <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-                              <p className="pr-0 text-base font-bold leading-7 text-slate-900 md:pr-6">
-                                {log.question}
-                              </p>
-                              <span className="shrink-0 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-500">
-                                {log.createdAt || "-"}
-                              </span>
-                            </div>
-
-                            <p className="mt-3 text-sm leading-6 text-slate-600 line-clamp-2">
-                              {log.answer}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                      <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">
+                        Q. {log.question}
+                      </p>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
