@@ -186,3 +186,28 @@ J-E-Trace는 단순한 과제 제출 시스템이 아니라,
 
 학생의 결과물이 아닌  
 **생각의 흐름과 학습 과정 자체를 평가하는 새로운 교육 방식**을 제안합니다.
+
+
+
+## 구현 예시
+
+<img width="1428" height="918" alt="2" src="https://github.com/user-attachments/assets/06e5461a-5b8c-465a-996f-b4809be1015a" />
+<img width="1458" height="909" alt="1" src="https://github.com/user-attachments/assets/fcb313f2-b764-4936-9a6a-f5b4e1a45bb6" />
+<img width="1478" height="902" alt="5" src="https://github.com/user-attachments/assets/ad3cd903-fc1a-4276-926e-2f0c907cb89e" />
+<img width="1311" height="901" alt="4" src="https://github.com/user-attachments/assets/a2451134-ff60-43b1-8c9f-53af1239ddbb" />
+<img width="1376" height="898" alt="3" src="https://github.com/user-attachments/assets/d6698116-efd2-4a41-825e-01f6046b9e71" />
+<img width="1105" height="889" alt="9" src="https://github.com/user-attachments/assets/ee9273cb-8a31-4387-807f-f88af8ff8102" />
+<img width="1509" height="919" alt="8" src="https://github.com/user-attachments/assets/b995f1ce-1af9-4c99-b3aa-1810ba3730da" />
+<img width="1509" height="919" alt="7" src="https://github.com/user-attachments/assets/a60914f6-3168-4e4c-8897-b28390a27a5e" />
+<img width="1478" height="919" alt="6" src="https://github.com/user-attachments/assets/39f9d56b-a684-4cea-922e-b60cff59f216" />
+<img width="1185" height="880" alt="17" src="https://github.com/user-attachments/assets/6e161084-9212-484e-ab58-38a829ad4457" />
+<img width="1041" height="563" alt="16" src="https://github.com/user-attachments/assets/06668105-8895-419e-b570-d03bb83b9344" />
+<img width="1282" height="900" alt="15-2" src="https://github.com/user-attachments/assets/b998a1a3-20fa-4ff9-84b6-7de55593ba28" />
+<img width="1152" height="899" alt="15-1" src="https://github.com/user-attachments/assets/4ffd725b-d4dc-47f7-b621-258f86331ac9" />
+<img width="1053" height="540" alt="14" src="https://github.com/user-attachments/assets/dc80d11b-f3f0-4274-b28c-1ede8789d2ed" />
+<img width="632" height="703" alt="13" src="https://github.com/user-attachments/assets/a78bc809-9644-4b5e-8ef8-45a3b25c2bf6" />
+<img width="1294" height="702" alt="12" src="https://github.com/user-attachments/assets/04b95d10-8042-460f-83b1-84822ded7a73" />
+<img width="1271" height="909" alt="11" src="https://github.com/user-attachments/assets/aa62bb76-6a7c-43f3-bc69-11b92170bc9b" />
+<img width="1104" height="483" alt="10" src="https://github.com/user-attachments/assets/e98f926f-a1c9-4197-b0df-4cc58a8c96de" />
+<img width="1330" height="906" alt="19" src="https://github.com/user-attachments/assets/df00edad-bb4b-4d11-9fdc-3c267901ae36" />
+<img width="986" height="344" alt="18" src="https://github.com/user-attachments/assets/65961c1d-4573-4f7f-98d9-88e2baf07dd1" />
